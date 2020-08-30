@@ -1,0 +1,396 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\src">
+      <UniqueIdentifier>{82bfc7ff-a29c-40ef-8579-8a4076b294f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\common">
+      <UniqueIdentifier>{acbf0bc8-4889-4035-8fb8-c2741ddf67f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\core">
+      <UniqueIdentifier>{7cee759e-4563-4037-9ab2-6b4a70cc6335}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\data">
+      <UniqueIdentifier>{bf1ec24a-fbec-4a23-a7a1-35fc15a0dcc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\import">
+      <UniqueIdentifier>{27ddf191-0721-4a0a-9ec5-38912ebefb1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\render">
+      <UniqueIdentifier>{a0fd0b76-3617-4c27-a7a0-13fd1102434f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\scene">
+      <UniqueIdentifier>{b6e1c614-f3b4-466f-b23e-93f00bae1491}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\stb">
+      <UniqueIdentifier>{5725b063-f72f-486e-8bc6-49af9de9d1d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\utils">
+      <UniqueIdentifier>{26ae5d7b-ac8e-4624-b41a-fd0f3ae4116d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\scene\camera">
+      <UniqueIdentifier>{b02397af-5717-45c0-b27b-bb2dc00c43bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\scene\light">
+      <UniqueIdentifier>{75e18ef0-939b-4417-b41a-af1ccf06184d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\scene\mesh">
+      <UniqueIdentifier>{32fd1779-46fb-4919-ae45-20d5ccbbc625}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\scene\misc">
+      <UniqueIdentifier>{b835c021-0941-4c6c-a3bf-144157fcf888}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\render\objects">
+      <UniqueIdentifier>{1aebcaa5-dc37-4c57-84ac-d3c8e39bc9eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\render\memory">
+      <UniqueIdentifier>{e3a1ebab-c627-4a73-a986-345f11b47687}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\render\passes">
+      <UniqueIdentifier>{d87ff9c3-c0b4-4da8-8053-46521b1a5d82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\render\resources">
+      <UniqueIdentifier>{ed0025ae-f46a-462d-b0a1-683264dd1312}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\render\shader">
+      <UniqueIdentifier>{1bf44170-f32b-425a-993c-2f6330a11299}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\HashString.cpp">
+      <Filter>Source Files\src\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\Class.cpp">
+      <Filter>Source Files\src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\Engine.cpp">
+      <Filter>Source Files\src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\ObjectBase.cpp">
+      <Filter>Source Files\src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\TimeManager.cpp">
+      <Filter>Source Files\src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\DataManager.cpp">
+      <Filter>Source Files\src\data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\Material.cpp">
+      <Filter>Source Files\src\data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\MeshData.cpp">
+      <Filter>Source Files\src\data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\Resource.cpp">
+      <Filter>Source Files\src\data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\Texture2D.cpp">
+      <Filter>Source Files\src\data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\TextureData.cpp">
+      <Filter>Source Files\src\data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\import\ImageImporter.cpp">
+      <Filter>Source Files\src\import</Filter>
+    </ClCompile>
+    <ClCompile Include="src\import\MeshImporter.cpp">
+      <Filter>Source Files\src\import</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\ImageUtils.cpp">
+      <Filter>Source Files\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stb\stb_image.cpp">
+      <Filter>Source Files\src\stb</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Scene.cpp">
+      <Filter>Source Files\src\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\SceneObjectBase.cpp">
+      <Filter>Source Files\src\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\SceneObjectComponent.cpp">
+      <Filter>Source Files\src\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Transform.cpp">
+      <Filter>Source Files\src\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\camera\CameraComponent.cpp">
+      <Filter>Source Files\src\scene\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\camera\CameraObject.cpp">
+      <Filter>Source Files\src\scene\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\light\LightComponent.cpp">
+      <Filter>Source Files\src\scene\light</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\light\LightObject.cpp">
+      <Filter>Source Files\src\scene\light</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\mesh\MeshComponent.cpp">
+      <Filter>Source Files\src\scene\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\mesh\MeshObject.cpp">
+      <Filter>Source Files\src\scene\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\misc\SkyboxComponent.cpp">
+      <Filter>Source Files\src\scene\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\misc\SkyboxObject.cpp">
+      <Filter>Source Files\src\scene\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\DataStructures.cpp">
+      <Filter>Source Files\src\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\GlobalSamplers.cpp">
+      <Filter>Source Files\src\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\PerFrameData.cpp">
+      <Filter>Source Files\src\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\PipelineRegistry.cpp">
+      <Filter>Source Files\src\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\Renderer.cpp">
+      <Filter>Source Files\src\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\TransferList.cpp">
+      <Filter>Source Files\src\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\objects\VulkanDescriptorSet.cpp">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\objects\VulkanPhysicalDevice.cpp">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\objects\DescriptorHeaps.cpp">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\objects\SwapChain.cpp">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\objects\Device.cpp">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\memory\DeviceMemoryChunk.cpp">
+      <Filter>Source Files\src\render\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\memory\DeviceMemoryManager.cpp">
+      <Filter>Source Files\src\render\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\passes\DeferredLightingPass.cpp">
+      <Filter>Source Files\src\render\passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\passes\GBufferPass.cpp">
+      <Filter>Source Files\src\render\passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\passes\LightClusteringPass.cpp">
+      <Filter>Source Files\src\render\passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\passes\PostProcessPass.cpp">
+      <Filter>Source Files\src\render\passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\passes\VulkanPassBase.cpp">
+      <Filter>Source Files\src\render\passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\passes\ZPrepass.cpp">
+      <Filter>Source Files\src\render\passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\resources\VulkanBuffer.cpp">
+      <Filter>Source Files\src\render\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\resources\VulkanDeviceMemory.cpp">
+      <Filter>Source Files\src\render\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\resources\VulkanImage.cpp">
+      <Filter>Source Files\src\render\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\shader\Shader.cpp">
+      <Filter>Source Files\src\render\shader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\shader\VulkanShaderModule.cpp">
+      <Filter>Source Files\src\render\shader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\objects\CommandBuffers.cpp">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\d3dx12.h">
+      <Filter>Source Files\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\HashString.h">
+      <Filter>Source Files\src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\Class.h">
+      <Filter>Source Files\src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\Engine.h">
+      <Filter>Source Files\src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\ObjectBase.h">
+      <Filter>Source Files\src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\TimeManager.h">
+      <Filter>Source Files\src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data\DataManager.h">
+      <Filter>Source Files\src\data</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data\Material.h">
+      <Filter>Source Files\src\data</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data\MeshData.h">
+      <Filter>Source Files\src\data</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data\Resource.h">
+      <Filter>Source Files\src\data</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data\Texture2D.h">
+      <Filter>Source Files\src\data</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data\TextureData.h">
+      <Filter>Source Files\src\data</Filter>
+    </ClInclude>
+    <ClInclude Include="src\import\ImageImporter.h">
+      <Filter>Source Files\src\import</Filter>
+    </ClInclude>
+    <ClInclude Include="src\import\MeshImporter.h">
+      <Filter>Source Files\src\import</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\ImageUtils.h">
+      <Filter>Source Files\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stb\stb_image.h">
+      <Filter>Source Files\src\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\Scene.h">
+      <Filter>Source Files\src\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\SceneObjectBase.h">
+      <Filter>Source Files\src\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\SceneObjectComponent.h">
+      <Filter>Source Files\src\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\Transform.h">
+      <Filter>Source Files\src\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\camera\CameraComponent.h">
+      <Filter>Source Files\src\scene\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\camera\CameraObject.h">
+      <Filter>Source Files\src\scene\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\light\LightComponent.h">
+      <Filter>Source Files\src\scene\light</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\light\LightObject.h">
+      <Filter>Source Files\src\scene\light</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\mesh\MeshComponent.h">
+      <Filter>Source Files\src\scene\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\mesh\MeshObject.h">
+      <Filter>Source Files\src\scene\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\misc\SkyboxComponent.h">
+      <Filter>Source Files\src\scene\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\misc\SkyboxObject.h">
+      <Filter>Source Files\src\scene\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\HelperUtils.h">
+      <Filter>Source Files\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\DataStructures.h">
+      <Filter>Source Files\src\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\GlobalSamplers.h">
+      <Filter>Source Files\src\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\PerFrameData.h">
+      <Filter>Source Files\src\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\PipelineRegistry.h">
+      <Filter>Source Files\src\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\Renderer.h">
+      <Filter>Source Files\src\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\TransferList.h">
+      <Filter>Source Files\src\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\objects\VulkanDescriptorSet.h">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\objects\VulkanPhysicalDevice.h">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\objects\DescriptorHeaps.h">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\objects\SwapChain.h">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\objects\Device.h">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\memory\DeviceMemoryChunk.h">
+      <Filter>Source Files\src\render\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\memory\DeviceMemoryManager.h">
+      <Filter>Source Files\src\render\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\passes\DeferredLightingPass.h">
+      <Filter>Source Files\src\render\passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\passes\GBufferPass.h">
+      <Filter>Source Files\src\render\passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\passes\LightClusteringPass.h">
+      <Filter>Source Files\src\render\passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\passes\PostProcessPass.h">
+      <Filter>Source Files\src\render\passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\passes\VulkanPassBase.h">
+      <Filter>Source Files\src\render\passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\passes\ZPrepass.h">
+      <Filter>Source Files\src\render\passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\resources\VulkanBuffer.h">
+      <Filter>Source Files\src\render\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\resources\VulkanDeviceMemory.h">
+      <Filter>Source Files\src\render\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\resources\VulkanImage.h">
+      <Filter>Source Files\src\render\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\shader\Shader.h">
+      <Filter>Source Files\src\render\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\shader\VulkanShaderModule.h">
+      <Filter>Source Files\src\render\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\objects\CommandBuffers.h">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
