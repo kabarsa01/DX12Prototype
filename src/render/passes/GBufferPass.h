@@ -1,12 +1,12 @@
 #pragma once
 
-#include "VulkanPassBase.h"
+#include "PassBase.h"
 #include "vulkan/vulkan.hpp"
 #include <array>
 
 using namespace VULKAN_HPP_NAMESPACE;
 
-class GBufferPass : public VulkanPassBase
+class GBufferPass : public PassBase
 {
 public:
 	GBufferPass(HashString inName);

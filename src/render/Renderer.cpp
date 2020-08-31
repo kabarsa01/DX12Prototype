@@ -61,9 +61,9 @@ void Renderer::Init()
 	glfwGetFramebufferSize(window, &width, &height);
 
 	HWND hWnd = glfwGetWin32Window(Engine::GetInstance()->GetGlfwWindow());
-	device.Create("VulkanRenderer", "VulkanEngine", enableValidationLayers, hWnd);
+	device.Create("DX12Renderer", "MiniEngine", hWnd);
 	swapChain.Create(&device, 2);
-	swapChain.CreateForResolution(width, height);
+//	swapChain.CreateForResolution(width, height);
 	commandBuffers.Create(&device, 2, 1);
 	descriptorPools.Create(&device);
 
@@ -97,91 +97,48 @@ void Renderer::RenderFrame()
 	}
 
 	bool outdated = false;
-	uint32_t imageIndex = swapChain.AcquireNextImage(outdated);
-	if (outdated)
-	{
-		OnResolutionChange();
-		return;
-	}
+	uint32_t imageIndex = swapChain.GetCurrentImageIndex();
+	//if (outdated)
+	//{
+	//	OnResolutionChange();
+	//	return;
+	//}
 
 	perFrameData->UpdateBufferData();
 
-	CommandBuffer& cmdBuffer = commandBuffers.GetNextForPool(imageIndex);
+	ComPtr<ID3D12CommandAllocator> cmdAllocator = commandBuffers.GetCommandPool(imageIndex);
+	ComPtr<ID3D12GraphicsCommandList> cmdList = commandBuffers.GetForPool(imageIndex);
 
-	CommandBufferBeginInfo beginInfo;
-	beginInfo.setFlags(CommandBufferUsageFlagBits::eSimultaneousUse);
-	beginInfo.setPInheritanceInfo(nullptr);
+	cmdAllocator->Reset();
+	cmdList->Reset(cmdAllocator.Get(), nullptr);
 
-	// begin command buffer record
-	cmdBuffer.begin(beginInfo);
+	//CommandBufferBeginInfo beginInfo;
+	//beginInfo.setFlags(CommandBufferUsageFlagBits::eSimultaneousUse);
+	//beginInfo.setPInheritanceInfo(nullptr);
+
+	//// begin command buffer record
+	//cmdList.begin(beginInfo);
 	// copy new data
-	TransferResources(cmdBuffer, device.GetPhysicalDevice().GetCachedQueueFamiliesIndices().graphicsFamily.value());
+	//TransferResources(cmdList, device.GetPhysicalDevice().GetCachedQueueFamiliesIndices().graphicsFamily.value());
 
 	// render passes
 	// z prepass
-	zPrepass->RecordCommands(&cmdBuffer);
+	zPrepass->RecordCommands(&cmdList);
 	//--------------------------------------------------------
-	lightClusteringPass->RecordCommands(&cmdBuffer);
-	//// barriers ----------------------------------------------
-	ImageMemoryBarrier clustersTextureBarrier = lightClusteringPass->image.CreateLayoutBarrier(
-		ImageLayout::eGeneral,
-		ImageLayout::eShaderReadOnlyOptimal,
-		AccessFlagBits::eShaderWrite,
-		AccessFlagBits::eShaderRead,
-		ImageAspectFlagBits::eColor,
-		0, 1, 0, 1);
-	cmdBuffer.pipelineBarrier(
-		PipelineStageFlagBits::eComputeShader,
-		PipelineStageFlagBits::eVertexShader,
-		DependencyFlags(),
-		0, nullptr, 0, nullptr,
-		1, &clustersTextureBarrier);
+	lightClusteringPass->RecordCommands(&cmdList);
 	//--------------------------------------------------------
 	// gbuffer pass
-	gBufferPass->RecordCommands(&cmdBuffer);
+	gBufferPass->RecordCommands(&cmdList);
 	// barriers ----------------------------------------------
 	const std::vector<VulkanImage>& gBufferAttachments = gBufferPass->GetAttachments();
-	std::vector<ImageMemoryBarrier> gBufferBarriers;
-	for (uint32_t index = 0; index < gBufferAttachments.size(); index++)
-	{
-		ImageMemoryBarrier attachmentBarrier = gBufferAttachments[index].CreateLayoutBarrier(
-			ImageLayout::eColorAttachmentOptimal,
-			ImageLayout::eShaderReadOnlyOptimal,
-			AccessFlagBits::eColorAttachmentWrite,
-			AccessFlagBits::eShaderRead,
-			ImageAspectFlagBits::eColor,
-			0, 1, 0, 1);
-		gBufferBarriers.push_back(attachmentBarrier);
-	}
-	cmdBuffer.pipelineBarrier(
-		PipelineStageFlagBits::eColorAttachmentOutput,
-		PipelineStageFlagBits::eFragmentShader,
-		DependencyFlags(),
-		0, nullptr, 0, nullptr,
-		static_cast<uint32_t>(gBufferBarriers.size()),
-		gBufferBarriers.data());
 	//--------------------------------------------------------
 	// deferred lighting pass
-	deferredLightingPass->RecordCommands(&cmdBuffer);
-	//--------------------------------------------------------
-	ImageMemoryBarrier attachmentBarrier = deferredLightingPass->GetAttachments()[0].CreateLayoutBarrier(
-		ImageLayout::eColorAttachmentOptimal,
-		ImageLayout::eShaderReadOnlyOptimal,
-		AccessFlagBits::eColorAttachmentWrite,
-		AccessFlagBits::eShaderRead,
-		ImageAspectFlagBits::eColor,
-		0, 1, 0, 1);
-	cmdBuffer.pipelineBarrier(
-		PipelineStageFlagBits::eColorAttachmentOutput,
-		PipelineStageFlagBits::eFragmentShader,
-		DependencyFlags(),
-		0, nullptr, 0, nullptr,
-		1, &attachmentBarrier);
+	deferredLightingPass->RecordCommands(&cmdList);
 	//--------------------------------------------------------
 	// post process pass
-	postProcessPass->RecordCommands(&cmdBuffer);
+	postProcessPass->RecordCommands(&cmdList);
 	// end commands recording
-	cmdBuffer.end();
+	cmdList.end();
 
 	SubmitInfo submitInfo;
 	Semaphore waitSemaphores[] = { swapChain.GetImageAvailableSemaphore() };
@@ -190,14 +147,14 @@ void Renderer::RenderFrame()
 	submitInfo.setPWaitSemaphores(waitSemaphores);
 	submitInfo.setPWaitDstStageMask(waitStages);
 	submitInfo.setCommandBufferCount(1);
-	submitInfo.setPCommandBuffers(&cmdBuffer);
+	submitInfo.setPCommandBuffers(&cmdList);
 
 	Semaphore signalSemaphores[] = { swapChain.GetRenderingFinishedSemaphore() };
 	submitInfo.setSignalSemaphoreCount(1);
 	submitInfo.setPSignalSemaphores(signalSemaphores);
 
 	ArrayProxy<const SubmitInfo> submitInfoArray(1, &submitInfo);
-	device.GetGraphicsQueue().submit(submitInfoArray, swapChain.GetGraphicsQueueFence());
+	device.GetGraphicsQueue().submit(submitInfoArray, swapChain.GetCurrentFence());
 
 	if (!swapChain.Present())
 	{
@@ -209,7 +166,7 @@ void Renderer::RenderFrame()
 
 void Renderer::WaitForDevice()
 {
-	device.GetDevice().waitIdle();
+	device.GetNativeDevice().waitIdle();
 }
 
 void Renderer::Cleanup()
@@ -267,7 +224,7 @@ Device& Renderer::GetVulkanDevice()
 
 Device& Renderer::GetDevice()
 {
-	return device.GetDevice();
+	return device.GetNativeDevice();
 }
 
 SwapChain& Renderer::GetSwapChain()
@@ -292,7 +249,7 @@ Queue Renderer::GetGraphicsQueue()
 
 void Renderer::OnResolutionChange()
 {
-	device.GetDevice().waitIdle();
+	device.GetNativeDevice().waitIdle();
 
 	GLFWwindow* window = Engine::GetInstance()->GetGlfwWindow();
 	glfwGetFramebufferSize(window, &width, &height);

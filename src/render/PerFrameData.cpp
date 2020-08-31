@@ -43,7 +43,7 @@ void PerFrameData::Create(Device* inDevice)
 	set.Create(device);
 
 	descriptorWrites = ProduceWrites(set);
-	device->GetDevice().updateDescriptorSets(static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+	device->GetNativeDevice().updateDescriptorSets(static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 }
 
 void PerFrameData::Destroy()

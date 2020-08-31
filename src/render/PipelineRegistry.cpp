@@ -25,7 +25,7 @@ PipelineRegistry* PipelineRegistry::GetInstance()
 
 void PipelineRegistry::DestroyPipelines(Device* inDevice)
 {
-	Device& device = inDevice->GetDevice();
+	Device& device = inDevice->GetNativeDevice();
 	for (auto& passPair : pipelinesData)
 	{
 		for (auto& shaderPair : passPair.second)
@@ -39,7 +39,7 @@ void PipelineRegistry::DestroyPipelines(Device* inDevice)
 
 void PipelineRegistry::DestroyPipelines(Device* inDevice, HashString inPassHash)
 {
-	Device& device = inDevice->GetDevice();
+	Device& device = inDevice->GetNativeDevice();
 	if (pipelinesData.find(inPassHash) != pipelinesData.end())
 	{
 		for (auto& shaderPair : pipelinesData[inPassHash])

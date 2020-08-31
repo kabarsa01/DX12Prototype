@@ -1,4 +1,4 @@
-#include "VulkanPassBase.h"
+#include "PassBase.h"
 #include "../Renderer.h"
 #include "core/Engine.h"
 #include "../shader/Shader.h"
@@ -13,18 +13,18 @@
 #include "../PerFrameData.h"
 #include "utils/ImageUtils.h"
 
-VulkanPassBase::VulkanPassBase(HashString inName)
+PassBase::PassBase(HashString inName)
 	: name(inName)
 {
 
 }
 
-VulkanPassBase::~VulkanPassBase()
+PassBase::~PassBase()
 {
 
 }
 
-void VulkanPassBase::Create()
+void PassBase::Create()
 {
 	renderer = Engine::GetRendererInstance();
 	vulkanDevice = &renderer->GetVulkanDevice();
@@ -50,11 +50,11 @@ void VulkanPassBase::Create()
 	OnCreate();
 }
 
-void VulkanPassBase::Destroy()
+void PassBase::Destroy()
 {
 	OnDestroy();
 
-	Device& device = vulkanDevice->GetDevice();
+	device& device = vulkanDevice->GetDevice();
 
 	PipelineRegistry::GetInstance()->DestroyPipelines(vulkanDevice, name);
 
@@ -72,13 +72,13 @@ void VulkanPassBase::Destroy()
 	}
 }
 
-void VulkanPassBase::SetResolution(uint32_t inWidth, uint32_t inHeight)
+void PassBase::SetResolution(uint32_t inWidth, uint32_t inHeight)
 {
 	width = inWidth;
 	height = inHeight;
 }
 
-void VulkanPassBase::SetExternalDepth(const VulkanImage& inDepthAttachment, const ImageView& inDepthAttachmentView)
+void PassBase::SetExternalDepth(const VulkanImage& inDepthAttachment, const ImageView& inDepthAttachmentView)
 {
 	isDepthExternal = inDepthAttachment && inDepthAttachmentView;
 	if (isDepthExternal)
@@ -88,7 +88,7 @@ void VulkanPassBase::SetExternalDepth(const VulkanImage& inDepthAttachment, cons
 	}
 }
 
-Framebuffer VulkanPassBase::CreateFramebuffer(RenderPass inRenderPass, std::vector<ImageView>& inAttachmentViews, uint32_t inWidth, uint32_t inHeight)
+Framebuffer PassBase::CreateFramebuffer(RenderPass inRenderPass, std::vector<ImageView>& inAttachmentViews, uint32_t inWidth, uint32_t inHeight)
 {
 	FramebufferCreateInfo framebufferInfo;
 	framebufferInfo.setRenderPass(inRenderPass);
@@ -101,9 +101,9 @@ Framebuffer VulkanPassBase::CreateFramebuffer(RenderPass inRenderPass, std::vect
 	return vulkanDevice->GetDevice().createFramebuffer(framebufferInfo);
 }
 
-PipelineLayout VulkanPassBase::CreatePipelineLayout(std::vector<DescriptorSetLayout>& inDescriptorSetLayouts)
+PipelineLayout PassBase::CreatePipelineLayout(std::vector<DescriptorSetLayout>& inDescriptorSetLayouts)
 {
-	Device& device = vulkanDevice->GetDevice();
+	device& device = vulkanDevice->GetDevice();
 
 	PipelineLayoutCreateInfo pipelineLayoutInfo;
 	pipelineLayoutInfo.setFlags(PipelineLayoutCreateFlags());
@@ -121,9 +121,9 @@ PipelineLayout VulkanPassBase::CreatePipelineLayout(std::vector<DescriptorSetLay
 	return device.createPipelineLayout(pipelineLayoutInfo);
 }
 
-PipelineData& VulkanPassBase::FindPipeline(MaterialPtr inMaterial)
+PipelineData& PassBase::FindPipeline(MaterialPtr inMaterial)
 {
-	Device& device = vulkanDevice->GetDevice();
+	device& device = vulkanDevice->GetDevice();
 
 	PipelineRegistry& pipelineRegistry = *PipelineRegistry::GetInstance();
 	// check pipeline storage and create new pipeline in case it was not created before
@@ -144,7 +144,7 @@ PipelineData& VulkanPassBase::FindPipeline(MaterialPtr inMaterial)
 	return pipelineRegistry.GetPipeline(name, inMaterial->GetShaderHash());
 }
 
-DescriptorSetLayout VulkanPassBase::CreateDescriptorSetLayout(MaterialPtr inMaterial)
+DescriptorSetLayout PassBase::CreateDescriptorSetLayout(MaterialPtr inMaterial)
 {
 	DescriptorSetLayoutCreateInfo descriptorSetLayoutInfo;
 	descriptorSetLayoutInfo.setBindingCount(static_cast<uint32_t>(inMaterial->GetBindings().size()));

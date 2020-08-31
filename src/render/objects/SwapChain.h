@@ -5,6 +5,7 @@
 #include <dxgi1_6.h>
 #include <wrl.h>
 #include <d3d12.h>
+#include "Fence.h"
 
 using namespace Microsoft::WRL;
 
@@ -21,18 +22,18 @@ public:
 	//void DestroyForResolution();
 
 	uint32_t AcquireNextImage(bool& outBecameOutdated);
-	bool Present();
+	bool Present(bool inVSync);
 
 	void WaitForPresentQueue();
 
-	ComPtr<ID3D12Resource> GetImage() { return images[imageIndex]; }
-	ComPtr<ID3D12Resource> GetPrevImage() { return images[prevImageIndex]; }
-	uint32_t GetImageIndex() { return imageIndex; }
-	uint32_t GetPrevImageIndex() { return prevImageIndex; }
+	ComPtr<ID3D12Resource> GetCurrentImage() { return images[swapChain4->GetCurrentBackBufferIndex()]; }
+//	ComPtr<ID3D12Resource> GetPrevImage() { return images[prevImageIndex]; }
+	uint32_t GetCurrentImageIndex() { return swapChain4->GetCurrentBackBufferIndex(); }
+//	uint32_t GetPrevImageIndex() { return prevImageIndex; }
 	//Semaphore& GetImageAvailableSemaphore() { return imageAvailableSemaphores[prevImageIndex]; }
 	//Semaphore& GetRenderingFinishedSemaphore() { return renderingFinishedSemaphores[imageIndex]; }
-	ComPtr<ID3D12Fence> GetGraphicsQueueFence();
-	ComPtr<ID3D12Fence> GetGraphicsQueuePrevFence();
+	Fence GetCurrentFence();
+//	Fence GetPrevFence();
 	//Framebuffer& GetFramebuffer() { return framebuffers[imageIndex]; }
 	//Framebuffer& GetFramebuffer(uint32_t inIndex) { return framebuffers[inIndex]; }
 	//uint32_t GetFramebuffersCount() { return static_cast<uint32_t>(framebuffers.size()); }
@@ -51,9 +52,10 @@ private:
 	Device* device;
 	ComPtr<IDXGISwapChain4> swapChain4;
 	std::vector< ComPtr<ID3D12Resource> > images;
-	std::vector< ComPtr<ID3D12Fence> > fences;
+	std::vector< Fence > fences;
 
 	uint32_t buffersCount = 2;
+	bool isTearingSupported = true;
 
 	//std::vector<ImageView> imageViews;
 	//std::vector<Framebuffer> framebuffers;
@@ -69,8 +71,8 @@ private:
 
 	//Queue presentQueue;
 
-	uint32_t imageIndex = 0;
-	uint32_t prevImageIndex = 0;
+	//uint32_t imageIndex = 0;
+	//uint32_t prevImageIndex = 0;
 
 	bool CheckTearingSupport();
 	void CreateRTVs();

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "vulkan/vulkan.hpp"
-#include "render/passes/VulkanPassBase.h"
+#include "render/passes/PassBase.h"
 
-class PostProcessPass : public VulkanPassBase
+class PostProcessPass : public PassBase
 {
 public:
 	PostProcessPass(HashString inName);

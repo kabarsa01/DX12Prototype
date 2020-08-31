@@ -1,12 +1,12 @@
 #pragma once
 
-#include "VulkanPassBase.h"
+#include "PassBase.h"
 #include "vulkan/vulkan.hpp"
 #include <array>
 
 using namespace VULKAN_HPP_NAMESPACE;
 
-class ZPrepass : public VulkanPassBase
+class ZPrepass : public PassBase
 {
 public:
 	ZPrepass(HashString inName);

@@ -1,7 +1,7 @@
 #include "LightClusteringPass.h"
 #include "data/DataManager.h"
 #include "../DataStructures.h"
-#include "VulkanPassBase.h"
+#include "PassBase.h"
 #include "render/Renderer.h"
 #include "ZPrepass.h"
 #include "scene/light/LightComponent.h"
@@ -10,7 +10,7 @@
 #include "scene/Transform.h"
 
 LightClusteringPass::LightClusteringPass(HashString inName)
-	: VulkanPassBase(inName)
+	: PassBase(inName)
 {
 
 }

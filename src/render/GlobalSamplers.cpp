@@ -43,23 +43,23 @@ void GlobalSamplers::Create(Device* inVulkanDevice)
 	samplerInfo.setMinFilter(Filter::eLinear);
 	samplerInfo.setMipmapMode(SamplerMipmapMode::eLinear);
 	samplerInfo.setUnnormalizedCoordinates(VK_FALSE);
-	repeatLinearMipLinear = vulkanDevice->GetDevice().createSampler(samplerInfo);
+	repeatLinearMipLinear = vulkanDevice->GetNativeDevice().createSampler(samplerInfo);
 	samplers.push_back(&repeatLinearMipLinear);
 
 	samplerInfo.setAddressModeU(SamplerAddressMode::eMirroredRepeat);
 	samplerInfo.setAddressModeV(SamplerAddressMode::eMirroredRepeat);
 	samplerInfo.setAddressModeW(SamplerAddressMode::eMirroredRepeat);
-	repeatMirrorLinearMipLinear = vulkanDevice->GetDevice().createSampler(samplerInfo);
+	repeatMirrorLinearMipLinear = vulkanDevice->GetNativeDevice().createSampler(samplerInfo);
 	samplers.push_back(&repeatMirrorLinearMipLinear);
 
 	samplerInfo.setAddressModeU(SamplerAddressMode::eClampToBorder);
 	samplerInfo.setAddressModeV(SamplerAddressMode::eClampToBorder);
 	samplerInfo.setAddressModeW(SamplerAddressMode::eClampToBorder);
-	borderBlackLinearMipLinear = vulkanDevice->GetDevice().createSampler(samplerInfo);
+	borderBlackLinearMipLinear = vulkanDevice->GetNativeDevice().createSampler(samplerInfo);
 	samplers.push_back(&borderBlackLinearMipLinear);
 
 	samplerInfo.setBorderColor(BorderColor::eIntOpaqueWhite);
-	borderWhiteLinearMipLinear = vulkanDevice->GetDevice().createSampler(samplerInfo);
+	borderWhiteLinearMipLinear = vulkanDevice->GetNativeDevice().createSampler(samplerInfo);
 	samplers.push_back(&borderWhiteLinearMipLinear);
 
 	// construct bindings 
@@ -70,7 +70,7 @@ void GlobalSamplers::Destroy()
 {
 	for (uint32_t index = 0; index < samplers.size(); index++)
 	{
-		vulkanDevice->GetDevice().destroySampler(*samplers[index]);
+		vulkanDevice->GetNativeDevice().destroySampler(*samplers[index]);
 	}
 	samplers.clear();
 }

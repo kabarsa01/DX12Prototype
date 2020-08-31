@@ -204,9 +204,6 @@
     <ClCompile Include="src\render\passes\PostProcessPass.cpp">
       <Filter>Source Files\src\render\passes</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\passes\VulkanPassBase.cpp">
-      <Filter>Source Files\src\render\passes</Filter>
-    </ClCompile>
     <ClCompile Include="src\render\passes\ZPrepass.cpp">
       <Filter>Source Files\src\render\passes</Filter>
     </ClCompile>
@@ -227,6 +224,12 @@
     </ClCompile>
     <ClCompile Include="src\render\objects\CommandBuffers.cpp">
       <Filter>Source Files\src\render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\objects\Fence.cpp">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\passes\PassBase.cpp">
+      <Filter>Source Files\src\render\passes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -368,9 +371,6 @@
     <ClInclude Include="src\render\passes\PostProcessPass.h">
       <Filter>Source Files\src\render\passes</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\passes\VulkanPassBase.h">
-      <Filter>Source Files\src\render\passes</Filter>
-    </ClInclude>
     <ClInclude Include="src\render\passes\ZPrepass.h">
       <Filter>Source Files\src\render\passes</Filter>
     </ClInclude>
@@ -391,6 +391,12 @@
     </ClInclude>
     <ClInclude Include="src\render\objects\CommandBuffers.h">
       <Filter>Source Files\src\render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\objects\Fence.h">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\passes\PassBase.h">
+      <Filter>Source Files\src\render\passes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

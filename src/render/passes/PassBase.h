@@ -1,6 +1,5 @@
 #pragma once
 
-#include "vulkan/vulkan.hpp"
 #include <vector>
 #include "../resources/VulkanBuffer.h"
 #include "../memory/DeviceMemoryManager.h"
@@ -8,16 +7,14 @@
 #include "../PipelineRegistry.h"
 #include "data/Material.h"
 
-using namespace VULKAN_HPP_NAMESPACE;
-
-class VulkanDevice;
+class Device;
 class Renderer;
 
-class VulkanPassBase
+class PassBase
 {
 public:
-	VulkanPassBase(HashString inName);
-	virtual ~VulkanPassBase();
+	PassBase(HashString inName);
+	virtual ~PassBase();
 
 	void Create();
 	void Destroy();
@@ -38,7 +35,7 @@ public:
 
 	virtual void RecordCommands(CommandBuffer* inCommandBuffer) = 0;
 protected:
-	inline VulkanDevice* GetVulkanDevice() { return vulkanDevice; }
+	inline Device* GetDevice() { return device; }
 	inline Renderer* GetRenderer() { return renderer; }
 
 	virtual void OnCreate() = 0;
@@ -67,7 +64,7 @@ protected:
 	DescriptorSetLayout CreateDescriptorSetLayout(MaterialPtr inMaterial);
 private:
 	HashString name;
-	VulkanDevice* vulkanDevice;
+	Device* device;
 	Renderer* renderer;
 
 	RenderPass renderPass;
@@ -81,5 +78,5 @@ private:
 	uint32_t height = 720;
 	bool isDepthExternal;
 
-	VulkanPassBase() {}
+	PassBase() {}
 };

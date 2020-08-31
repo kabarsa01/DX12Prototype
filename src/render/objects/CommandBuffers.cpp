@@ -53,12 +53,12 @@ ComPtr<ID3D12CommandAllocator> CommandBuffers::GetCommandPool(uint32_t inPoolInd
 	return commandAllocators[inPoolIndex];
 }
 
-ComPtr<ID3D12GraphicsCommandList> CommandBuffers::GetNextForPool(uint32_t inPoolIndex)
-{
-	uint32_t bufferIndex = nextBuffer[inPoolIndex];
-	nextBuffer[inPoolIndex] = (bufferIndex + 1) % cmdBuffersPerPool;
-	return commandLists[inPoolIndex][bufferIndex];
-}
+//ComPtr<ID3D12GraphicsCommandList> CommandBuffers::GetNextForPool(uint32_t inPoolIndex)
+//{
+//	uint32_t bufferIndex = nextBuffer[inPoolIndex];
+//	nextBuffer[inPoolIndex] = (bufferIndex + 1) % cmdBuffersPerPool;
+//	return commandLists[inPoolIndex][bufferIndex];
+//}
 
 ComPtr<ID3D12GraphicsCommandList> CommandBuffers::GetForPool(uint32_t inPoolIndex, uint32_t inBufferIndex)
 {
@@ -68,7 +68,7 @@ ComPtr<ID3D12GraphicsCommandList> CommandBuffers::GetForPool(uint32_t inPoolInde
 ComPtr<ID3D12CommandAllocator> CommandBuffers::CreateAllocator(Device* inDevice, D3D12_COMMAND_LIST_TYPE inType)
 {
 	ComPtr<ID3D12CommandAllocator> allocator;
-	ThrowIfFailed( inDevice->GetDevice()->CreateCommandAllocator(inType, IID_PPV_ARGS(&allocator)) );
+	ThrowIfFailed( inDevice->GetNativeDevice()->CreateCommandAllocator(inType, IID_PPV_ARGS(&allocator)) );
 
 	return allocator;
 }
@@ -76,7 +76,7 @@ ComPtr<ID3D12CommandAllocator> CommandBuffers::CreateAllocator(Device* inDevice,
 ComPtr<ID3D12GraphicsCommandList> CommandBuffers::CreateList(Device* inDevice, ComPtr<ID3D12CommandAllocator> inAllocator, D3D12_COMMAND_LIST_TYPE inType)
 {
 	ComPtr<ID3D12GraphicsCommandList> list;
-	ThrowIfFailed( inDevice->GetDevice()->CreateCommandList(0, inType, inAllocator.Get(), nullptr, IID_PPV_ARGS(&list)) );
+	ThrowIfFailed( inDevice->GetNativeDevice()->CreateCommandList(0, inType, inAllocator.Get(), nullptr, IID_PPV_ARGS(&list)) );
 	ThrowIfFailed(list->Close());
 
 	return list;

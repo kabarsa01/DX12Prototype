@@ -57,7 +57,7 @@ void Shader::DestroyShaderModule()
 {
 	if (shaderModule)
 	{
-		Engine::GetRendererInstance()->GetVulkanDevice().GetDevice().destroyShaderModule(shaderModule);
+		Engine::GetRendererInstance()->GetVulkanDevice().GetNativeDevice().destroyShaderModule(shaderModule);
 		shaderModule = nullptr;
 	}
 }
@@ -84,7 +84,7 @@ void Shader::CreateShaderModule()
 	createInfo.setCodeSize(binary.size());
 	createInfo.setPCode(reinterpret_cast<const uint32_t*>(binary.data()));
 
-	shaderModule = Engine::GetRendererInstance()->GetVulkanDevice().GetDevice().createShaderModule(createInfo);
+	shaderModule = Engine::GetRendererInstance()->GetVulkanDevice().GetNativeDevice().createShaderModule(createInfo);
 }
 
 std::vector<BindingInfo> Shader::ExtractBindingInfo(

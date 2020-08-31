@@ -19,6 +19,7 @@ void SwapChain::Create(Device* inDevice, uint32_t inBuffersCount/* = 2*/)
 {
 	device = inDevice;
 	buffersCount = std::max<uint32_t>(inBuffersCount, 2);
+	isTearingSupported = CheckTearingSupport();
 
 	ComPtr<IDXGIFactory4> dxgiFactory4;
 	UINT factoryFlags = 0;
@@ -43,7 +44,7 @@ void SwapChain::Create(Device* inDevice, uint32_t inBuffersCount/* = 2*/)
 	swapChainDesc.SampleDesc = sampleDesc;
 	swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapChainDesc.Flags = CheckTearingSupport() ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+	swapChainDesc.Flags = isTearingSupported ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 	HWND hWnd = Engine::GetInstance()->GetWin32Window();
 
@@ -60,9 +61,8 @@ void SwapChain::Create(Device* inDevice, uint32_t inBuffersCount/* = 2*/)
 
 	CreateRTVs();
 	CreateFences();
-
-	imageIndex = 0;
-	prevImageIndex = buffersCount - 1;
+	//imageIndex = 0;
+	//prevImageIndex = buffersCount - 1;
 }
 
 void SwapChain::Destroy()
@@ -144,9 +144,7 @@ void SwapChain::Destroy()
 uint32_t SwapChain::AcquireNextImage(bool& outBecameOutdated)
 {
 	outBecameOutdated = false;
-	prevImageIndex = imageIndex;
-
-	ComPtr<ID3D12Device2> d3dDevice = device->GetDevice();
+//	prevImageIndex = imageIndex;
 //
 //	ResultValue<uint32_t> imageIndexResult = ResultValue<uint32_t>(Result::eSuccess, imageIndex);
 //
@@ -172,11 +170,14 @@ uint32_t SwapChain::AcquireNextImage(bool& outBecameOutdated)
 //	device->GetDevice().waitForFences(1, &cmdBuffersFences[imageIndex], VK_TRUE, UINT64_MAX);
 //	device->GetDevice().resetFences(1, &cmdBuffersFences[imageIndex]);
 
-	return imageIndex;
+	return swapChain4->GetCurrentBackBufferIndex();
 }
 
-bool SwapChain::Present()
+bool SwapChain::Present(bool inVSync)
 {
+	UINT syncInterval = inVSync ? 1 : 0;
+	UINT presentFlags = isTearingSupported && !inVSync ? DXGI_PRESENT_ALLOW_TEARING : 0;
+	ThrowIfFailed(swapChain4->Present(syncInterval, presentFlags));
 	//SwapchainKHR swapChains[] = { swapChain4 };
 	//PresentInfoKHR presentInfo;
 	//presentInfo.setWaitSemaphoreCount(1);
@@ -208,15 +209,15 @@ void SwapChain::WaitForPresentQueue()
 //	presentQueue.waitIdle();
 }
 
-ComPtr<ID3D12Fence> SwapChain::GetGraphicsQueueFence()
+Fence SwapChain::GetCurrentFence()
 {
-	return fences[imageIndex];
+	return fences[swapChain4->GetCurrentBackBufferIndex()];
 }
 
-ComPtr<ID3D12Fence> SwapChain::GetGraphicsQueuePrevFence()
-{
-	return fences[prevImageIndex];
-}
+//Fence SwapChain::GetPrevFence()
+//{
+//	return fences[prevImageIndex];
+//}
 
 bool SwapChain::CheckTearingSupport()
 {
@@ -291,7 +292,7 @@ void SwapChain::CreateRTVs()
 {
 	DescriptorHeaps& heaps = Engine::GetRendererInstance()->GetDescriptorHeaps();
 
-	ComPtr<ID3D12Device2> d3dDevice = device->GetDevice();
+	ComPtr<ID3D12Device2> d3dDevice = device->GetNativeDevice();
 	uint32_t descSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle(heaps.GetRTVHeap()->GetCPUDescriptorHandleForHeapStart());
@@ -315,7 +316,10 @@ void SwapChain::CreateFences()
 
 	for (uint32_t index = 0; index < buffersCount; index++)
 	{
-		ThrowIfFailed( device->GetDevice()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fences[index])) );
+		Fence fence;
+		fence.Create(device);
+
+		fences[index] = fence;
 	}
 }
 //

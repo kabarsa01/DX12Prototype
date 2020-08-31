@@ -13,12 +13,12 @@ public:
 	Device();
 	virtual ~Device();
 
-	void Create(const char* inAppName, const char* inEngine, bool inValidationEnabled, HWND inHwnd);
+	void Create(const char* inAppName, const char* inEngine, HWND inHwnd);
 	void Destroy();
 
 	//Instance& GetInstance() { return instance; }
 	//VulkanPhysicalDevice& GetPhysicalDevice() { return physicalDevice; }
-	ComPtr<ID3D12Device2> GetDevice() { return device; }
+	ComPtr<ID3D12Device2> GetNativeDevice() { return device; }
 	ComPtr<ID3D12CommandQueue> GetDirectQueue() { return directQueue; }
 	//SurfaceKHR& GetSurface() { return surface; };
 	//PipelineCache& GetPipelineCache() { return pipelineCache; };

@@ -220,7 +220,7 @@ void Material::UpdateDescriptorSet(DescriptorSet inSet, Device* inDevice)
 	{
 		write.setDstSet(inSet);
 	}
-	inDevice->GetDevice().updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
+	inDevice->GetNativeDevice().updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
 }
 
 VulkanBuffer& Material::GetUniformBuffer(const std::string& inName)

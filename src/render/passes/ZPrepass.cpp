@@ -4,7 +4,7 @@
 #include "scene/mesh/MeshComponent.h"
 
 ZPrepass::ZPrepass(HashString inName)
-	: VulkanPassBase(inName)
+	: PassBase(inName)
 {
 
 }

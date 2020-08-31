@@ -4,7 +4,7 @@
 #include "scene/mesh/MeshComponent.h"
 
 GBufferPass::GBufferPass(HashString inName)
-	:VulkanPassBase(inName)
+	:PassBase(inName)
 {
 }
 

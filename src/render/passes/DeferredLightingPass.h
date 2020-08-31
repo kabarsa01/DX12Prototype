@@ -1,8 +1,8 @@
 #pragma once
 
-#include "VulkanPassBase.h"
+#include "PassBase.h"
 
-class DeferredLightingPass : public VulkanPassBase
+class DeferredLightingPass : public PassBase
 {
 public:
 	DeferredLightingPass(HashString inName);

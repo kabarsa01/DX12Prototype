@@ -51,9 +51,9 @@ void VulkanDescriptorSet::Destroy()
 {
 	if (layout)
 	{
-		vulkanDevice->GetDevice().destroyDescriptorSetLayout(layout);
+		vulkanDevice->GetNativeDevice().destroyDescriptorSetLayout(layout);
 		layout = nullptr;
-		vulkanDevice->GetDevice().freeDescriptorSets(pool, { set });
+		vulkanDevice->GetNativeDevice().freeDescriptorSets(pool, { set });
 		set = nullptr;
 	}
 }
@@ -79,7 +79,7 @@ DescriptorSetLayout& VulkanDescriptorSet::CreateLayout()
 	layoutInfo.setBindingCount(static_cast<uint32_t>(bindings.size()));
 	layoutInfo.setPBindings(bindings.data());
 
-	layout = vulkanDevice->GetDevice().createDescriptorSetLayout(layoutInfo);
+	layout = vulkanDevice->GetNativeDevice().createDescriptorSetLayout(layoutInfo);
 
 	return layout;
 }

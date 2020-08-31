@@ -8,7 +8,7 @@
 #include "ZPrepass.h"
 
 DeferredLightingPass::DeferredLightingPass(HashString inName)
-	: VulkanPassBase(inName)
+	: PassBase(inName)
 {
 
 }

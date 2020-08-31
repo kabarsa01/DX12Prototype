@@ -15,7 +15,7 @@ Device::~Device()
 
 }
 
-void Device::Create(const char* inAppName, const char* inEngine, bool inValidationEnabled, HWND inHwnd)
+void Device::Create(const char* inAppName, const char* inEngine, HWND inHwnd)
 {
 #if defined(_DEBUG)
 	{

@@ -1,11 +1,11 @@
 #pragma once
 
 #include "vulkan/vulkan.hpp"
-#include "VulkanPassBase.h"
+#include "PassBase.h"
 #include "../resources/VulkanImage.h"
 #include "../DataStructures.h"
 
-class LightClusteringPass : public VulkanPassBase
+class LightClusteringPass : public PassBase
 {
 
 public:

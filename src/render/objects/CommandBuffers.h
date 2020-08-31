@@ -17,8 +17,8 @@ public:
 	void Destroy();
 
 	ComPtr<ID3D12CommandAllocator> GetCommandPool(uint32_t inPoolIndex);
-	ComPtr<ID3D12GraphicsCommandList> GetNextForPool(uint32_t inPoolIndex);
-	ComPtr<ID3D12GraphicsCommandList> GetForPool(uint32_t inPoolIndex, uint32_t inBufferIndex);
+//	ComPtr<ID3D12GraphicsCommandList> GetNextForPool(uint32_t inPoolIndex);
+	ComPtr<ID3D12GraphicsCommandList> GetForPool(uint32_t inPoolIndex, uint32_t inBufferIndex = 0);
 private:
 	Device* device;
 	std::vector<ComPtr<ID3D12CommandAllocator>> commandAllocators;

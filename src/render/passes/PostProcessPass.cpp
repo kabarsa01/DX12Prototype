@@ -7,7 +7,7 @@
 #include "LightClusteringPass.h"
 
 PostProcessPass::PostProcessPass(HashString inName)
-	: VulkanPassBase(inName)
+	: PassBase(inName)
 {
 
 }

@@ -1,6 +1,13 @@
 #include "DescriptorHeaps.h"
 #include "Device.h"
 
+namespace {
+	const uint32_t SHADER_RESOURCES_HEAP_SIZE = 2048;
+	const uint32_t SAMPLER_HEAP_SIZE = 32;
+	const uint32_t RTV_HEAP_SIZE = 64;
+	const uint32_t DSV_HEAP_SIZE = 64;
+};
+
 DescriptorHeaps::DescriptorHeaps()
 {
 
@@ -14,10 +21,10 @@ DescriptorHeaps::~DescriptorHeaps()
 void DescriptorHeaps::Create(Device* inDevice)
 {
 	device = inDevice;
-	shaderResourcesHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 2048);
-	samplersHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 32);
-	RTVHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 64);
-	DSVHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 64);
+	shaderResourcesHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, SHADER_RESOURCES_HEAP_SIZE);
+	samplersHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, SAMPLER_HEAP_SIZE);
+	RTVHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RTV_HEAP_SIZE);
+	DSVHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, DSV_HEAP_SIZE);
 //	pools.push_back(ConstructDescriptorPool());
 }
 
