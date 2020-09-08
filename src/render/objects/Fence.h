@@ -36,4 +36,5 @@ protected:
 	Device* device;
 	ComPtr<ID3D12Fence> d3dFence;
 	HANDLE eventHandle;
+	bool isValid = false;
 };

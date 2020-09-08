@@ -179,6 +179,7 @@
     <ClCompile Include="src\render\memory\DeviceMemoryManager.cpp" />
     <ClCompile Include="src\render\objects\CommandBuffers.cpp" />
     <ClCompile Include="src\render\objects\DescriptorHeaps.cpp" />
+    <ClCompile Include="src\render\objects\DescriptorPool.cpp" />
     <ClCompile Include="src\render\objects\Fence.cpp" />
     <ClCompile Include="src\render\objects\VulkanDescriptorSet.cpp" />
     <ClCompile Include="src\render\objects\Device.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="src\render\memory\DeviceMemoryManager.h" />
     <ClInclude Include="src\render\objects\CommandBuffers.h" />
     <ClInclude Include="src\render\objects\DescriptorHeaps.h" />
+    <ClInclude Include="src\render\objects\DescriptorPool.h" />
     <ClInclude Include="src\render\objects\Fence.h" />
     <ClInclude Include="src\render\objects\VulkanDescriptorSet.h" />
     <ClInclude Include="src\render\objects\Device.h" />

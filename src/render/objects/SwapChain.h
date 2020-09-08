@@ -33,6 +33,9 @@ public:
 	//Semaphore& GetImageAvailableSemaphore() { return imageAvailableSemaphores[prevImageIndex]; }
 	//Semaphore& GetRenderingFinishedSemaphore() { return renderingFinishedSemaphores[imageIndex]; }
 	Fence GetCurrentFence();
+	Fence GetFence(uint32_t inIndex) { return fences[inIndex]; }
+	void SignalFences();
+	void ResetFences();
 //	Fence GetPrevFence();
 	//Framebuffer& GetFramebuffer() { return framebuffers[imageIndex]; }
 	//Framebuffer& GetFramebuffer(uint32_t inIndex) { return framebuffers[inIndex]; }
@@ -77,6 +80,7 @@ private:
 	bool CheckTearingSupport();
 	void CreateRTVs();
 	void CreateFences();
+	void DestroyFences();
 
 	//void CreateRenderPass();
 	//void DestroyRenderPass();

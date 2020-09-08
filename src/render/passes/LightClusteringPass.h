@@ -16,7 +16,7 @@ public:
 	Texture2DPtr depthTexture;
 
 	LightClusteringPass(HashString inName);
-	void RecordCommands(CommandBuffer* inCommandBuffer) override;
+	void RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList) override;
 protected:
 	ClusterLightsData* clusterLightData;
 	LightsList* lightsList;

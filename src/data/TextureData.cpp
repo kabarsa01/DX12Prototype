@@ -42,7 +42,7 @@ bool TextureData::Load()
 		return false;
 	}
 
-	Device& device = Engine::GetRendererInstance()->GetVulkanDevice();
+	Device& device = Engine::GetRendererInstance()->GetDevice();
 	image.createInfo = GetImageInfo();
 	image.Create(&device);
 	image.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);

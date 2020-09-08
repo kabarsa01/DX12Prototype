@@ -7,7 +7,7 @@ class PostProcessPass : public PassBase
 {
 public:
 	PostProcessPass(HashString inName);
-	void RecordCommands(CommandBuffer* inCommandBuffer) override;
+	void RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList) override;
 protected:
 	MaterialPtr postProcessMaterial;
 	Texture2DPtr screenImage;

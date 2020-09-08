@@ -92,7 +92,7 @@ void MeshData::SetupBuffer(VulkanBuffer& inBuffer, std::vector<T>& inDataVector,
 	inBuffer.createInfo.setSize(size);
 	inBuffer.createInfo.setUsage(usage | BufferUsageFlagBits::eTransferDst);
 	inBuffer.createInfo.setSharingMode(SharingMode::eExclusive);
-	inBuffer.Create(&Engine::GetRendererInstance()->GetVulkanDevice());
+	inBuffer.Create(&Engine::GetRendererInstance()->GetDevice());
 	inBuffer.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
 	inBuffer.SetData(size, reinterpret_cast<char*>( inDataVector.data() ));
 

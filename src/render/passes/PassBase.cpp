@@ -27,7 +27,7 @@ PassBase::~PassBase()
 void PassBase::Create()
 {
 	renderer = Engine::GetRendererInstance();
-	vulkanDevice = &renderer->GetVulkanDevice();
+	vulkanDevice = &renderer->GetDevice();
 	//width = renderer->GetWidth();
 	//height = renderer->GetHeight();
 

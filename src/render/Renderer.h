@@ -58,8 +58,7 @@ public:
 	int GetWidth() const;
 	int GetHeight() const;
 
-	Device& GetVulkanDevice();
-//	Device& GetDevice();
+	Device& GetDevice();
 	SwapChain& GetSwapChain();
 	CommandBuffers& GetCommandBuffers();
 	DescriptorHeaps& GetDescriptorHeaps();

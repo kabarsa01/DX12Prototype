@@ -50,7 +50,7 @@ MemoryPropertyFlags VulkanDeviceMemory::GetMemPropertyFlags()
 
 void VulkanDeviceMemory::Allocate(DeviceSize inSize, uint32_t inMemTypeBits, MemoryPropertyFlags inMemPropertyFlags)
 {
-	device = Engine::GetRendererInstance()->GetVulkanDevice();
+	device = Engine::GetRendererInstance()->GetDevice();
 
 	MemoryAllocateInfo memoryInfo;
 	memoryInfo.setAllocationSize(inSize);
@@ -135,7 +135,7 @@ VulkanDeviceMemory::operator DeviceMemory() const
 
 uint32_t VulkanDeviceMemory::FindMemoryTypeStatic(uint32_t inTypeFilter, MemoryPropertyFlags inPropFlags)
 {
-	PhysicalDeviceMemoryProperties memProps = Engine::GetRendererInstance()->GetVulkanDevice().GetPhysicalDevice().GetMemoryProperties();
+	PhysicalDeviceMemoryProperties memProps = Engine::GetRendererInstance()->GetDevice().GetPhysicalDevice().GetMemoryProperties();
 
 	for (uint32_t index = 0; index < memProps.memoryTypeCount; index++)
 	{

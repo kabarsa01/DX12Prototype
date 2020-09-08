@@ -231,6 +231,9 @@
     <ClCompile Include="src\render\passes\PassBase.cpp">
       <Filter>Source Files\src\render\passes</Filter>
     </ClCompile>
+    <ClCompile Include="src\render\objects\DescriptorPool.cpp">
+      <Filter>Source Files\src\render\objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\d3dx12.h">
@@ -397,6 +400,9 @@
     </ClInclude>
     <ClInclude Include="src\render\passes\PassBase.h">
       <Filter>Source Files\src\render\passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\objects\DescriptorPool.h">
+      <Filter>Source Files\src\render\objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

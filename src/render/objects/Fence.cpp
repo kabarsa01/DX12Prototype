@@ -8,6 +8,7 @@ namespace {
 }
 
 Fence::Fence()
+	: isValid(false)
 {
 
 }
@@ -19,6 +20,10 @@ Fence::~Fence()
 
 void Fence::Create(Device* inDevice)
 {
+	if (isValid)
+	{
+		return;
+	}
 	device = inDevice;
 	ThrowIfFailed(device->GetNativeDevice()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&d3dFence)));
 	eventHandle = ::CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -26,6 +31,10 @@ void Fence::Create(Device* inDevice)
 
 void Fence::Destroy()
 {
+	if (!isValid)
+	{
+		return;
+	}
 	::CloseHandle(eventHandle);
 }
 

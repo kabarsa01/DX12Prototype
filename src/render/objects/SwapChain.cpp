@@ -214,6 +214,22 @@ Fence SwapChain::GetCurrentFence()
 	return fences[swapChain4->GetCurrentBackBufferIndex()];
 }
 
+void SwapChain::SignalFences()
+{
+	for (uint32_t index = 0; index < fences.size(); index++)
+	{
+		fences[index].Signal();
+	}
+}
+
+void SwapChain::ResetFences()
+{
+	for (uint32_t index = 0; index < fences.size(); index++)
+	{
+		fences[index].Reset();
+	}
+}
+
 //Fence SwapChain::GetPrevFence()
 //{
 //	return fences[prevImageIndex];
@@ -312,6 +328,7 @@ void SwapChain::CreateRTVs()
 
 void SwapChain::CreateFences()
 {
+	DestroyFences();
 	fences.resize(buffersCount);
 
 	for (uint32_t index = 0; index < buffersCount; index++)
@@ -322,6 +339,15 @@ void SwapChain::CreateFences()
 		fences[index] = fence;
 	}
 }
+
+void SwapChain::DestroyFences()
+{
+	for (uint32_t index = 0; index < fences.size(); index++)
+	{
+		fences[index].Destroy();
+	}
+}
+
 //
 //void SwapChain::DestroyRTV()
 //{

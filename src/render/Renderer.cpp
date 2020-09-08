@@ -29,6 +29,8 @@
 #include "PipelineRegistry.h"
 #include "passes/DeferredLightingPass.h"
 #include "passes/LightClusteringPass.h"
+#include "objects/SwapChain.h"
+#include "utils/HelperUtils.h"
 
 //const std::vector<Vertex> verticesTest = {
 //	{{0.0f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}},
@@ -62,7 +64,8 @@ void Renderer::Init()
 
 	HWND hWnd = glfwGetWin32Window(Engine::GetInstance()->GetGlfwWindow());
 	device.Create("DX12Renderer", "MiniEngine", hWnd);
-	swapChain.Create(&device, 2);
+	swapChain.Create(&device, 3);
+	swapChain.SignalFences();
 //	swapChain.CreateForResolution(width, height);
 	commandBuffers.Create(&device, 2, 1);
 	descriptorPools.Create(&device);
@@ -96,7 +99,11 @@ void Renderer::RenderFrame()
 		return;
 	}
 
-	bool outdated = false;
+	// waiting for the current frame to be available
+	swapChain.GetCurrentFence().Wait();
+	// resetting our fence object
+	swapChain.GetCurrentFence().Reset();
+
 	uint32_t imageIndex = swapChain.GetCurrentImageIndex();
 	//if (outdated)
 	//{
@@ -123,50 +130,41 @@ void Renderer::RenderFrame()
 
 	// render passes
 	// z prepass
-	zPrepass->RecordCommands(&cmdList);
+	zPrepass->RecordCommands(cmdList);
 	//--------------------------------------------------------
-	lightClusteringPass->RecordCommands(&cmdList);
+	lightClusteringPass->RecordCommands(cmdList);
 	//--------------------------------------------------------
 	// gbuffer pass
-	gBufferPass->RecordCommands(&cmdList);
+	gBufferPass->RecordCommands(cmdList);
 	// barriers ----------------------------------------------
 	const std::vector<VulkanImage>& gBufferAttachments = gBufferPass->GetAttachments();
 	//--------------------------------------------------------
 	// deferred lighting pass
-	deferredLightingPass->RecordCommands(&cmdList);
+	deferredLightingPass->RecordCommands(cmdList);
 	//--------------------------------------------------------
 	// post process pass
-	postProcessPass->RecordCommands(&cmdList);
+	postProcessPass->RecordCommands(cmdList);
+
+	CD3DX12_RESOURCE_BARRIER presentBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		swapChain.GetCurrentImage().Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT
+	);
+	cmdList->ResourceBarrier(1, &presentBarrier);
 	// end commands recording
-	cmdList.end();
+	ThrowIfFailed(cmdList->Close());
 
-	SubmitInfo submitInfo;
-	Semaphore waitSemaphores[] = { swapChain.GetImageAvailableSemaphore() };
-	PipelineStageFlags waitStages[] = { PipelineStageFlagBits::eColorAttachmentOutput };
-	submitInfo.setWaitSemaphoreCount(1);
-	submitInfo.setPWaitSemaphores(waitSemaphores);
-	submitInfo.setPWaitDstStageMask(waitStages);
-	submitInfo.setCommandBufferCount(1);
-	submitInfo.setPCommandBuffers(&cmdList);
-
-	Semaphore signalSemaphores[] = { swapChain.GetRenderingFinishedSemaphore() };
-	submitInfo.setSignalSemaphoreCount(1);
-	submitInfo.setPSignalSemaphores(signalSemaphores);
-
-	ArrayProxy<const SubmitInfo> submitInfoArray(1, &submitInfo);
-	device.GetGraphicsQueue().submit(submitInfoArray, swapChain.GetCurrentFence());
-
-	if (!swapChain.Present())
-	{
-		OnResolutionChange();
-	}
-	device.GetGraphicsQueue().waitIdle();
-	//swapChain.WaitForPresentQueue();
+	ComPtr<ID3D12CommandQueue> queue;
+	ID3D12CommandList* lists[] = { cmdList.Get() };
+	queue->ExecuteCommandLists(std::size(lists), lists);
+	swapChain.Present(true);
+	// getting current frame fence to signal it on GPU after present
+	swapChain.GetCurrentFence().Signal(queue);
 }
 
 void Renderer::WaitForDevice()
 {
-	device.GetNativeDevice().waitIdle();
+//	device.GetNativeDevice()->wawaitIdle();
 }
 
 void Renderer::Cleanup()
@@ -217,14 +215,9 @@ int Renderer::GetHeight() const
 	return height;
 }
 
-Device& Renderer::GetVulkanDevice()
-{
-	return device;
-}
-
 Device& Renderer::GetDevice()
 {
-	return device.GetNativeDevice();
+	return device;
 }
 
 SwapChain& Renderer::GetSwapChain()

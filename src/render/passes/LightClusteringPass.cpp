@@ -15,7 +15,7 @@ LightClusteringPass::LightClusteringPass(HashString inName)
 
 }
 
-void LightClusteringPass::RecordCommands(CommandBuffer* inCommandBuffer)
+void LightClusteringPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList)
 {
 	ScenePtr scene = Engine::GetSceneInstance();
 	std::vector<LightComponentPtr> lights = scene->GetSceneComponentsCast<LightComponent>();
@@ -62,7 +62,7 @@ void LightClusteringPass::RecordCommands(CommandBuffer* inCommandBuffer)
 		ImageAspectFlagBits::eColor,
 		0, 1, 0, 1);
 	std::array<ImageMemoryBarrier, 2> barriers{ depthTextureBarrier, clustersTextureBarrier };
-	inCommandBuffer->pipelineBarrier(
+	inCommandList->pipelineBarrier(
 		PipelineStageFlagBits::eAllGraphics,
 		PipelineStageFlagBits::eComputeShader,
 		DependencyFlags(),
@@ -72,9 +72,9 @@ void LightClusteringPass::RecordCommands(CommandBuffer* inCommandBuffer)
 	PipelineData& pipelineData = FindPipeline(computeMaterial);
 
 	DeviceSize offset = 0;
-	inCommandBuffer->bindPipeline(PipelineBindPoint::eCompute, pipelineData.pipeline);
-	inCommandBuffer->bindDescriptorSets(PipelineBindPoint::eCompute, pipelineData.pipelineLayout, 0, pipelineData.descriptorSets, {});
-	inCommandBuffer->dispatch(32, 32, 1);
+	inCommandList->bindPipeline(PipelineBindPoint::eCompute, pipelineData.pipeline);
+	inCommandList->bindDescriptorSets(PipelineBindPoint::eCompute, pipelineData.pipelineLayout, 0, pipelineData.descriptorSets, {});
+	inCommandList->dispatch(32, 32, 1);
 }
 
 void LightClusteringPass::OnCreate()

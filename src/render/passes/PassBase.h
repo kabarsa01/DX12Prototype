@@ -1,6 +1,9 @@
 #pragma once
 
+#include <wrl.h>
+#include <d3d12.h>
 #include <vector>
+
 #include "../resources/VulkanBuffer.h"
 #include "../memory/DeviceMemoryManager.h"
 #include "../resources/VulkanImage.h"
@@ -9,6 +12,8 @@
 
 class Device;
 class Renderer;
+
+using namespace Microsoft::WRL;
 
 class PassBase
 {
@@ -33,7 +38,7 @@ public:
 
 	void SetExternalDepth(const VulkanImage& inDepthAttachment, const ImageView& inDepthAttachmentView);
 
-	virtual void RecordCommands(CommandBuffer* inCommandBuffer) = 0;
+	virtual void RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList) = 0;
 protected:
 	inline Device* GetDevice() { return device; }
 	inline Renderer* GetRenderer() { return renderer; }

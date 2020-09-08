@@ -10,7 +10,7 @@ class GBufferPass : public PassBase
 {
 public:
 	GBufferPass(HashString inName);
-	void RecordCommands(CommandBuffer* inCommandBuffer) override;
+	void RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList) override;
 protected:
 	std::array<ClearValue, 3> clearValues;
 

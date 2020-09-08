@@ -8,7 +8,7 @@ GBufferPass::GBufferPass(HashString inName)
 {
 }
 
-void GBufferPass::RecordCommands(CommandBuffer* inCommandBuffer)
+void GBufferPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList)
 {
 	ImageMemoryBarrier depthTextureBarrier = GetDepthAttachment().CreateLayoutBarrier(
 		ImageLayout::eUndefined,
@@ -17,7 +17,7 @@ void GBufferPass::RecordCommands(CommandBuffer* inCommandBuffer)
 		AccessFlagBits::eDepthStencilAttachmentRead,
 		ImageAspectFlagBits::eDepth | ImageAspectFlagBits::eStencil,
 		0, 1, 0, 1);
-	inCommandBuffer->pipelineBarrier(
+	inCommandList->pipelineBarrier(
 		PipelineStageFlagBits::eComputeShader,
 		PipelineStageFlagBits::eAllGraphics,
 		DependencyFlags(),
@@ -34,36 +34,36 @@ void GBufferPass::RecordCommands(CommandBuffer* inCommandBuffer)
 	passBeginInfo.setPClearValues(clearValues.data());
 
 	DeviceSize offset = 0;
-	inCommandBuffer->beginRenderPass(passBeginInfo, SubpassContents::eInline);
+	inCommandList->beginRenderPass(passBeginInfo, SubpassContents::eInline);
 
 	//------------------------------------------------------------------------------------------------------------
 	for (HashString& shaderHash : scene->GetShadersList())
 	{
 		PipelineData& pipelineData = FindPipeline(scene->GetShaderToMaterial()[shaderHash][0]);
 
-		inCommandBuffer->bindPipeline(PipelineBindPoint::eGraphics, pipelineData.pipeline);
-		inCommandBuffer->bindDescriptorSets(PipelineBindPoint::eGraphics, pipelineData.pipelineLayout, 0, pipelineData.descriptorSets, {});
+		inCommandList->bindPipeline(PipelineBindPoint::eGraphics, pipelineData.pipeline);
+		inCommandList->bindDescriptorSets(PipelineBindPoint::eGraphics, pipelineData.pipelineLayout, 0, pipelineData.descriptorSets, {});
 
 		for (MaterialPtr material : scene->GetShaderToMaterial()[shaderHash])
 		{
 			HashString materialId = material->GetResourceId();
 
 			material->CreateDescriptorSet(GetVulkanDevice());
-			inCommandBuffer->bindDescriptorSets(PipelineBindPoint::eGraphics, pipelineData.pipelineLayout, 1, material->GetDescriptorSets(), {});
+			inCommandList->bindDescriptorSets(PipelineBindPoint::eGraphics, pipelineData.pipelineLayout, 1, material->GetDescriptorSets(), {});
 
 			for (MeshDataPtr meshData : scene->GetMaterialToMeshData()[material->GetResourceId()])
 			{
 				HashString meshId = meshData->GetResourceId();
 
-				inCommandBuffer->pushConstants(pipelineData.pipelineLayout, ShaderStageFlagBits::eAllGraphics, 0, sizeof(uint32_t), & scene->GetMeshDataToIndex(materialId)[meshId]);
-				inCommandBuffer->bindVertexBuffers(0, 1, &meshData->GetVertexBuffer().GetBuffer(), &offset);
-				inCommandBuffer->bindIndexBuffer(meshData->GetIndexBuffer().GetBuffer(), 0, IndexType::eUint32);
-				inCommandBuffer->drawIndexed(meshData->GetIndexCount(), scene->GetMeshDataToTransform(materialId)[meshId].size(), 0, 0, 0);
+				inCommandList->pushConstants(pipelineData.pipelineLayout, ShaderStageFlagBits::eAllGraphics, 0, sizeof(uint32_t), & scene->GetMeshDataToIndex(materialId)[meshId]);
+				inCommandList->bindVertexBuffers(0, 1, &meshData->GetVertexBuffer().GetBuffer(), &offset);
+				inCommandList->bindIndexBuffer(meshData->GetIndexBuffer().GetBuffer(), 0, IndexType::eUint32);
+				inCommandList->drawIndexed(meshData->GetIndexCount(), scene->GetMeshDataToTransform(materialId)[meshId].size(), 0, 0, 0);
 			}
 		}		
 	}
 	//------------------------------------------------------------------------------------------------------------
-	inCommandBuffer->endRenderPass();
+	inCommandList->endRenderPass();
 }
 
 void GBufferPass::OnCreate()

@@ -6,7 +6,7 @@ class DeferredLightingPass : public PassBase
 {
 public:
 	DeferredLightingPass(HashString inName);
-	void RecordCommands(CommandBuffer* inCommandBuffer) override;
+	void RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList) override;
 protected:
 	MaterialPtr lightingMaterial;
 	Texture2DPtr albedoTexture;

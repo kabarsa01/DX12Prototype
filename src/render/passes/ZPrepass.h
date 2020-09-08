@@ -10,7 +10,7 @@ class ZPrepass : public PassBase
 {
 public:
 	ZPrepass(HashString inName);
-	void RecordCommands(CommandBuffer* inCommandBuffer) override;
+	void RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList) override;
 protected:
 	ClearValue clearValue;
 

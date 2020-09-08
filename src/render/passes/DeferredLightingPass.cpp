@@ -13,7 +13,7 @@ DeferredLightingPass::DeferredLightingPass(HashString inName)
 
 }
 
-void DeferredLightingPass::RecordCommands(CommandBuffer* inCommandBuffer)
+void DeferredLightingPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList)
 {
 	LightClusteringPass* clusteringPass = GetRenderer()->GetLightClusteringPass();
 	VulkanBuffer& buffer = clusteringPass->computeMaterial->GetStorageBuffer("clusterLightsData");
@@ -38,7 +38,7 @@ void DeferredLightingPass::RecordCommands(CommandBuffer* inCommandBuffer)
 		ImageAspectFlagBits::eDepth | ImageAspectFlagBits::eStencil,
 		0, 1, 0, 1);
 	std::array<ImageMemoryBarrier, 2> barriers{ attachmentBarrier, depthTextureBarrier };
-	inCommandBuffer->pipelineBarrier(
+	inCommandList->pipelineBarrier(
 		PipelineStageFlagBits::eVertexShader,
 		PipelineStageFlagBits::eFragmentShader,
 		DependencyFlags(),
@@ -60,14 +60,14 @@ void DeferredLightingPass::RecordCommands(CommandBuffer* inCommandBuffer)
 	passBeginInfo.setPClearValues(&clearValue);
 
 	DeviceSize offset = 0;
-	inCommandBuffer->beginRenderPass(passBeginInfo, SubpassContents::eInline);
-	inCommandBuffer->bindPipeline(PipelineBindPoint::eGraphics, pipelineData.pipeline);
-	inCommandBuffer->bindDescriptorSets(PipelineBindPoint::eGraphics, pipelineData.pipelineLayout, 0, pipelineData.descriptorSets, {});
+	inCommandList->beginRenderPass(passBeginInfo, SubpassContents::eInline);
+	inCommandList->bindPipeline(PipelineBindPoint::eGraphics, pipelineData.pipeline);
+	inCommandList->bindDescriptorSets(PipelineBindPoint::eGraphics, pipelineData.pipelineLayout, 0, pipelineData.descriptorSets, {});
 
-	inCommandBuffer->bindVertexBuffers(0, 1, &meshData->GetVertexBuffer().GetBuffer(), &offset);
-	inCommandBuffer->bindIndexBuffer(meshData->GetIndexBuffer().GetBuffer(), 0, IndexType::eUint32);
-	inCommandBuffer->drawIndexed(meshData->GetIndexCount(), 1, 0, 0, 0);
-	inCommandBuffer->endRenderPass();
+	inCommandList->bindVertexBuffers(0, 1, &meshData->GetVertexBuffer().GetBuffer(), &offset);
+	inCommandList->bindIndexBuffer(meshData->GetIndexBuffer().GetBuffer(), 0, IndexType::eUint32);
+	inCommandList->drawIndexed(meshData->GetIndexCount(), 1, 0, 0, 0);
+	inCommandList->endRenderPass();
 }
 
 void DeferredLightingPass::OnCreate()

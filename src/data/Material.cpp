@@ -155,7 +155,7 @@ void Material::SetStorageTexture(const std::string& inName, Texture2DPtr inTextu
 
 void Material::SetUniformBuffer(const std::string& inName, uint64_t inSize, const char* inData)
 {
-	Device& vulkanDevice = Engine::GetRendererInstance()->GetVulkanDevice();
+	Device& vulkanDevice = Engine::GetRendererInstance()->GetDevice();
 
 	VulkanBuffer buffer;
 	buffer.createInfo.setSharingMode(SharingMode::eExclusive);
@@ -187,7 +187,7 @@ void Material::SetStorageBufferExternal(const std::string& inName, const VulkanB
 
 void Material::SetStorageBuffer(const std::string& inName, uint64_t inSize, const char* inData)
 {
-	Device& vulkanDevice = Engine::GetRendererInstance()->GetVulkanDevice();
+	Device& vulkanDevice = Engine::GetRendererInstance()->GetDevice();
 
 	VulkanBuffer buffer(false);
 	buffer.createInfo.setSharingMode(SharingMode::eExclusive);
