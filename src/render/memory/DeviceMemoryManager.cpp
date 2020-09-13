@@ -45,7 +45,7 @@ MemoryRecord DeviceMemoryManager::RequestMemory(uint32_t inSize, D3D12_HEAP_TYPE
 				auto currentTime = std::chrono::high_resolution_clock::now();
 				double deltaTime = std::chrono::duration<double, std::chrono::microseconds::period>(currentTime - startTime).count();
 
-				std::printf("suballocation from %I64u bytes memtype %I64u for %I64u took %f microseconds\n", GetRangeBase(static_cast<uint32_t>(rangeIndex)) * 2048, memTypeIndex, requiredSize, deltaTime);
+				std::printf("suballocation for %I64u took %f microseconds\n", requiredSize, deltaTime);
 
 				return memoryRecord;
 			}
@@ -62,7 +62,7 @@ MemoryRecord DeviceMemoryManager::RequestMemory(uint32_t inSize, D3D12_HEAP_TYPE
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	double deltaTime = std::chrono::duration<double, std::chrono::microseconds::period>(currentTime - startTime).count();
 
-	std::printf("vulkan allocation of %I64u bytes memtype %I64u for %I64u took %f microseconds\n", GetRangeBase(static_cast<uint32_t>(rangeIndex)) * 2048, memTypeIndex, requiredSize, deltaTime);
+	std::printf("allocation of %I64u took %f microseconds\n", requiredSize, deltaTime);
 
 	MemoryPosition pos = chunk->AcquireSegment(requiredSize);
 
@@ -83,7 +83,7 @@ void DeviceMemoryManager::ReturnMemory(const MemoryRecord& inMemoryRecord)
 
 void DeviceMemoryManager::CleanupMemory()
 {
-	std::map<D3D12_HEAP_TYPE, std::vector<DeviceMemoryChunk*>>::iterator regionIter;
+	std::map<uint64_t, std::vector<DeviceMemoryChunk*>>::iterator regionIter;
 	for (regionIter = memRegions.begin(); regionIter != memRegions.end(); regionIter++)
 	{
 		std::vector<DeviceMemoryChunk*>& chunks = regionIter->second;

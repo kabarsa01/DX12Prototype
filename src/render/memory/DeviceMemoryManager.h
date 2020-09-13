@@ -33,7 +33,7 @@ public:
 protected:
 	static DeviceMemoryManager* staticInstance;
 
-	std::map<D3D12_HEAP_TYPE, std::vector<DeviceMemoryChunk*>> memRegions;
+	std::map<uint64_t, std::vector<DeviceMemoryChunk*>> memRegions;
 
 	DeviceMemoryManager();
 	DeviceMemoryManager(const DeviceMemoryManager&) {}
