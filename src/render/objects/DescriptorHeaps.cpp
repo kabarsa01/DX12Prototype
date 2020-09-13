@@ -21,11 +21,11 @@ void DescriptorHeaps::Create(Device* inDevice)
 {
 	device = inDevice;
 
-	shaderResourcesPools.push_back(DescriptorPool());
+	CBV_SRV_UAVPools.push_back(DescriptorPool());
 	RTVPools.push_back(DescriptorPool());
 	DSVPools.push_back(DescriptorPool());
 
-	shaderResourcesPools[0].Create(inDevice, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, SHADER_RESOURCES_HEAP_SIZE, true);
+	CBV_SRV_UAVPools[0].Create(inDevice, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, SHADER_RESOURCES_HEAP_SIZE, true);
 	RTVPools[0].Create(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RTV_HEAP_SIZE, true);
 	DSVPools[0].Create(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, DSV_HEAP_SIZE, true);
 }
@@ -37,6 +37,50 @@ void DescriptorHeaps::Destroy()
 	//	device->GetDevice().destroyDescriptorPool(pool);
 	//}
 }
+
+DescriptorBlock DescriptorHeaps::AllocateDescriptorsCBV_SRV_UAV(uint16_t inBlockSize)
+{
+	AllocateDescriptors(inBlockSize, CBV_SRV_UAVPools, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, SHADER_RESOURCES_HEAP_SIZE, true);
+}
+
+DescriptorBlock DescriptorHeaps::AllocateDescriptorsRTV(uint16_t inBlockSize)
+{
+	AllocateDescriptors(inBlockSize, RTVPools, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RTV_HEAP_SIZE, true);
+}
+
+DescriptorBlock DescriptorHeaps::AllocateDescriptorsDSV(uint16_t inBlockSize)
+{
+	AllocateDescriptors(inBlockSize, DSVPools, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, DSV_HEAP_SIZE, true);
+}
+
+void DescriptorHeaps::ReleaseDescriptors(const DescriptorBlock& inBlock)
+{
+
+}
+
+DescriptorBlock DescriptorHeaps::AllocateDescriptors(uint16_t inBlockSize, std::vector<DescriptorPool>& inPools, D3D12_DESCRIPTOR_HEAP_TYPE inType, uint16_t inHeapSize, bool inShaderVisible)
+{
+	for (uint32_t poolIndex = 0; poolIndex < inPools.size(); poolIndex++)
+	{
+		DescriptorPool& pool = inPools[poolIndex];
+		DescriptorBlock block = pool.Allocate(inBlockSize);
+		if (block.size > 0)
+		{
+			return block;
+		}
+	}
+
+	inPools.push_back(DescriptorPool());
+	inPools.back().Create(device, inType, inHeapSize, inShaderVisible);
+
+	return inPools.back().Allocate(inBlockSize);
+}
+
+void DescriptorHeaps::ReleaseDescriptors(const DescriptorBlock& inBlock)
+{
+	inBlock.parent->Release(inBlock);
+}
+
 //
 //std::vector<DescriptorSet> VulkanDescriptorPools::AllocateSet(const std::vector<DescriptorSetLayout>& inLayouts, DescriptorPool& outPool)
 //{

@@ -7,7 +7,7 @@ namespace
 	static const unsigned char splitFlag = 1 << 1;
 };
 
-DeviceMemoryChunk::DeviceMemoryChunk(DeviceSize inSegmentSize, uint32_t inTreeDepth)
+DeviceMemoryChunk::DeviceMemoryChunk(uint64_t inSegmentSize, uint32_t inTreeDepth)
 	: segmentSize(inSegmentSize)
 	, treeDepth(inTreeDepth)
 	, treeSize((1 << treeDepth) - 1)
@@ -34,26 +34,16 @@ DeviceMemoryChunk::~DeviceMemoryChunk()
 	delete [] memoryTree;
 }
 
-void DeviceMemoryChunk::Allocate(uint32_t inMemTypeBits, MemoryPropertyFlags inMemPropertyFlags)
+void DeviceMemoryChunk::Allocate(Device* inDevice, D3D12_HEAP_TYPE inHeapType)
 {
-	DeviceSize chunkSize = segmentSize * segmentCount;
-	memory.Allocate(chunkSize, inMemTypeBits, inMemPropertyFlags);
+	uint64_t chunkSize = segmentSize * segmentCount;
+	memory.Allocate(inDevice, chunkSize, inHeapType);
 }
 
-void DeviceMemoryChunk::Allocate(const MemoryRequirements& inMemRequirements, MemoryPropertyFlags inMemPropertyFlags)
+MemoryPosition DeviceMemoryChunk::AcquireSegment(uint64_t inSize)
 {
-	Allocate(inMemRequirements.memoryTypeBits, inMemPropertyFlags);
-}
-
-void DeviceMemoryChunk::Free()
-{
-	memory.Free();
-}
-
-MemoryPosition DeviceMemoryChunk::AcquireSegment(DeviceSize inSize)
-{
-	DeviceSize order = 0;
-	DeviceSize requiredSize = segmentSize;
+	uint64_t order = 0;
+	uint64_t requiredSize = segmentSize;
 	uint32_t layer = 0;
 	while (inSize > requiredSize)
 	{
@@ -88,7 +78,7 @@ void DeviceMemoryChunk::ReleaseSegment(const MemoryPosition& inMemoryPosition)
 	MarkFreeUp(inMemoryPosition.layer, inMemoryPosition.index);
 }
 
-VulkanDeviceMemory& DeviceMemoryChunk::GetMemory()
+DeviceMemory& DeviceMemoryChunk::GetMemory()
 {
 	return memory;
 }
@@ -125,10 +115,10 @@ uint32_t DeviceMemoryChunk::GetSiblingIndex(uint32_t inIndex)
 	return buddyIndex;
 }
 
-DeviceSize DeviceMemoryChunk::CalculateOffset(uint32_t inLayer, uint32_t inIndex)
+uint64_t DeviceMemoryChunk::CalculateOffset(uint32_t inLayer, uint32_t inIndex)
 {
 	uint32_t baseLayerIndex = GetLayerStartIndex(inLayer);
-	DeviceSize layerSegmentSize = segmentSize * (uint64_t(1) << inLayer);
+	uint64_t layerSegmentSize = segmentSize * (uint64_t(1) << inLayer);
 	return (inIndex - baseLayerIndex) * layerSegmentSize;
 }
 

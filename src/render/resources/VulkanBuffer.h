@@ -1,11 +1,8 @@
 #pragma once
 
-#include "vulkan/vulkan.hpp"
 #include "../memory/DeviceMemoryManager.h"
 #include "../objects/Device.h"
 #include <vector>
-
-using namespace VULKAN_HPP_NAMESPACE;
 
 class VulkanBuffer
 {
@@ -15,7 +12,7 @@ public:
 	VulkanBuffer(bool inScoped = false, bool inCleanup = true);
 	virtual ~VulkanBuffer();
 
-	void Create(VulkanDevice* inDevice);
+	void Create(Device* inDevice);
 	void Destroy();
 
 	void SetData(const std::vector<char>& inData);
@@ -44,7 +41,7 @@ public:
 
 	//static void SubmitCopyCommand(const VulkanBuffer& inSrc, const VulkanBuffer& inDst);
 protected:
-	VulkanDevice* vulkanDevice;
+	Device* device;
 	Buffer buffer;
 	DescriptorBufferInfo descriptorInfo;
 	MemoryRecord memRecord;

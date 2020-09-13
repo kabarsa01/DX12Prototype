@@ -18,14 +18,25 @@ VulkanBuffer::~VulkanBuffer()
 	}
 }
 
-void VulkanBuffer::Create(VulkanDevice* inDevice)
+void VulkanBuffer::Create(Device* inDevice)
 {
 	if (buffer)
 	{
 		return;
 	}
-	vulkanDevice = inDevice;
-	buffer = vulkanDevice->GetDevice().createBuffer(createInfo);
+	device = inDevice;
+
+	D3D12_RESOURCE_DESC desc;
+	desc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+	desc.DepthOrArraySize = 1;
+	desc.Height = 1;
+	desc.MipLevels = 1;
+	desc.Format = DXGI_FORMAT_UNKNOWN;
+	desc.SampleDesc.Quality = 0;
+	desc.SampleDesc.Count = 1;
+	desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+	buffer = device->GetNativeDevice()->CreatePlacedResource(nullptr, 0, );
 
 	descriptorInfo.setBuffer(buffer);
 	descriptorInfo.setOffset(0);
@@ -83,7 +94,7 @@ void VulkanBuffer::Destroy()
 	}
 	if (buffer)
 	{
-		vulkanDevice->GetDevice().destroyBuffer(buffer);
+		device->GetDevice().destroyBuffer(buffer);
 		buffer = nullptr;
 		DeviceMemoryManager::GetInstance()->ReturnMemory(memRecord);
 	}
@@ -97,12 +108,12 @@ void VulkanBuffer::BindMemory(MemoryPropertyFlags inMemPropertyFlags)
 	}
 	DeviceMemoryManager* dmm = DeviceMemoryManager::GetInstance();
 	memRecord = dmm->RequestMemory(GetMemoryRequirements(), inMemPropertyFlags);
-	vulkanDevice->GetDevice().bindBufferMemory(buffer, memRecord.pos.memory, memRecord.pos.offset);
+	device->GetDevice().bindBufferMemory(buffer, memRecord.pos.memory, memRecord.pos.offset);
 }
 
 void VulkanBuffer::BindMemory(const DeviceMemory& inDeviceMemory, DeviceSize inMemOffset)
 {
-	vulkanDevice->GetDevice().bindBufferMemory(buffer, inDeviceMemory, inMemOffset);
+	device->GetDevice().bindBufferMemory(buffer, inDeviceMemory, inMemOffset);
 }
 
 VulkanBuffer* VulkanBuffer::CreateStagingBuffer()
@@ -121,7 +132,7 @@ VulkanBuffer* VulkanBuffer::CreateStagingBuffer(DeviceSize inSize, char* inData)
 	stagingBuffer->createInfo.setSize(inSize);
 	stagingBuffer->createInfo.setUsage(BufferUsageFlagBits::eTransferSrc);
 	stagingBuffer->createInfo.setSharingMode(SharingMode::eExclusive);
-	stagingBuffer->Create(vulkanDevice);
+	stagingBuffer->Create(device);
 	stagingBuffer->BindMemory(MemoryPropertyFlagBits::eHostCoherent | MemoryPropertyFlagBits::eHostVisible);
 	if (inData)
 	{
@@ -174,7 +185,7 @@ Buffer VulkanBuffer::GetBuffer() const
 
 MemoryRequirements VulkanBuffer::GetMemoryRequirements()
 {
-	return vulkanDevice->GetDevice().getBufferMemoryRequirements(buffer);
+	return device->GetDevice().getBufferMemoryRequirements(buffer);
 }
 
 MemoryRecord& VulkanBuffer::GetMemoryRecord()

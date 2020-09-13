@@ -210,9 +210,6 @@
     <ClCompile Include="src\render\resources\VulkanBuffer.cpp">
       <Filter>Source Files\src\render\resources</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\resources\VulkanDeviceMemory.cpp">
-      <Filter>Source Files\src\render\resources</Filter>
-    </ClCompile>
     <ClCompile Include="src\render\resources\VulkanImage.cpp">
       <Filter>Source Files\src\render\resources</Filter>
     </ClCompile>
@@ -233,6 +230,9 @@
     </ClCompile>
     <ClCompile Include="src\render\objects\DescriptorPool.cpp">
       <Filter>Source Files\src\render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\resources\DeviceMemory.cpp">
+      <Filter>Source Files\src\render\resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -380,9 +380,6 @@
     <ClInclude Include="src\render\resources\VulkanBuffer.h">
       <Filter>Source Files\src\render\resources</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\resources\VulkanDeviceMemory.h">
-      <Filter>Source Files\src\render\resources</Filter>
-    </ClInclude>
     <ClInclude Include="src\render\resources\VulkanImage.h">
       <Filter>Source Files\src\render\resources</Filter>
     </ClInclude>
@@ -403,6 +400,9 @@
     </ClInclude>
     <ClInclude Include="src\render\objects\DescriptorPool.h">
       <Filter>Source Files\src\render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\resources\DeviceMemory.h">
+      <Filter>Source Files\src\render\resources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

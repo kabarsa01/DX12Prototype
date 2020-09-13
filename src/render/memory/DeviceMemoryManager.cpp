@@ -1,12 +1,9 @@
 #include "DeviceMemoryManager.h"
 #include <algorithm>
+#include "core/Engine.h"
+#include "../Renderer.h"
 
 DeviceMemoryManager* DeviceMemoryManager::staticInstance = new DeviceMemoryManager();
-
-namespace
-{
-	static const uint32_t CHUNK_ELEMENT_COUNT = 64;
-};
 
 DeviceMemoryManager::DeviceMemoryManager()
 {
@@ -18,48 +15,19 @@ DeviceMemoryManager::~DeviceMemoryManager()
 
 }
 
-DeviceSize DeviceMemoryManager::GetRangeBase(uint32_t inIndex)
-{
-	return baseMemorySegmentSize << (inIndex * (sizeRangeShift + 1));
-}
-
-DeviceSize DeviceMemoryManager::GetRangeMax(uint32_t inIndex)
-{
-	return GetRangeBase(inIndex) << sizeRangeShift;
-}
-
-uint32_t DeviceMemoryManager::GetRangeIndex(DeviceSize inSize)
-{
-	for (uint32_t index = 0; index < maxRanges; index++)
-	{
-		DeviceSize baseRangeSize = baseMemorySegmentSize << ( index * (sizeRangeShift + 1) );
-		DeviceSize rangeUpperLimit = baseRangeSize << sizeRangeShift;
-		if (inSize < rangeUpperLimit)
-		{
-			return index;
-		}
-	}
-
-	return maxRanges - 1;
-}
-
 DeviceMemoryManager* DeviceMemoryManager::GetInstance()
 {
 	return staticInstance;
 }
 
-MemoryRecord DeviceMemoryManager::RequestMemory(const MemoryRequirements& inMemRequirements, MemoryPropertyFlags inMemPropertyFlags)
+MemoryRecord DeviceMemoryManager::RequestMemory(uint32_t inSize, D3D12_HEAP_TYPE inHeapType)
 {
-	std::printf("allocation alignment requirement is %I64u \n", inMemRequirements.alignment);
-
 	auto startTime = std::chrono::high_resolution_clock::now();
 
 	MemoryRecord memoryRecord;
 
-	uint64_t memTypeIndex = VulkanDeviceMemory::FindMemoryTypeStatic(inMemRequirements.memoryTypeBits, inMemPropertyFlags);
-	DeviceSize requiredSize = inMemRequirements.size;
-	uint64_t rangeIndex = GetRangeIndex(requiredSize);
-	uint64_t regionHash = rangeIndex | (memTypeIndex << 32);
+	uint64_t regionHash = inHeapType;
+	uint64_t requiredSize = inSize;
 
 	std::vector<DeviceMemoryChunk*>& chunkArray = memRegions[regionHash];
 	for (uint64_t index = 0; index < chunkArray.size(); index++)
@@ -84,12 +52,12 @@ MemoryRecord DeviceMemoryManager::RequestMemory(const MemoryRequirements& inMemR
 		}
 	}
 
-	chunkArray.push_back(new DeviceMemoryChunk(GetRangeBase(static_cast<uint32_t>(rangeIndex)), memoryTreeDepth));
+	chunkArray.push_back(new DeviceMemoryChunk(baseMemorySegmentSize, memoryTreeDepth));
 
 	startTime = std::chrono::high_resolution_clock::now();
 
 	DeviceMemoryChunk* chunk = chunkArray.back();
-	chunk->Allocate(inMemRequirements, inMemPropertyFlags);
+	chunk->Allocate(&Engine::GetRendererInstance()->GetDevice(), inHeapType);
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	double deltaTime = std::chrono::duration<double, std::chrono::microseconds::period>(currentTime - startTime).count();
@@ -115,13 +83,12 @@ void DeviceMemoryManager::ReturnMemory(const MemoryRecord& inMemoryRecord)
 
 void DeviceMemoryManager::CleanupMemory()
 {
-	std::map<uint64_t, std::vector<DeviceMemoryChunk*>>::iterator regionIter;
+	std::map<D3D12_HEAP_TYPE, std::vector<DeviceMemoryChunk*>>::iterator regionIter;
 	for (regionIter = memRegions.begin(); regionIter != memRegions.end(); regionIter++)
 	{
 		std::vector<DeviceMemoryChunk*>& chunks = regionIter->second;
 		for (uint64_t index = 0; index < chunks.size(); index++)
 		{
-			chunks[index]->Free();
 			delete chunks[index];
 		}
 	}

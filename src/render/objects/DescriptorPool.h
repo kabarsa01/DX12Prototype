@@ -12,6 +12,7 @@ using namespace Microsoft::WRL;
 struct DescriptorBlock
 {
 	DescriptorPool* parent;
+	ComPtr<ID3D12DescriptorHeap> heap;
 	CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle;
 	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle;
 	uint16_t head;
@@ -45,6 +46,8 @@ public:
 
 	void Create(Device* inDevice, D3D12_DESCRIPTOR_HEAP_TYPE inType, uint16_t inDescriptorsCount, bool inShaderVisible);
 	void Destroy();
+
+	inline D3D12_DESCRIPTOR_HEAP_TYPE GetType() { return type; }
 
 	DescriptorBlock Allocate(uint16_t inSize);
 	void Release(const DescriptorBlock& inBlock);

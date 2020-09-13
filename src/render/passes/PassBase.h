@@ -27,10 +27,7 @@ public:
 	void SetResolution(uint32_t inWidth, uint32_t inHeight);
 
 	inline HashString& GetName() { return name; }
-	inline RenderPass& GetRenderPass() { return renderPass; }
-	inline Framebuffer& GetFramebuffer() { return framebuffer; }
 	inline const std::vector<VulkanImage>& GetAttachments() { return attachments; }
-	inline const std::vector<ImageView>& GetAttachmentViews() { return attachmentViews; }
 	inline VulkanImage& GetDepthAttachment() { return depthAttachment; }
 	inline ImageView& GetDepthAttachmentView() { return depthAttachmentView; }
 	inline uint32_t GetWidth() { return width; }
@@ -45,7 +42,6 @@ protected:
 
 	virtual void OnCreate() = 0;
 	virtual void OnDestroy() = 0;
-	virtual RenderPass CreateRenderPass() = 0;
 	virtual void CreateColorAttachments(
 		std::vector<VulkanImage>& outAttachments, 
 		std::vector<ImageView>& outAttachmentViews,

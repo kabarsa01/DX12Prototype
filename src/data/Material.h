@@ -1,13 +1,13 @@
 #pragma once
 
-#include "vulkan/vulkan.hpp"
+#include <wrl.h>
+#include <d3d12.h>
+#include "d3dx12.h"
 
 #include "data/Resource.h"
 #include "data/Texture2D.h"
 #include "render/shader/Shader.h"
 #include "render/objects/VulkanDescriptorSet.h"
-
-using namespace VULKAN_HPP_NAMESPACE;
 
 class Device;
 
@@ -21,14 +21,11 @@ public:
 	void LoadResources();
 	HashString GetShaderHash();
 
-	void CreateDescriptorSet(Device* inDevice);
-	DescriptorSet GetDescriptorSet();
-	std::vector<DescriptorSet> GetDescriptorSets();
-	DescriptorSetLayout GetDescriptorSetLayout();
+//	void CreateDescriptorSet(Device* inDevice);
 
-	PipelineShaderStageCreateInfo GetVertexStageInfo();
-	PipelineShaderStageCreateInfo GetFragmentStageInfo();
-	PipelineShaderStageCreateInfo GetComputeStageInfo();
+	ShaderPtr GetVertexShader();
+	ShaderPtr GetFragmentShader();
+	ShaderPtr GetComputeShader();
 
 	void SetEntrypoints(const std::string& inVertexEntrypoint, const std::string& inFragmentEntrypoint);
 	void SetVertexEntrypoint(const std::string& inEntrypoint);
@@ -51,7 +48,6 @@ public:
 	void UpdateUniformBuffer(const std::string& inName, T& inUniformBuffer);
 	void UpdateUniformBuffer(const std::string& inName, uint64_t inSize, const char* inData);
 	void UpdateStorageBuffer(const std::string& inName, uint64_t inSize, const char* inData);
-	void UpdateDescriptorSet(DescriptorSet inSet, Device* inDevice);
 
 	VulkanBuffer& GetUniformBuffer(const std::string& inName);
 	VulkanBuffer& GetStorageBuffer(const std::string& inName);
@@ -63,11 +59,10 @@ public:
 	inline const std::string& GetFragmentEntrypoint() const { return fragmentEntrypoint; };
 	inline const std::string& GetComputeEntrypoint() const { return computeEntrypoint; };
 
+	inline CD3DX12_ROOT_PARAMETER1& GetRootParameter() { return descriptorTable; }
+
 	bool Load() override;
 	bool Cleanup() override;
-
-	std::vector<DescriptorSetLayoutBinding>& GetBindings();
-	std::vector<WriteDescriptorSet>& GetDescriptorWrites();
 protected:
 	std::string vertexShaderPath;
 	std::string fragmentShaderPath;
@@ -85,23 +80,16 @@ protected:
 	std::map<HashString, VulkanBuffer> buffers;
 	std::map<HashString, VulkanBuffer> storageBuffers;
 
-	std::vector<DescriptorSetLayoutBinding> descriptorBindings;
-	std::map<HashString, DescriptorImageInfo> imageDescInfos;
-	std::map<HashString, DescriptorBufferInfo> bufferDescInfos;
-	std::vector<WriteDescriptorSet> descriptorWrites;
+	std::vector<CD3DX12_DESCRIPTOR_RANGE1> descriptorRanges;
+	std::map<HashString, uint32_t> nameToRange;
+	CD3DX12_ROOT_PARAMETER1 descriptorTable;
+	DescriptorBlock descriptorBlock;
 
 	Device* vulkanDevice;
 	VulkanDescriptorSet vulkanDescriptorSet;
 
-	void PrepareDescriptorInfos();
-
 	ShaderPtr InitShader(const std::string& inResourcePath);
-	void PrepareDescriptorWrites(ShaderPtr inShader);
-
-	template<class T>
-	void ProcessDescriptorType(DescriptorType inType, ShaderPtr inShader, std::map<HashString, T>& inResources, std::vector<DescriptorSetLayoutBinding>& inOutBindings);
-	template<class T>
-	void PrepareDescriptorWrites(DescriptorType inType, ShaderPtr inShader, std::map<HashString, T>& inDescInfos, std::vector<WriteDescriptorSet>& inOutDescriptorWrites);
+	
 };
 
 typedef std::shared_ptr<Material> MaterialPtr;
@@ -128,63 +116,5 @@ void Material::UpdateUniformBuffer(const std::string& inName, T& inUniformBuffer
 	UpdateUniformBuffer(inName, sizeof(T), reinterpret_cast<const char*>(&inUniformBuffer));
 }
 
-template<class T>
-void Material::ProcessDescriptorType(DescriptorType inType, ShaderPtr inShader, std::map<HashString, T>& inResources, std::vector<DescriptorSetLayoutBinding>& inOutBindings)
-{
-	std::vector<BindingInfo>& bindingInfoVector = inShader->GetBindings(inType);
-	for (BindingInfo& info : bindingInfoVector)
-	{
-		if (inResources.find(info.name) == inResources.end())
-		{
-			continue;
-		}
 
-		DescriptorSetLayoutBinding binding;
-		binding.setBinding(info.binding);
-		binding.setDescriptorType(info.descriptorType);
-		binding.setDescriptorCount(info.IsArray() ? info.arrayDimensions[0] : 1);
-		binding.setStageFlags(ShaderStageFlagBits::eAllGraphics | ShaderStageFlagBits::eCompute);
-
-		inOutBindings.push_back(binding);
-	}
-}
-
-template<class T>
-void Material::PrepareDescriptorWrites(DescriptorType inType, ShaderPtr inShader, std::map<HashString, T>& inDescInfos, std::vector<WriteDescriptorSet>& inOutDescriptorWrites)
-{
-	std::vector<BindingInfo>& bindingInfoVector = inShader->GetBindings(inType);
-	for (BindingInfo& info : bindingInfoVector)
-	{
-		if (inDescInfos.find(info.name) == inDescInfos.end())
-		{
-			continue;
-		}
-
-		WriteDescriptorSet writeDescriptorSet;
-		// we do not know the set at the moment
-		//writeDescriptorSet.setDstSet(descriptorSet);
-		writeDescriptorSet.setDstBinding(info.binding);
-		writeDescriptorSet.setDstArrayElement(0);
-		writeDescriptorSet.setDescriptorCount(1);
-		writeDescriptorSet.setDescriptorType(info.descriptorType);
-
-		switch (info.descriptorType)
-		{
-		case DescriptorType::eSampledImage:
-			writeDescriptorSet.setPImageInfo(& imageDescInfos[info.name]);
-			break;
-		case DescriptorType::eStorageImage:
-			writeDescriptorSet.setPImageInfo(&imageDescInfos[info.name]);
-			break;
-		case DescriptorType::eUniformBuffer:
-			writeDescriptorSet.setPBufferInfo(& bufferDescInfos[info.name]);
-			break;
-		case DescriptorType::eStorageBuffer:
-			writeDescriptorSet.setPBufferInfo(&bufferDescInfos[info.name]);
-			break;
-		}
-
-		inOutDescriptorWrites.push_back(writeDescriptorSet);
-	}
-}
 

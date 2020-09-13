@@ -1,31 +1,30 @@
 #pragma once
 
+#include <wrl.h>
 #include "core\ObjectBase.h"
 #include <memory>
 #include <string>
 #include <vector>
-#include "vulkan\vulkan.hpp"
 #include "data\Resource.h"
-#include "spirv_cross\spirv_cross.hpp"
+#include <d3d12shader.h>
 
-using namespace VULKAN_HPP_NAMESPACE;
+using namespace Microsoft::WRL;
 
-struct BindingInfo
-{
-	uint32_t set;
-	uint32_t binding;
-	uint32_t vectorSize;
-	uint32_t numColumns;
-	DescriptorType descriptorType;
-	HashString name;
-	HashString blockName;
-	std::vector<uint32_t> arrayDimensions;
-
-	bool IsArray()
-	{
-		return arrayDimensions.size() > 0;
-	}
-};
+//struct BindingInfo
+//{
+//	uint32_t set;
+//	uint32_t binding;
+//	uint32_t vectorSize;
+//	uint32_t numColumns;
+//	HashString name;
+//	HashString blockName;
+//	std::vector<uint32_t> arrayDimensions;
+//
+//	bool IsArray()
+//	{
+//		return arrayDimensions.size() > 0;
+//	}
+//};
 
 class Shader : public Resource
 {
@@ -36,24 +35,14 @@ public:
 	virtual bool Load() override;
 	virtual bool Cleanup() override;
 
-	ShaderModule GetShaderModule();
-	void DestroyShaderModule();
-	const std::vector<char>& GetCode() const;
-
-	std::vector<BindingInfo>& GetBindings(DescriptorType inDescriptorType);
+	ComPtr<ID3DBlob> GetShaderBlob() { return shaderBlob; }
+	std::vector<D3D12_SHADER_INPUT_BIND_DESC>& GetBindings() { return bindings; }
+	uint32_t GetBindingsCount() { return bindingsCount; }
 protected:
 	std::string filePath;
-	std::vector<char> binary;
-	std::map<DescriptorType, std::vector<BindingInfo>> bindings;
-
-	ShaderModule shaderModule;
-
-	void CreateShaderModule();
-	std::vector<BindingInfo> ExtractBindingInfo(
-		SPIRV_CROSS_NAMESPACE::SmallVector<SPIRV_CROSS_NAMESPACE::Resource>& inResources, 
-		SPIRV_CROSS_NAMESPACE::Compiler& inCompiler,
-		DescriptorType inDescriptorType);
-	void ExtractBindingsInfo();
+	ComPtr<ID3DBlob> shaderBlob;
+	std::vector<D3D12_SHADER_INPUT_BIND_DESC> bindings;
+	uint32_t bindingsCount;
 };
 
 typedef std::shared_ptr<Shader> ShaderPtr;

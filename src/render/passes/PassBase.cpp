@@ -27,7 +27,7 @@ PassBase::~PassBase()
 void PassBase::Create()
 {
 	renderer = Engine::GetRendererInstance();
-	vulkanDevice = &renderer->GetDevice();
+	device = &renderer->GetDevice();
 	//width = renderer->GetWidth();
 	//height = renderer->GetHeight();
 
@@ -123,7 +123,7 @@ PipelineLayout PassBase::CreatePipelineLayout(std::vector<DescriptorSetLayout>& 
 
 PipelineData& PassBase::FindPipeline(MaterialPtr inMaterial)
 {
-	device& device = vulkanDevice->GetDevice();
+	ComPtr<ID3D12Device2> device = device->Get;
 
 	PipelineRegistry& pipelineRegistry = *PipelineRegistry::GetInstance();
 	// check pipeline storage and create new pipeline in case it was not created before

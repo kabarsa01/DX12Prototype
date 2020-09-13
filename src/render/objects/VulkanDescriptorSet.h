@@ -1,8 +1,7 @@
 #pragma once
 
-#include "vulkan/vulkan.hpp"
-
-using namespace VULKAN_HPP_NAMESPACE;
+#include <d3d12.h>
+#include "d3dx12.h"
 
 class Device;
 
@@ -17,21 +16,18 @@ public:
 	static void Create(Device* inVulkanDevice, uint32_t inCount, VulkanDescriptorSet** inSets);
 	void Destroy();
 
-	DescriptorSet& GetSet() { return set; }
-	DescriptorSetLayout& GetLayout() { return layout; }
-	void SetBindings(const std::vector<DescriptorSetLayoutBinding>& inBindings);
-	std::vector<DescriptorSetLayoutBinding>& GetBindings() { return bindings; }
+	std::vector<CD3DX12_DESCRIPTOR_RANGE1>& GetDescriptors() { return descriptors; }
+	CD3DX12_ROOT_PARAMETER1 GetTableRootParameter() { return tableRootParameter; }
+	void SetDescriptors(const std::vector<CD3DX12_DESCRIPTOR_RANGE1>& inDescriptors);
+//	void SetBindings(const std::vector<DescriptorSetLayoutBinding>& inBindings);
+//	std::vector<DescriptorSetLayoutBinding>& GetBindings() { return bindings; }
 
-	operator bool() { return set; }
+//	operator bool() { return set; }
 protected:
-	virtual std::vector<DescriptorSetLayoutBinding> ProduceCustomBindings();
+//	virtual std::vector<DescriptorSetLayoutBinding> ProduceCustomBindings();
 private:
 	Device* vulkanDevice;
-
-	DescriptorPool pool;
-	DescriptorSet set;
-	DescriptorSetLayout layout;
-	std::vector<DescriptorSetLayoutBinding> bindings;
-
-	DescriptorSetLayout& CreateLayout();
+	std::vector<CD3DX12_DESCRIPTOR_RANGE1> descriptors;
+	CD3DX12_ROOT_PARAMETER1 tableRootParameter;
+	DescriptorBlock descriptorBlock;
 };

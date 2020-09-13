@@ -9,7 +9,7 @@
 #include "data/Resource.h"
 #include "vulkan/vulkan.hpp"
 #include "render/resources/VulkanBuffer.h"
-#include "render/resources/VulkanDeviceMemory.h"
+#include "render/resources/DeviceMemory.h"
 #include "core/Engine.h"
 #include "render/Renderer.h"
 

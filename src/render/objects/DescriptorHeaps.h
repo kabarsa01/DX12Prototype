@@ -19,14 +19,23 @@ public:
 	void Create(Device* inDevice);
 	void Destroy();
 
-	inline std::vector<DescriptorPool>& GetShaderResourcePools() { return shaderResourcesPools; }
+	inline std::vector<DescriptorPool>& GetCBV_SRV_UAVPools() { return CBV_SRV_UAVPools; }
 	inline std::vector<DescriptorPool>& GetRTVPools() { return RTVPools; }
 	inline std::vector<DescriptorPool>& GetDSVPools() { return DSVPools; }
 
-//	std::vector<DescriptorSet> AllocateSet(const std::vector<DescriptorSetLayout>& inLayouts, DescriptorPool& outPool);
+	DescriptorBlock AllocateDescriptorsCBV_SRV_UAV(uint16_t inBlockSize);
+	DescriptorBlock AllocateDescriptorsRTV(uint16_t inBlockSize);
+	DescriptorBlock AllocateDescriptorsDSV(uint16_t inBlockSize);
+
+	void ReleaseDescriptors(const DescriptorBlock& inBlock);
 private:
 	Device* device;
-	std::vector<DescriptorPool> shaderResourcesPools;
+	std::vector<DescriptorPool> CBV_SRV_UAVPools;
 	std::vector<DescriptorPool> RTVPools;
 	std::vector<DescriptorPool> DSVPools;
+
+	DescriptorBlock AllocateDescriptors(uint16_t inBlockSize, std::vector<DescriptorPool>& inPools, D3D12_DESCRIPTOR_HEAP_TYPE inType, uint16_t inHeapSize, bool inShaderVisible);
+	void ReleaseDescriptors(const DescriptorBlock& inBlock);
 };
+
+

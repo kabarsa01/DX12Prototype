@@ -1,15 +1,16 @@
 #pragma once
 
+#include <d3d12.h>
 #include <deque>
-#include "../resources/VulkanDeviceMemory.h"
+#include "../resources/DeviceMemory.h"
 
 struct MemoryPosition
 {
 	bool valid = false;
 	uint32_t layer;
 	uint32_t index;
-	DeviceSize offset;
-	VulkanDeviceMemory memory;
+	uint64_t offset;
+	DeviceMemory memory;
 
 	MemoryPosition()
 		: valid(false)
@@ -20,21 +21,21 @@ struct MemoryPosition
 	{}
 };
 
+class Device;
+
 class DeviceMemoryChunk
 {
 public:
-	DeviceMemoryChunk(DeviceSize inSegmentSize, uint32_t inTreeDepth);
+	DeviceMemoryChunk(uint64_t inSegmentSize, uint32_t inTreeDepth);
 	DeviceMemoryChunk(const DeviceMemoryChunk& inOther);
 	virtual ~DeviceMemoryChunk();
 
-	void Allocate(uint32_t inMemTypeBits, MemoryPropertyFlags inMemPropertyFlags);
-	void Allocate(const MemoryRequirements& inMemRequirements, MemoryPropertyFlags inMemPropertyFlags);
-	void Free();
+	void Allocate(Device* inDevice, D3D12_HEAP_TYPE inHeapType);
 
-	MemoryPosition AcquireSegment(DeviceSize inSize);
+	MemoryPosition AcquireSegment(uint64_t inSize);
 	void ReleaseSegment(const MemoryPosition& inMemoryPosition);
 
-	VulkanDeviceMemory& GetMemory();
+	DeviceMemory& GetMemory();
 	bool HasFreeSpace();
 protected:
 	uint32_t treeDepth;
@@ -42,14 +43,14 @@ protected:
 	uint32_t segmentCount;
 	// flattened binary tree for memory segment tracking
 	unsigned char* memoryTree;
-	VulkanDeviceMemory memory;
-	DeviceSize segmentSize;
+	DeviceMemory memory;
+	uint64_t segmentSize;
 
 	uint32_t GetLayerStartIndex(uint32_t inLayer);
 	uint32_t GetParentIndex(uint32_t inIndex);
 	uint32_t GetChildIndex(uint32_t inIndex);
 	uint32_t GetSiblingIndex(uint32_t inIndex);
-	DeviceSize CalculateOffset(uint32_t inLayer, uint32_t inIndex);
+	uint64_t CalculateOffset(uint32_t inLayer, uint32_t inIndex);
 
 	bool FindSegmentIndex(uint32_t inStartLayer, uint32_t inTargetLayer, uint32_t inIndex, uint32_t& outTargetIndex);
 	void MarkFreeUp(uint32_t inStartLayer, uint32_t inIndex);

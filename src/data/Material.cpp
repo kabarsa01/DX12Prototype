@@ -32,18 +32,61 @@ Material::~Material()
 void Material::LoadResources()
 {
 	// TODO: process all the material resources
-	descriptorBindings.clear();
-	descriptorWrites.clear();
+	descriptorRanges.clear();
 
 	vertexShader = InitShader(vertexShaderPath);
 	fragmentShader = InitShader(fragmentShaderPath);
 	computeShader = InitShader(computeShaderPath);
 
-	PrepareDescriptorInfos();
+	// all the bindings are united for now
+	// we have a very primitive system of assigning a range per binding, which is not beautiful but will do for now
+	// TODO: group bindings by type, space and consecutive indices
+	std::vector<D3D12_SHADER_INPUT_BIND_DESC> bindings;
+	bindings.reserve(vertexShader->GetBindingsCount() + fragmentShader->GetBindingsCount() + computeShader->GetBindingsCount());
+	bindings.insert(bindings.end(), vertexShader->GetBindings().begin(), vertexShader->GetBindings().end());
+	bindings.insert(bindings.end(), fragmentShader->GetBindings().begin(), fragmentShader->GetBindings().end());
+	bindings.insert(bindings.end(), computeShader->GetBindings().begin(), computeShader->GetBindings().end());
 
-	PrepareDescriptorWrites(vertexShader);
-	PrepareDescriptorWrites(fragmentShader);
-	PrepareDescriptorWrites(computeShader);
+	for (uint32_t index = 0; index < bindings.size(); index++)
+	{
+		D3D12_SHADER_INPUT_BIND_DESC& binding = bindings[index];
+
+		// zero space is reserved for per frame data, it's simpler to divide for now
+		// TODO: manage spaces
+		if (binding.Space == 0)
+		{
+			continue;
+		}
+
+		CD3DX12_DESCRIPTOR_RANGE1 range;
+		D3D12_DESCRIPTOR_RANGE_TYPE type;
+
+		switch (binding.Type)
+		{
+		case D3D_SHADER_INPUT_TYPE::D3D_SIT_CBUFFER:
+			type = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+			break;
+		case D3D_SHADER_INPUT_TYPE::D3D_SIT_TEXTURE:
+			type = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			break;
+		case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWTYPED:
+		case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWSTRUCTURED:
+			type = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+			break;
+		default:
+			throw std::exception("Error! Shader binding type is not supported. Implement or edit shader.");
+			break;
+		}
+
+		range.Init(type, 1, binding.BindPoint, binding.Space);
+		descriptorRanges.push_back(range);
+		nameToRange[binding.Name] = descriptorRanges.size() - 1;
+	}
+	descriptorTable.InitAsDescriptorTable(descriptorRanges.size(), descriptorRanges.data(), D3D12_SHADER_VISIBILITY_ALL);
+	descriptorBlock = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsCBV_SRV_UAV(descriptorRanges.size());
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	//Device->GetNativeDevice()->CreateShaderResourceView();
 
 	shaderHash = HashString(vertexShaderPath + fragmentShaderPath + computeShaderPath);
 }
@@ -51,64 +94,6 @@ void Material::LoadResources()
 HashString Material::GetShaderHash()
 {
 	return shaderHash;
-}
-
-void Material::CreateDescriptorSet(Device* inDevice)
-{
-	if (vulkanDescriptorSet)
-	{
-		return;
-	}
-
-	vulkanDevice = inDevice;
-	vulkanDescriptorSet.SetBindings(GetBindings());
-	vulkanDescriptorSet.Create(vulkanDevice);
-	UpdateDescriptorSet(vulkanDescriptorSet.GetSet(), vulkanDevice);
-}
-
-DescriptorSet Material::GetDescriptorSet()
-{
-	return vulkanDescriptorSet.GetSet();
-}
-
-std::vector<DescriptorSet> Material::GetDescriptorSets()
-{
-	return { vulkanDescriptorSet.GetSet() };
-}
-
-DescriptorSetLayout Material::GetDescriptorSetLayout()
-{
-	return vulkanDescriptorSet.GetLayout();
-}
-
-PipelineShaderStageCreateInfo Material::GetVertexStageInfo()
-{
-	PipelineShaderStageCreateInfo vertStageInfo;
-	vertStageInfo.setStage(ShaderStageFlagBits::eVertex);
-	vertStageInfo.setModule(vertexShader->GetShaderModule());
-	vertStageInfo.setPName(vertexEntrypoint.c_str());
-
-	return vertStageInfo;
-}
-
-PipelineShaderStageCreateInfo Material::GetFragmentStageInfo()
-{
-	PipelineShaderStageCreateInfo fragStageInfo;
-	fragStageInfo.setStage(ShaderStageFlagBits::eFragment);
-	fragStageInfo.setModule(fragmentShader->GetShaderModule());
-	fragStageInfo.setPName(fragmentEntrypoint.c_str());
-
-	return fragStageInfo;
-}
-
-PipelineShaderStageCreateInfo Material::GetComputeStageInfo()
-{
-	PipelineShaderStageCreateInfo computeStageInfo;
-	computeStageInfo.setStage(ShaderStageFlagBits::eCompute);
-	computeStageInfo.setModule(computeShader->GetShaderModule());
-	computeStageInfo.setPName(computeEntrypoint.c_str());
-
-	return computeStageInfo;
 }
 
 void Material::SetEntrypoints(const std::string& inVertexEntrypoint, const std::string& inFragmentEntrypoint)
@@ -155,14 +140,11 @@ void Material::SetStorageTexture(const std::string& inName, Texture2DPtr inTextu
 
 void Material::SetUniformBuffer(const std::string& inName, uint64_t inSize, const char* inData)
 {
-	Device& vulkanDevice = Engine::GetRendererInstance()->GetDevice();
+	Device& device = Engine::GetRendererInstance()->GetDevice();
 
 	VulkanBuffer buffer;
-	buffer.createInfo.setSharingMode(SharingMode::eExclusive);
-	buffer.createInfo.setSize(inSize);
-	buffer.createInfo.setUsage(BufferUsageFlagBits::eUniformBuffer | BufferUsageFlagBits::eTransferDst);
-	buffer.Create(&vulkanDevice);
-	buffer.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
+	buffer.Create(&device);
+//	buffer.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
 	buffer.CreateStagingBuffer();
 
 	buffers[inName].Destroy();
@@ -187,14 +169,11 @@ void Material::SetStorageBufferExternal(const std::string& inName, const VulkanB
 
 void Material::SetStorageBuffer(const std::string& inName, uint64_t inSize, const char* inData)
 {
-	Device& vulkanDevice = Engine::GetRendererInstance()->GetDevice();
+	Device& device = Engine::GetRendererInstance()->GetDevice();
 
 	VulkanBuffer buffer(false);
-	buffer.createInfo.setSharingMode(SharingMode::eExclusive);
-	buffer.createInfo.setSize(inSize);
-	buffer.createInfo.setUsage(BufferUsageFlagBits::eStorageBuffer | BufferUsageFlagBits::eTransferDst);
-	buffer.Create(&vulkanDevice);
-	buffer.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
+	buffer.Create(&device);
+//	buffer.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
 	buffer.CreateStagingBuffer();
 
 	storageBuffers[inName].Destroy();
@@ -211,16 +190,6 @@ void Material::UpdateStorageBuffer(const std::string& inName, uint64_t inSize, c
 {
 	storageBuffers[inName].CopyTo(inSize, inData);
 	TransferList::GetInstance()->PushBuffer(&storageBuffers[inName]);
-}
-
-void Material::UpdateDescriptorSet(DescriptorSet inSet, Device* inDevice)
-{
-	std::vector<WriteDescriptorSet>& writes = GetDescriptorWrites();
-	for (WriteDescriptorSet& write : writes)
-	{
-		write.setDstSet(inSet);
-	}
-	inDevice->GetNativeDevice().updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
 }
 
 VulkanBuffer& Material::GetUniformBuffer(const std::string& inName)
@@ -253,68 +222,16 @@ bool Material::Cleanup()
 	return true;
 }
 
-std::vector<DescriptorSetLayoutBinding>& Material::GetBindings()
-{
-	return descriptorBindings;
-}
-
-std::vector<WriteDescriptorSet>& Material::GetDescriptorWrites()
-{
-	return descriptorWrites;
-}
-
-void Material::PrepareDescriptorInfos()
-{
-	for (auto& pair : sampledImages2D)
-	{
-		DescriptorImageInfo imageInfo;
-		imageInfo.setImageView(pair.second->GetImageView());
-		imageInfo.setImageLayout(ImageLayout::eShaderReadOnlyOptimal);
-
-		imageDescInfos[pair.first] = imageInfo;
-	}
-	for (auto& pair : storageImages2D)
-	{
-		DescriptorImageInfo imageInfo;
-		imageInfo.setImageView(pair.second->GetImageView());
-		imageInfo.setImageLayout(ImageLayout::eGeneral);
-
-		imageDescInfos[pair.first] = imageInfo;
-	}
-
-
-	for (auto& pair : buffers)
-	{
-		bufferDescInfos[pair.first] = pair.second.GetDescriptorInfo();
-	}
-	for (auto& pair : storageBuffers)
-	{
-		bufferDescInfos[pair.first] = pair.second.GetDescriptorInfo();
-	}
-}
-
 ShaderPtr Material::InitShader(const std::string& inResourcePath)
 {
 	if (!inResourcePath.empty())
 	{
 		ShaderPtr shader = DataManager::RequestResourceType<Shader>(inResourcePath);
-		ProcessDescriptorType<Texture2DPtr>(DescriptorType::eSampledImage, shader, sampledImages2D, descriptorBindings);
-		ProcessDescriptorType<Texture2DPtr>(DescriptorType::eStorageImage, shader, storageImages2D, descriptorBindings);
-		ProcessDescriptorType<VulkanBuffer>(DescriptorType::eUniformBuffer, shader, buffers, descriptorBindings);
-		ProcessDescriptorType<VulkanBuffer>(DescriptorType::eStorageBuffer, shader, storageBuffers, descriptorBindings);
 		return shader;
 	}
 	return ShaderPtr();
 }
 
-void Material::PrepareDescriptorWrites(ShaderPtr inShader)
-{
-	if (inShader)
-	{
-		PrepareDescriptorWrites<DescriptorImageInfo>(DescriptorType::eSampledImage, inShader, imageDescInfos, descriptorWrites);
-		PrepareDescriptorWrites<DescriptorImageInfo>(DescriptorType::eStorageImage, inShader, imageDescInfos, descriptorWrites);
-		PrepareDescriptorWrites<DescriptorBufferInfo>(DescriptorType::eUniformBuffer, inShader, bufferDescInfos, descriptorWrites);
-		PrepareDescriptorWrites<DescriptorBufferInfo>(DescriptorType::eStorageBuffer, inShader, bufferDescInfos, descriptorWrites);
-	}
-}
+
+
 
