@@ -72,7 +72,7 @@ public:
 protected:
 private:
 	// TEMP
-	VulkanBuffer uniformBuffer;
+	BufferResource uniformBuffer;
 	//======================= VARS ===============================
 	uint32_t version;
 	int width = 1600;

@@ -4,7 +4,7 @@
 #include <d3d12.h>
 #include <vector>
 
-#include "../resources/VulkanBuffer.h"
+#include "../resources/BufferResource.h"
 #include "../memory/DeviceMemoryManager.h"
 #include "../resources/VulkanImage.h"
 #include "../PipelineRegistry.h"

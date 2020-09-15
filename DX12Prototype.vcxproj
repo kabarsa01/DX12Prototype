@@ -194,7 +194,7 @@
     <ClCompile Include="src\render\PerFrameData.cpp" />
     <ClCompile Include="src\render\PipelineRegistry.cpp" />
     <ClCompile Include="src\render\Renderer.cpp" />
-    <ClCompile Include="src\render\resources\VulkanBuffer.cpp" />
+    <ClCompile Include="src\render\resources\BufferResource.cpp" />
     <ClCompile Include="src\render\resources\DeviceMemory.cpp" />
     <ClCompile Include="src\render\resources\VulkanImage.cpp" />
     <ClCompile Include="src\render\shader\Shader.cpp" />
@@ -251,7 +251,7 @@
     <ClInclude Include="src\render\PerFrameData.h" />
     <ClInclude Include="src\render\PipelineRegistry.h" />
     <ClInclude Include="src\render\Renderer.h" />
-    <ClInclude Include="src\render\resources\VulkanBuffer.h" />
+    <ClInclude Include="src\render\resources\BufferResource.h" />
     <ClInclude Include="src\render\resources\DeviceMemory.h" />
     <ClInclude Include="src\render\resources\VulkanImage.h" />
     <ClInclude Include="src\render\shader\Shader.h" />

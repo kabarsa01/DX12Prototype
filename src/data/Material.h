@@ -42,15 +42,15 @@ public:
 	void SetStorageBuffer(const std::string& inName, T& inStorageBuffer);
 	void SetUniformBuffer(const std::string& inName, uint64_t inSize, const char* inData);
 	void SetStorageBuffer(const std::string& inName, uint64_t inSize, const char* inData);
-	void SetUniformBufferExternal(const std::string& inName, const VulkanBuffer& inBuffer);
-	void SetStorageBufferExternal(const std::string& inName, const VulkanBuffer& inBuffer);
+	void SetUniformBufferExternal(const std::string& inName, const BufferResource& inBuffer);
+	void SetStorageBufferExternal(const std::string& inName, const BufferResource& inBuffer);
 	template<typename T>
 	void UpdateUniformBuffer(const std::string& inName, T& inUniformBuffer);
 	void UpdateUniformBuffer(const std::string& inName, uint64_t inSize, const char* inData);
 	void UpdateStorageBuffer(const std::string& inName, uint64_t inSize, const char* inData);
 
-	VulkanBuffer& GetUniformBuffer(const std::string& inName);
-	VulkanBuffer& GetStorageBuffer(const std::string& inName);
+	BufferResource& GetUniformBuffer(const std::string& inName);
+	BufferResource& GetStorageBuffer(const std::string& inName);
 
 	inline ShaderPtr GetVertexShader() { return vertexShader; }
 	inline ShaderPtr GetFragmentShader() { return fragmentShader; }
@@ -77,8 +77,8 @@ protected:
 	ShaderPtr computeShader;
 	std::map<HashString, Texture2DPtr> sampledImages2D;
 	std::map<HashString, Texture2DPtr> storageImages2D;
-	std::map<HashString, VulkanBuffer> buffers;
-	std::map<HashString, VulkanBuffer> storageBuffers;
+	std::map<HashString, BufferResource> buffers;
+	std::map<HashString, BufferResource> storageBuffers;
 
 	std::vector<CD3DX12_DESCRIPTOR_RANGE1> descriptorRanges;
 	std::map<HashString, uint32_t> nameToRange;

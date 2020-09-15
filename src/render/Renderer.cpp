@@ -262,7 +262,7 @@ void Renderer::TransferResources(CommandBuffer& inCmdBuffer, uint32_t inQueueFam
 	TransferList* TL = TransferList::GetInstance();
 
 	// get new resources to copy
-	std::vector<VulkanBuffer*> buffers = TL->GetBuffers();
+	std::vector<BufferResource*> buffers = TL->GetBuffers();
 	std::vector<VulkanImage*> images = TL->GetImages();
 	TL->ClearBuffers();
 	TL->ClearImages();
@@ -274,7 +274,7 @@ void Renderer::TransferResources(CommandBuffer& inCmdBuffer, uint32_t inQueueFam
 
 	// buffers
 	std::vector<BufferMemoryBarrier> buffersTransferBarriers;
-	for (VulkanBuffer* buffer : buffers)
+	for (BufferResource* buffer : buffers)
 	{
 		inCmdBuffer.copyBuffer(*buffer->CreateStagingBuffer(), *buffer, 1, &buffer->CreateBufferCopy());
 		buffersTransferBarriers.push_back(buffer->CreateMemoryBarrier(

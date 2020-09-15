@@ -212,17 +212,17 @@ MemoryRequirements VulkanImage::GetMemoryRequirements()
 	return memoryRequirements;
 }
 
-VulkanBuffer* VulkanImage::CreateStagingBuffer(char* inData)
+BufferResource* VulkanImage::CreateStagingBuffer(char* inData)
 {
 	return CreateStagingBuffer(SharingMode::eExclusive, 0, inData);
 }
 
-VulkanBuffer* VulkanImage::CreateStagingBuffer(SharingMode inSharingMode, uint32_t inQueueFamilyIndex)
+BufferResource* VulkanImage::CreateStagingBuffer(SharingMode inSharingMode, uint32_t inQueueFamilyIndex)
 {
 	return CreateStagingBuffer(inSharingMode, inQueueFamilyIndex, data.data());
 }
 
-VulkanBuffer* VulkanImage::CreateStagingBuffer(SharingMode inSharingMode, uint32_t inQueueFamilyIndex, char* inData)
+BufferResource* VulkanImage::CreateStagingBuffer(SharingMode inSharingMode, uint32_t inQueueFamilyIndex, char* inData)
 {
 	if (stagingBuffer)
 	{

@@ -142,7 +142,7 @@ void Material::SetUniformBuffer(const std::string& inName, uint64_t inSize, cons
 {
 	Device& device = Engine::GetRendererInstance()->GetDevice();
 
-	VulkanBuffer buffer;
+	BufferResource buffer;
 	buffer.Create(&device);
 //	buffer.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
 	buffer.CreateStagingBuffer();
@@ -153,14 +153,14 @@ void Material::SetUniformBuffer(const std::string& inName, uint64_t inSize, cons
 	UpdateUniformBuffer(inName, inSize, inData);
 }
 
-void Material::SetUniformBufferExternal(const std::string& inName, const VulkanBuffer& inBuffer)
+void Material::SetUniformBufferExternal(const std::string& inName, const BufferResource& inBuffer)
 {
 	buffers[inName].Destroy();
 	buffers[inName] = inBuffer;
 	buffers[inName].SetCleanup(false);
 }
 
-void Material::SetStorageBufferExternal(const std::string& inName, const VulkanBuffer& inBuffer)
+void Material::SetStorageBufferExternal(const std::string& inName, const BufferResource& inBuffer)
 {
 	storageBuffers[inName].Destroy();
 	storageBuffers[inName] = inBuffer;
@@ -171,7 +171,7 @@ void Material::SetStorageBuffer(const std::string& inName, uint64_t inSize, cons
 {
 	Device& device = Engine::GetRendererInstance()->GetDevice();
 
-	VulkanBuffer buffer(false);
+	BufferResource buffer(false);
 	buffer.Create(&device);
 //	buffer.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
 	buffer.CreateStagingBuffer();
@@ -192,12 +192,12 @@ void Material::UpdateStorageBuffer(const std::string& inName, uint64_t inSize, c
 	TransferList::GetInstance()->PushBuffer(&storageBuffers[inName]);
 }
 
-VulkanBuffer& Material::GetUniformBuffer(const std::string& inName)
+BufferResource& Material::GetUniformBuffer(const std::string& inName)
 {
 	return buffers[inName];
 }
 
-VulkanBuffer& Material::GetStorageBuffer(const std::string& inName)
+BufferResource& Material::GetStorageBuffer(const std::string& inName)
 {
 	return storageBuffers[inName];
 }

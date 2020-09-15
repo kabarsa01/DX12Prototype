@@ -7,15 +7,13 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "data/Resource.h"
-#include "vulkan/vulkan.hpp"
-#include "render/resources/VulkanBuffer.h"
+#include "render/resources/BufferResource.h"
 #include "render/resources/DeviceMemory.h"
 #include "core/Engine.h"
 #include "render/Renderer.h"
 
 using namespace std;
 using namespace glm;
-using namespace VULKAN_HPP_NAMESPACE;
 
 //packing should probably be considered, maybe in the future someday
 //#pragma pack(push, 1)
@@ -53,10 +51,10 @@ public:
 	void DestroyBuffer();
 	void Draw();
 
-	VulkanBuffer& GetVertexBuffer();
+	BufferResource& GetVertexBuffer();
 	uint32_t GetVertexBufferSizeBytes();
 	uint32_t GetVertexCount();
-	VulkanBuffer& GetIndexBuffer();
+	BufferResource& GetIndexBuffer();
 	uint32_t GetIndexBufferSizeBytes();
 	uint32_t GetIndexCount();
 
@@ -64,13 +62,13 @@ public:
 	// fullscreen quad instance to be used for screen space stuff
 	static std::shared_ptr<MeshData> FullscreenQuad();
 private:
-	VulkanBuffer vertexBuffer;
-	VulkanBuffer indexBuffer;
+	BufferResource vertexBuffer;
+	BufferResource indexBuffer;
 
 	MeshData() : Resource(HashString::NONE) {}
 
 	template<class T>
-	void SetupBuffer(VulkanBuffer& inBuffer, std::vector<T>& inDataVector, BufferUsageFlags usage);
+	void SetupBuffer(BufferResource& inBuffer, std::vector<T>& inDataVector, BufferUsageFlags usage);
 };
 
 typedef std::shared_ptr<MeshData> MeshDataPtr;
@@ -80,7 +78,7 @@ typedef std::shared_ptr<MeshData> MeshDataPtr;
 //--------------------------------------------------------------------------------------------------------------------------
 
 template<class T>
-void MeshData::SetupBuffer(VulkanBuffer& inBuffer, std::vector<T>& inDataVector, BufferUsageFlags usage)
+void MeshData::SetupBuffer(BufferResource& inBuffer, std::vector<T>& inDataVector, BufferUsageFlags usage)
 {
 	if (indexBuffer)
 	{

@@ -16,7 +16,7 @@ DeferredLightingPass::DeferredLightingPass(HashString inName)
 void DeferredLightingPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList)
 {
 	LightClusteringPass* clusteringPass = GetRenderer()->GetLightClusteringPass();
-	VulkanBuffer& buffer = clusteringPass->computeMaterial->GetStorageBuffer("clusterLightsData");
+	BufferResource& buffer = clusteringPass->computeMaterial->GetStorageBuffer("clusterLightsData");
 
 	// barriers ----------------------------------------------
 	BufferMemoryBarrier clusterDataBarrier = buffer.CreateMemoryBarrier(
@@ -64,8 +64,8 @@ void DeferredLightingPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCo
 	inCommandList->bindPipeline(PipelineBindPoint::eGraphics, pipelineData.pipeline);
 	inCommandList->bindDescriptorSets(PipelineBindPoint::eGraphics, pipelineData.pipelineLayout, 0, pipelineData.descriptorSets, {});
 
-	inCommandList->bindVertexBuffers(0, 1, &meshData->GetVertexBuffer().GetBuffer(), &offset);
-	inCommandList->bindIndexBuffer(meshData->GetIndexBuffer().GetBuffer(), 0, IndexType::eUint32);
+	inCommandList->bindVertexBuffers(0, 1, &meshData->GetVertexBuffer().GetResource(), &offset);
+	inCommandList->bindIndexBuffer(meshData->GetIndexBuffer().GetResource(), 0, IndexType::eUint32);
 	inCommandList->drawIndexed(meshData->GetIndexCount(), 1, 0, 0, 0);
 	inCommandList->endRenderPass();
 }

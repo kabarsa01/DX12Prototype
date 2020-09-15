@@ -1,14 +1,13 @@
 #pragma once
 
-#include "vulkan/vulkan.hpp"
+#include <wrl.h>
+#include <d3d12.h>
+
 #include "../objects/Device.h"
 #include "../memory/DeviceMemoryManager.h"
-#include "VulkanBuffer.h"
+#include "BufferResource.h"
 #include <vector>
 
-using namespace VULKAN_HPP_NAMESPACE;
-
-// Wrapper for a Vulkan image resource
 class VulkanImage
 {
 public:
@@ -71,9 +70,9 @@ public:
 	Image& GetImage();
 	const Image& GetImage() const;
 	MemoryRequirements GetMemoryRequirements();
-	VulkanBuffer* CreateStagingBuffer(char* inData);
-	VulkanBuffer* CreateStagingBuffer(SharingMode inSharingMode, uint32_t inQueueFamilyIndex);
-	VulkanBuffer* CreateStagingBuffer(SharingMode inSharingMode, uint32_t inQueueFamilyIndex, char* inData);
+	BufferResource* CreateStagingBuffer(char* inData);
+	BufferResource* CreateStagingBuffer(SharingMode inSharingMode, uint32_t inQueueFamilyIndex);
+	BufferResource* CreateStagingBuffer(SharingMode inSharingMode, uint32_t inQueueFamilyIndex, char* inData);
 	void DestroyStagingBuffer();
 
 	operator Image() const { return image; }
@@ -83,7 +82,7 @@ protected:
 	Image image;
 	MemoryRecord memoryRecord;
 	MemoryRequirements memoryRequirements;
-	VulkanBuffer stagingBuffer;
+	BufferResource stagingBuffer;
 	std::vector<char> data;
 
 	bool scoped;

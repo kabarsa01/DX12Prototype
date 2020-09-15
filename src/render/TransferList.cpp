@@ -7,7 +7,7 @@ TransferList* TransferList::GetInstance()
 	return &instance;
 }
 
-void TransferList::PushBuffer(VulkanBuffer* inBuffer)
+void TransferList::PushBuffer(BufferResource* inBuffer)
 {
 	buffers.push_back(inBuffer);
 }
@@ -23,7 +23,7 @@ void TransferList::PushImage(VulkanImage* inImage)
 	images.push_back(inImage);
 }
 
-const std::vector<VulkanBuffer*>& TransferList::GetBuffers()
+const std::vector<BufferResource*>& TransferList::GetBuffers()
 {
 	return buffers;
 }

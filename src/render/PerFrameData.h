@@ -2,7 +2,7 @@
 
 #include "render/DataStructures.h"
 #include "objects/VulkanDescriptorSet.h"
-#include "resources/VulkanBuffer.h"
+#include "resources/BufferResource.h"
 #include "vulkan/vulkan.hpp"
 
 using namespace VULKAN_HPP_NAMESPACE;
@@ -22,8 +22,8 @@ public:
 private:
 	Device* device;
 
-	VulkanBuffer shaderDataBuffer;
-	VulkanBuffer transformDataBuffer;
+	BufferResource shaderDataBuffer;
+	BufferResource transformDataBuffer;
 	DescriptorSetLayoutBinding shaderDataBinding;
 	DescriptorSetLayoutBinding transformDataBinding;
 
