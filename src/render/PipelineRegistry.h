@@ -1,18 +1,21 @@
 #pragma once
 
-#include "vulkan/vulkan.hpp"
+#include <wrl.h>
+#include <d3d12.h>
+
 #include <map>
 #include "common/HashString.h"
 #include "objects/Device.h"
 #include "objects/VulkanDescriptorSet.h"
 
-using namespace VULKAN_HPP_NAMESPACE;
+using namespace Microsoft::WRL;
 
 struct PipelineData
 {
-	Pipeline pipeline;
-	PipelineLayout pipelineLayout;
-	std::vector<DescriptorSet> descriptorSets;
+	ComPtr<ID3D12PipelineState> pipeline;
+	ComPtr<ID3D12RootSignature> rootSignature;
+//	PipelineLayout pipelineLayout;
+//	std::vector<DescriptorSet> descriptorSets;
 };
 
 class PipelineRegistry

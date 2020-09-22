@@ -60,6 +60,7 @@ public:
 	inline const std::string& GetComputeEntrypoint() const { return computeEntrypoint; };
 
 	inline CD3DX12_ROOT_PARAMETER1& GetRootParameter() { return descriptorTable; }
+	inline DescriptorBlock& GetDescriptorBlock() { return descriptorBlock; }
 
 	bool Load() override;
 	bool Cleanup() override;

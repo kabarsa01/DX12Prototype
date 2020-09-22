@@ -2,8 +2,8 @@
 #include "Device.h"
 
 namespace {
-	const uint16_t SHADER_RESOURCES_HEAP_SIZE = 2048;
-	const uint16_t RTV_HEAP_SIZE = 64;
+	const uint16_t SHADER_RESOURCES_HEAP_SIZE = 4096;
+	const uint16_t RTV_HEAP_SIZE = 512;
 	const uint16_t DSV_HEAP_SIZE = 64;
 };
 

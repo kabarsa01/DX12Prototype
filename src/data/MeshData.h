@@ -1,6 +1,8 @@
 #pragma once
 
+#include <d3d12.h>
 #include <vector>
+#include <array>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -27,7 +29,7 @@ struct Vertex
 	vec3 tangent;
 	vec3 bitangent;
 
-	static std::array<VertexInputAttributeDescription, 5> GetAttributeDescriptions(uint32_t inDesiredBinding);
+	static std::array<D3D12_INPUT_ELEMENT_DESC, 5> GetAttributeDescriptions(uint32_t inInputSlot = 0);
 };
 
 
@@ -58,7 +60,7 @@ public:
 	uint32_t GetIndexBufferSizeBytes();
 	uint32_t GetIndexCount();
 
-	static VertexInputBindingDescription GetBindingDescription(uint32_t inDesiredBinding);
+//	static VertexInputBindingDescription GetBindingDescription(uint32_t inDesiredBinding);
 	// fullscreen quad instance to be used for screen space stuff
 	static std::shared_ptr<MeshData> FullscreenQuad();
 private:

@@ -18,12 +18,12 @@ protected:
 	virtual void OnDestroy() override {}
 	virtual RenderPass CreateRenderPass() override;
 	virtual void CreateColorAttachments(
-		std::vector<VulkanImage>& outAttachments,
+		std::vector<ImageResource>& outAttachments,
 		std::vector<ImageView>& outAttachmentViews,
 		uint32_t inWidth,
 		uint32_t inHeight) override;
 	virtual void CreateDepthAttachment(
-		VulkanImage& outDepthAttachment,
+		ImageResource& outDepthAttachment,
 		ImageView& outDepthAttachmentView,
 		uint32_t inWidth,
 		uint32_t inHeight) override;

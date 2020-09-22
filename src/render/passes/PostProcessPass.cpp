@@ -123,11 +123,11 @@ RenderPass PostProcessPass::CreateRenderPass()
 	return GetVulkanDevice()->GetDevice().createRenderPass(renderPassInfo);
 }
 
-void PostProcessPass::CreateColorAttachments(std::vector<VulkanImage>& outAttachments, std::vector<ImageView>& outAttachmentViews, uint32_t inWidth, uint32_t inHeight)
+void PostProcessPass::CreateColorAttachments(std::vector<ImageResource>& outAttachments, std::vector<ImageView>& outAttachmentViews, uint32_t inWidth, uint32_t inHeight)
 {
 }
 
-void PostProcessPass::CreateDepthAttachment(VulkanImage& outDepthAttachment, ImageView& outDepthAttachmentView, uint32_t inWidth, uint32_t inHeight)
+void PostProcessPass::CreateDepthAttachment(ImageResource& outDepthAttachment, ImageView& outDepthAttachmentView, uint32_t inWidth, uint32_t inHeight)
 {
 }
 

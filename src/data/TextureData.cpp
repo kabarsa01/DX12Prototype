@@ -10,7 +10,7 @@ namespace
 
 TextureData::TextureData(const HashString& inPath, bool inUsesAlpha /*= false*/, bool inFlipVertical /*= true*/, bool inLinear /*= true*/, bool inGenMips /*= true*/)
 	: Resource(inPath)
-	, imageView(nullptr)
+//	, imageView(nullptr)
 	, genMips(inGenMips)
 	, cleanup(true)
 {
@@ -36,6 +36,7 @@ bool TextureData::Load()
 	unsigned char* data;
 	stbi_set_flip_vertically_on_load(flipVertical);
 	data = stbi_load(path.c_str(), &width, &height, &numChannels, DESIRED_CHANNELS_COUNT);
+	uint64_t dataSize = width * height * DESIRED_CHANNELS_COUNT;
 
 	if (data == nullptr)
 	{
@@ -43,11 +44,11 @@ bool TextureData::Load()
 	}
 
 	Device& device = Engine::GetRendererInstance()->GetDevice();
-	image.createInfo = GetImageInfo();
+	image.resourceDescription = GetImageDesc();
 	image.Create(&device);
-	image.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
-	image.CreateStagingBuffer(reinterpret_cast<char*>(data));
-	imageView = CreateImageView(ImageSubresourceRange(ImageAspectFlagBits::eColor, 0, image.GetMips(), 0, 1));
+//	image.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
+	image.CreateStagingBuffer()->CopyTo(dataSize, reinterpret_cast<char*>(data));
+//	imageView = CreateImageView(ImageSubresourceRange(ImageAspectFlagBits::eColor, 0, image.GetMips(), 0, 1));
 
 	stbi_image_free(data);
 
@@ -61,11 +62,11 @@ bool TextureData::Cleanup()
 		return false;
 	}
 
-	if (imageView)
-	{
-		Engine::GetRendererInstance()->GetDevice().destroyImageView(imageView);
-		imageView = nullptr;
-	}
+	//if (imageView)
+	//{
+	//	Engine::GetRendererInstance()->GetDevice().destroyImageView(imageView);
+	//	imageView = nullptr;
+	//}
 	if (image)
 	{
 		image.Destroy();
@@ -74,17 +75,17 @@ bool TextureData::Cleanup()
 	return false;
 }
 
-void TextureData::CreateFromExternal(const VulkanImage& inImage, const ImageView& inImageView, bool inCleanup/* = false*/)
+void TextureData::CreateFromExternal(const ImageResource& inImage, bool inCleanup/* = false*/)
 {
 	image = inImage;
-	imageView = inImageView;
+//	imageView = inImageView;
 	cleanup = inCleanup;
 }
 
-ImageView& TextureData::GetImageView()
-{
-	return imageView;
-}
+//ImageView& TextureData::GetImageView()
+//{
+//	return imageView;
+//}
 
 
 

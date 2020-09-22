@@ -1,46 +1,33 @@
 #include "ImageUtils.h"
+#include "d3dx12.h"
 
-VulkanImage ImageUtils::CreateColorAttachment(Device* inDevice, uint32_t inWidth, uint32_t inHeight, bool in16BitFloat)
+ImageResource ImageUtils::CreateColorAttachment(Device* inDevice, uint32_t inWidth, uint32_t inHeight, bool in16BitFloat)
 {
-	VulkanImage colorAttachmentImage;
-	colorAttachmentImage.createInfo.setArrayLayers(1);
-	colorAttachmentImage.createInfo.setFormat(in16BitFloat ? Format::eR16G16B16A16Sfloat : Format::eR8G8B8A8Unorm);
-	colorAttachmentImage.createInfo.setImageType(ImageType::e2D);
-	colorAttachmentImage.createInfo.setInitialLayout(ImageLayout::eUndefined);
-	colorAttachmentImage.createInfo.setSamples(SampleCountFlagBits::e1);
-	colorAttachmentImage.createInfo.setMipLevels(1);
-	colorAttachmentImage.createInfo.setSharingMode(SharingMode::eExclusive);
-	//colorAttachmentImage.createInfo.setQueueFamilyIndexCount(1);
-	//colorAttachmentImage.createInfo.setPQueueFamilyIndices(queueFailyIndices);
-	colorAttachmentImage.createInfo.setTiling(ImageTiling::eOptimal);
-	colorAttachmentImage.createInfo.setFlags(ImageCreateFlags());
-	colorAttachmentImage.createInfo.setExtent(Extent3D(inWidth, inHeight, 1));
-	colorAttachmentImage.createInfo.setUsage(ImageUsageFlagBits::eColorAttachment | ImageUsageFlagBits::eSampled);
-	colorAttachmentImage.Create(inDevice);
-	colorAttachmentImage.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
+	ImageResource image;
+	image.resourceDescription = CD3DX12_RESOURCE_DESC::Tex2D(
+		in16BitFloat ? DXGI_FORMAT_R16G16B16A16_FLOAT : DXGI_FORMAT_R8G8B8A8_UNORM,
+		inWidth,
+		inHeight,
+		1, 1, 1, 0, // array, mips and sampling
+		D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, 
+		D3D12_TEXTURE_LAYOUT_UNKNOWN);
+	image.Create(inDevice);
 
-	return colorAttachmentImage;
+	return image;
 }
 
-VulkanImage ImageUtils::CreateDepthAttachment(Device* inDevice, uint32_t inWidth, uint32_t inHeight)
+ImageResource ImageUtils::CreateDepthAttachment(Device* inDevice, uint32_t inWidth, uint32_t inHeight)
 {
-	VulkanImage depthAttachmentImage;
-	depthAttachmentImage.createInfo.setArrayLayers(1);
-	depthAttachmentImage.createInfo.setFormat(Format::eD24UnormS8Uint);
-	depthAttachmentImage.createInfo.setImageType(ImageType::e2D);
-	depthAttachmentImage.createInfo.setInitialLayout(ImageLayout::eUndefined);
-	depthAttachmentImage.createInfo.setSamples(SampleCountFlagBits::e1);
-	depthAttachmentImage.createInfo.setMipLevels(1);
-	depthAttachmentImage.createInfo.setSharingMode(SharingMode::eExclusive);
-	//colorAttachmentImage.createInfo.setQueueFamilyIndexCount(1);
-	//colorAttachmentImage.createInfo.setPQueueFamilyIndices(queueFailyIndices);
-	depthAttachmentImage.createInfo.setTiling(ImageTiling::eOptimal);
-	depthAttachmentImage.createInfo.setFlags(ImageCreateFlags());
-	depthAttachmentImage.createInfo.setExtent(Extent3D(inWidth, inHeight, 1));
-	depthAttachmentImage.createInfo.setUsage(ImageUsageFlagBits::eDepthStencilAttachment | ImageUsageFlagBits::eSampled);
-	depthAttachmentImage.Create(inDevice);
-	depthAttachmentImage.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
+	ImageResource image;
+	image.resourceDescription = CD3DX12_RESOURCE_DESC::Tex2D(
+		DXGI_FORMAT_D24_UNORM_S8_UINT,
+		inWidth,
+		inHeight,
+		1, 1, 1, 0, // array, mips and sampling
+		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL,
+		D3D12_TEXTURE_LAYOUT_UNKNOWN);
+	image.Create(inDevice);
 
-	return depthAttachmentImage;
+	return image;
 }
 

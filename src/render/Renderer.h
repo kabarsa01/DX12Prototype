@@ -11,7 +11,7 @@
 #include "objects/SwapChain.h"
 #include "objects/CommandBuffers.h"
 #include "memory/DeviceMemoryManager.h"
-#include "resources/VulkanImage.h"
+#include "resources/ImageResource.h"
 #include "objects/DescriptorHeaps.h"
 
 // pre-build batch to compile all our shaders

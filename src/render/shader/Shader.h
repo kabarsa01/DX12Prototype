@@ -35,9 +35,10 @@ public:
 	virtual bool Load() override;
 	virtual bool Cleanup() override;
 
-	ComPtr<ID3DBlob> GetShaderBlob() { return shaderBlob; }
-	std::vector<D3D12_SHADER_INPUT_BIND_DESC>& GetBindings() { return bindings; }
-	uint32_t GetBindingsCount() { return bindingsCount; }
+	D3D12_SHADER_BYTECODE GetBytecode();
+	inline ComPtr<ID3DBlob> GetShaderBlob() { return shaderBlob; }
+	inline std::vector<D3D12_SHADER_INPUT_BIND_DESC>& GetBindings() { return bindings; }
+	inline uint32_t GetBindingsCount() { return bindingsCount; }
 protected:
 	std::string filePath;
 	ComPtr<ID3DBlob> shaderBlob;

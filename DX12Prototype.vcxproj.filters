@@ -207,9 +207,6 @@
     <ClCompile Include="src\render\passes\ZPrepass.cpp">
       <Filter>Source Files\src\render\passes</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\resources\VulkanImage.cpp">
-      <Filter>Source Files\src\render\resources</Filter>
-    </ClCompile>
     <ClCompile Include="src\render\shader\Shader.cpp">
       <Filter>Source Files\src\render\shader</Filter>
     </ClCompile>
@@ -232,6 +229,12 @@
       <Filter>Source Files\src\render\resources</Filter>
     </ClCompile>
     <ClCompile Include="src\render\resources\BufferResource.cpp">
+      <Filter>Source Files\src\render\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\resources\ImageResource.cpp">
+      <Filter>Source Files\src\render\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\resources\ResourceView.cpp">
       <Filter>Source Files\src\render\resources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -377,9 +380,6 @@
     <ClInclude Include="src\render\passes\ZPrepass.h">
       <Filter>Source Files\src\render\passes</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\resources\VulkanImage.h">
-      <Filter>Source Files\src\render\resources</Filter>
-    </ClInclude>
     <ClInclude Include="src\render\shader\Shader.h">
       <Filter>Source Files\src\render\shader</Filter>
     </ClInclude>
@@ -402,6 +402,12 @@
       <Filter>Source Files\src\render\resources</Filter>
     </ClInclude>
     <ClInclude Include="src\render\resources\BufferResource.h">
+      <Filter>Source Files\src\render\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\resources\ImageResource.h">
+      <Filter>Source Files\src\render\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\resources\ResourceView.h">
       <Filter>Source Files\src\render\resources</Filter>
     </ClInclude>
   </ItemGroup>

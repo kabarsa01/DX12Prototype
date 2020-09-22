@@ -27,9 +27,6 @@ void BufferResource::Create(Device* inDevice, uint64_t inSize, D3D12_HEAP_TYPE i
 	}
 	device = inDevice;
 
-	DeviceMemoryManager* dmm = DeviceMemoryManager::GetInstance();
-	memRecord = dmm->RequestMemory(inSize, inHeapType);
-
 	D3D12_RESOURCE_DESC desc;
 	desc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
 	desc.DepthOrArraySize = 1;
@@ -42,6 +39,10 @@ void BufferResource::Create(Device* inDevice, uint64_t inSize, D3D12_HEAP_TYPE i
 	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 	desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 	desc.Width = inSize;
+
+	D3D12_RESOURCE_ALLOCATION_INFO allocInfo = device->GetNativeDevice()->GetResourceAllocationInfo(0, 1, &desc);
+	DeviceMemoryManager* dmm = DeviceMemoryManager::GetInstance();
+	memRecord = dmm->RequestMemory(allocInfo.SizeInBytes, inHeapType);
 
 	D3D12_CLEAR_VALUE clearValue;
 	ThrowIfFailed( device->GetNativeDevice()->CreatePlacedResource(

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "data/Resource.h"
-#include "render/resources/VulkanImage.h"
+#include "render/resources/ImageResource.h"
 #include <string>
 
 class TextureData : public Resource
@@ -13,13 +13,13 @@ public:
 	virtual bool Load() override;
 	virtual bool Cleanup() override;
 
-	void CreateFromExternal(const VulkanImage& inImage, const ImageView& inImageView, bool inCleanup = false);
+	void CreateFromExternal(const ImageResource& inImage, bool inCleanup = false);
 
-	inline VulkanImage& GetImage() { return image; }
-	ImageView& GetImageView();
+	inline ImageResource& GetImage() { return image; }
+//	ImageView& GetImageView();
 protected:
-	VulkanImage image;
-	ImageView imageView;
+	ImageResource image;
+//	ImageView imageView;
 
 	std::string path;
 	bool useAlpha;
@@ -32,8 +32,8 @@ protected:
 	int height;
 	int numChannels;
 
-	virtual ImageCreateInfo GetImageInfo() = 0;
-	virtual ImageView CreateImageView(ImageSubresourceRange range) = 0;
+	virtual D3D12_RESOURCE_DESC GetImageDesc() = 0;
+//	virtual ImageView CreateImageView(ImageSubresourceRange range) = 0;
 private:
 	TextureData();
 };

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <d3d12.h>
+
 #include "TextureData.h"
 #include <memory>
 
@@ -9,8 +11,8 @@ public:
 	Texture2D(const HashString& inPath, bool inUsesAlpha = false, bool inFlipVertical = true, bool inLinear = true, bool inGenMips = true);
 	virtual ~Texture2D();
 protected:
-	ImageCreateInfo GetImageInfo() override;
-	ImageView CreateImageView(ImageSubresourceRange range) override;
+	D3D12_RESOURCE_DESC GetImageDesc() override;
+//	ImageView CreateImageView(ImageSubresourceRange range) override;
 private:
 	Texture2D();
 };

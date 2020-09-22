@@ -59,6 +59,13 @@ bool Shader::Cleanup()
 	return true;
 }
 
+D3D12_SHADER_BYTECODE Shader::GetBytecode()
+{
+	D3D12_SHADER_BYTECODE bytecode;
+	bytecode.BytecodeLength = shaderBlob->GetBufferSize();
+	bytecode.pShaderBytecode = shaderBlob->GetBufferPointer();
+	return bytecode;
+}
 
 
 

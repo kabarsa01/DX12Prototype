@@ -1,6 +1,7 @@
 #include "Texture2D.h"
 #include "core/Engine.h"
 #include "render/Renderer.h"
+#include "d3dx12.h"
 
 Texture2D::Texture2D(const HashString& inPath, bool inUsesAlpha /*= false*/, bool inFlipVertical /*= true*/, bool inLinear /*= true*/, bool inGenMips /*= true*/)
 	: TextureData(inPath, inUsesAlpha, inFlipVertical, inLinear, inGenMips)
@@ -13,30 +14,17 @@ Texture2D::~Texture2D()
 
 }
 
-ImageCreateInfo Texture2D::GetImageInfo()
+D3D12_RESOURCE_DESC Texture2D::GetImageDesc()
 {
-	ImageCreateInfo createInfo;
+	D3D12_RESOURCE_DESC desc;
+	desc = CD3DX12_RESOURCE_DESC::Tex2D(linear ? DXGI_FORMAT_R8G8B8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, width, height);
+	desc.MipLevels = genMips ? 0 : 1;
 
-	createInfo.setArrayLayers(1);
-	createInfo.setFormat(Format::eR8G8B8A8Unorm);
-	createInfo.setImageType(ImageType::e2D);
-	createInfo.setInitialLayout(ImageLayout::eUndefined);
-	createInfo.setSamples(SampleCountFlagBits::e1);
-	createInfo.setMipLevels(genMips ? 12 : 1); // 12 just in case
-	createInfo.setSharingMode(SharingMode::eExclusive);
-	// ignored if exclusive mode is used, see Vulkan 1.2 spec
-	//createInfo.setQueueFamilyIndexCount(1); 
-	//createInfo.setPQueueFamilyIndices(queueFailyIndices);
-	createInfo.setTiling(ImageTiling::eOptimal);
-	createInfo.setFlags(ImageCreateFlags());
-	createInfo.setExtent(Extent3D(width, height, 1));
-	createInfo.setUsage(ImageUsageFlagBits::eSampled | ImageUsageFlagBits::eTransferDst | ImageUsageFlagBits::eTransferSrc);
-
-	return createInfo;
+	return desc;
 }
-
-ImageView Texture2D::CreateImageView(ImageSubresourceRange range)
-{
-	return image.CreateView(range, ImageViewType::e2D);
-}
+//
+//ImageView Texture2D::CreateImageView(ImageSubresourceRange range)
+//{
+//	return image.CreateView(range, ImageViewType::e2D);
+//}
 

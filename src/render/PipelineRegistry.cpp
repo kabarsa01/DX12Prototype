@@ -25,28 +25,28 @@ PipelineRegistry* PipelineRegistry::GetInstance()
 
 void PipelineRegistry::DestroyPipelines(Device* inDevice)
 {
-	Device& device = inDevice->GetNativeDevice();
-	for (auto& passPair : pipelinesData)
-	{
-		for (auto& shaderPair : passPair.second)
-		{
-			device.destroyPipelineLayout(shaderPair.second.pipelineLayout);
-			device.destroyPipeline(shaderPair.second.pipeline);
-		}
-	}
+	//ComPtr<ID3D12Device2> device = inDevice->GetNativeDevice();
+	//for (auto& passPair : pipelinesData)
+	//{
+	//	for (auto& shaderPair : passPair.second)
+	//	{
+	//		device.destroyPipelineLayout(shaderPair.second.pipelineLayout);
+	//		device.destroyPipeline(shaderPair.second.pipeline);
+	//	}
+	//}
 	pipelinesData.clear();
 }
 
 void PipelineRegistry::DestroyPipelines(Device* inDevice, HashString inPassHash)
 {
-	Device& device = inDevice->GetNativeDevice();
+	//Device& device = inDevice->GetNativeDevice();
 	if (pipelinesData.find(inPassHash) != pipelinesData.end())
 	{
-		for (auto& shaderPair : pipelinesData[inPassHash])
+		/*for (auto& shaderPair : pipelinesData[inPassHash])
 		{
 			device.destroyPipelineLayout(shaderPair.second.pipelineLayout);
 			device.destroyPipeline(shaderPair.second.pipeline);
-		}
+		}*/
 		pipelinesData[inPassHash].clear();
 	}
 }

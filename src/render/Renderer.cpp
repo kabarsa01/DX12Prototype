@@ -137,7 +137,7 @@ void Renderer::RenderFrame()
 	// gbuffer pass
 	gBufferPass->RecordCommands(cmdList);
 	// barriers ----------------------------------------------
-	const std::vector<VulkanImage>& gBufferAttachments = gBufferPass->GetAttachments();
+	const std::vector<ImageResource>& gBufferAttachments = gBufferPass->GetAttachments();
 	//--------------------------------------------------------
 	// deferred lighting pass
 	deferredLightingPass->RecordCommands(cmdList);
@@ -263,7 +263,7 @@ void Renderer::TransferResources(CommandBuffer& inCmdBuffer, uint32_t inQueueFam
 
 	// get new resources to copy
 	std::vector<BufferResource*> buffers = TL->GetBuffers();
-	std::vector<VulkanImage*> images = TL->GetImages();
+	std::vector<ImageResource*> images = TL->GetImages();
 	TL->ClearBuffers();
 	TL->ClearImages();
 
@@ -317,7 +317,7 @@ void Renderer::TransferResources(CommandBuffer& inCmdBuffer, uint32_t inQueueFam
 		beforeTransferBarriers.data());
 
 	//submit copy
-	for (VulkanImage* image : images)
+	for (ImageResource* image : images)
 	{
 		// copy
 		inCmdBuffer.copyBufferToImage(
@@ -340,11 +340,11 @@ void Renderer::TransferResources(CommandBuffer& inCmdBuffer, uint32_t inQueueFam
 		afterTransferBarriers.data());
 }
 
-void Renderer::GenerateMips(CommandBuffer& inCmdBuffer, std::vector<VulkanImage*>& inImages)
+void Renderer::GenerateMips(CommandBuffer& inCmdBuffer, std::vector<ImageResource*>& inImages)
 {
 	for (uint32_t index = 0; index < inImages.size(); index++)
 	{
-		VulkanImage* image = inImages[index];
+		ImageResource* image = inImages[index];
 
 		for (uint32_t mipIndex = 1; mipIndex < image->GetMips(); mipIndex++)
 		{

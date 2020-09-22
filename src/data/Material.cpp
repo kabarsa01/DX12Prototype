@@ -3,6 +3,7 @@
 #include "core/Engine.h"
 #include "render/Renderer.h"
 #include "render/TransferList.h"
+#include "render/objects/Device.h"
 
 Material::Material(HashString inId)
 	: Resource(inId)
@@ -78,15 +79,17 @@ void Material::LoadResources()
 			break;
 		}
 
-		range.Init(type, 1, binding.BindPoint, binding.Space);
+		range.Init(type, 1, binding.BindPoint, binding.Space, D3D12_DESCRIPTOR_RANGE_FLAG_NONE);
 		descriptorRanges.push_back(range);
 		nameToRange[binding.Name] = descriptorRanges.size() - 1;
 	}
 	descriptorTable.InitAsDescriptorTable(descriptorRanges.size(), descriptorRanges.data(), D3D12_SHADER_VISIBILITY_ALL);
 	descriptorBlock = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsCBV_SRV_UAV(descriptorRanges.size());
 
+	// TODO create views
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	//Device->GetNativeDevice()->CreateShaderResourceView();
+	srvDesc.Texture2D.MipLevels = 1;
+	Engine::GetRendererInstance()->GetDevice().GetNativeDevice()->CreateShaderResourceView(nullptr, &srvDesc, D3D12_CPU_DESCRIPTOR_HANDLE());
 
 	shaderHash = HashString(vertexShaderPath + fragmentShaderPath + computeShaderPath);
 }
@@ -143,9 +146,8 @@ void Material::SetUniformBuffer(const std::string& inName, uint64_t inSize, cons
 	Device& device = Engine::GetRendererInstance()->GetDevice();
 
 	BufferResource buffer;
-	buffer.Create(&device);
-//	buffer.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
-	buffer.CreateStagingBuffer();
+	buffer.Create(&device, inSize, D3D12_HEAP_TYPE_DEFAULT);
+	buffer.CreateStagingBuffer()->CopyTo(inSize, inData, true);
 
 	buffers[inName].Destroy();
 	buffers[inName] = buffer;
@@ -172,9 +174,8 @@ void Material::SetStorageBuffer(const std::string& inName, uint64_t inSize, cons
 	Device& device = Engine::GetRendererInstance()->GetDevice();
 
 	BufferResource buffer(false);
-	buffer.Create(&device);
-//	buffer.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
-	buffer.CreateStagingBuffer();
+	buffer.Create(&device, inSize, D3D12_HEAP_TYPE_DEFAULT);
+	buffer.CreateStagingBuffer()->CopyTo(inSize, inData, true);
 
 	storageBuffers[inName].Destroy();
 	storageBuffers[inName] = buffer;

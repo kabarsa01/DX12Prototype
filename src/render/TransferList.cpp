@@ -18,7 +18,7 @@ void TransferList::PushBuffers(MeshDataPtr inData)
 	buffers.push_back(&inData->GetIndexBuffer());
 }
 
-void TransferList::PushImage(VulkanImage* inImage)
+void TransferList::PushImage(ImageResource* inImage)
 {
 	images.push_back(inImage);
 }
@@ -28,7 +28,7 @@ const std::vector<BufferResource*>& TransferList::GetBuffers()
 	return buffers;
 }
 
-const std::vector<VulkanImage*>& TransferList::GetImages()
+const std::vector<ImageResource*>& TransferList::GetImages()
 {
 	return images;
 }

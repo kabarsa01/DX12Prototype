@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include "resources/BufferResource.h"
-#include "resources/VulkanImage.h"
+#include "resources/ImageResource.h"
 #include "data/MeshData.h"
 
 class TransferList
@@ -11,10 +11,10 @@ public:
 
 	void PushBuffer(BufferResource* inBuffer);
 	void PushBuffers(MeshDataPtr inData);
-	void PushImage(VulkanImage* inImage);
+	void PushImage(ImageResource* inImage);
 
 	const std::vector<BufferResource*>& GetBuffers();
-	const std::vector<VulkanImage*>& GetImages();
+	const std::vector<ImageResource*>& GetImages();
 
 	void ClearBuffers();
 	void ClearImages();
@@ -22,7 +22,7 @@ private:
 	static TransferList instance;
 
 	std::vector<BufferResource*> buffers;
-	std::vector<VulkanImage*> images;
+	std::vector<ImageResource*> images;
 
 	TransferList();
 	TransferList(const TransferList& inOther);

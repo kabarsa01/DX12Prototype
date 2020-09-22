@@ -137,14 +137,14 @@ RenderPass DeferredLightingPass::CreateRenderPass()
 	return GetVulkanDevice()->GetDevice().createRenderPass(renderPassInfo);
 }
 
-void DeferredLightingPass::CreateColorAttachments(std::vector<VulkanImage>& outAttachments, std::vector<ImageView>& outAttachmentViews, uint32_t inWidth, uint32_t inHeight)
+void DeferredLightingPass::CreateColorAttachments(std::vector<ImageResource>& outAttachments, std::vector<ImageView>& outAttachmentViews, uint32_t inWidth, uint32_t inHeight)
 {
-	VulkanImage colorAttachmentImage = ImageUtils::CreateColorAttachment(GetVulkanDevice(), inWidth, inHeight, true); // do not forget 16 bit float
+	ImageResource colorAttachmentImage = ImageUtils::CreateColorAttachment(GetVulkanDevice(), inWidth, inHeight, true); // do not forget 16 bit float
 	outAttachments.push_back(colorAttachmentImage);
 	outAttachmentViews.push_back(colorAttachmentImage.CreateView({ ImageAspectFlagBits::eColor, 0, 1, 0, 1 }, ImageViewType::e2D));
 }
 
-void DeferredLightingPass::CreateDepthAttachment(VulkanImage& outDepthAttachment, ImageView& outDepthAttachmentView, uint32_t inWidth, uint32_t inHeight)
+void DeferredLightingPass::CreateDepthAttachment(ImageResource& outDepthAttachment, ImageView& outDepthAttachmentView, uint32_t inWidth, uint32_t inHeight)
 {
 }
 

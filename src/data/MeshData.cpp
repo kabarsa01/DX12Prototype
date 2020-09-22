@@ -1,8 +1,6 @@
-#include "MeshData.h"
+#include "data/MeshData.h"
 #include "data/DataManager.h"
 #include "core/Engine.h"
-
-using namespace VULKAN_HPP_NAMESPACE;
 
 //-------------------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -36,39 +34,16 @@ namespace
 //vec3 Tangent;
 //vec3 Bitangent;
 /////////////////
-std::array<VertexInputAttributeDescription, 5> Vertex::GetAttributeDescriptions(uint32_t inDesiredBinding)
+std::array<D3D12_INPUT_ELEMENT_DESC, 5> Vertex::GetAttributeDescriptions(uint32_t inInputSlot /*= 0*/)
 {
-	std::array<VertexInputAttributeDescription, 5> attributes = {};
-
-	// vec3 Position
-	attributes[0].setBinding(inDesiredBinding);
-	attributes[0].setLocation(0);
-	attributes[0].setFormat(Format::eR32G32B32Sfloat);
-	attributes[0].setOffset(offsetof(Vertex, position));
-
-	// vec3 Normal
-	attributes[1].setBinding(inDesiredBinding);
-	attributes[1].setLocation(1);
-	attributes[1].setFormat(Format::eR32G32B32Sfloat);
-	attributes[1].setOffset(offsetof(Vertex, normal));
-
-	// vec2 TexCoord
-	attributes[2].setBinding(inDesiredBinding);
-	attributes[2].setLocation(2);
-	attributes[2].setFormat(Format::eR32G32Sfloat);
-	attributes[2].setOffset(offsetof(Vertex, texCoord));
-
-	// vec3 Tangent
-	attributes[3].setBinding(inDesiredBinding);
-	attributes[3].setLocation(3);
-	attributes[3].setFormat(Format::eR32G32B32Sfloat);
-	attributes[3].setOffset(offsetof(Vertex, tangent));
-
-	// vec3 BiTangent
-	attributes[4].setBinding(inDesiredBinding);
-	attributes[4].setLocation(4);
-	attributes[4].setFormat(Format::eR32G32B32Sfloat);
-	attributes[4].setOffset(offsetof(Vertex, bitangent));
+	std::array<D3D12_INPUT_ELEMENT_DESC, 5> attributes =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, inInputSlot, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, inInputSlot, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, inInputSlot, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, inInputSlot, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, inInputSlot, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};
 
 	return attributes;
 }
@@ -116,16 +91,16 @@ void MeshData::Draw()
 	// bind VAO and draw
 }
 
-VertexInputBindingDescription MeshData::GetBindingDescription(uint32_t inDesiredBinding)
-{
-	VertexInputBindingDescription bindingDescription;
-
-	bindingDescription.setBinding(inDesiredBinding);
-	bindingDescription.setStride(sizeof(Vertex));
-	bindingDescription.setInputRate(VertexInputRate::eVertex);
-
-	return bindingDescription;
-}
+//VertexInputBindingDescription MeshData::GetBindingDescription(uint32_t inDesiredBinding)
+//{
+//	VertexInputBindingDescription bindingDescription;
+//
+//	bindingDescription.setBinding(inDesiredBinding);
+//	bindingDescription.setStride(sizeof(Vertex));
+//	bindingDescription.setInputRate(VertexInputRate::eVertex);
+//
+//	return bindingDescription;
+//}
 
 BufferResource& MeshData::GetVertexBuffer()
 {
