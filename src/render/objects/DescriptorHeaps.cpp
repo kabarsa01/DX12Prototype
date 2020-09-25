@@ -1,5 +1,6 @@
 #include "DescriptorHeaps.h"
 #include "Device.h"
+#include "../resources/ResourceView.h"
 
 namespace {
 	const uint16_t SHADER_RESOURCES_HEAP_SIZE = 4096;

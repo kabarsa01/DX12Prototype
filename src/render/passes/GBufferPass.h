@@ -21,7 +21,7 @@ protected:
 //	virtual RenderPass CreateRenderPass() override;
 	virtual void CreateColorAttachments(
 		std::vector<ImageResource>& outAttachments, 
-//		std::vector<ImageView>& outAttachmentViews, 
+		std::vector<ResourceView>& outAttachmentViews,
 		uint32_t inWidth, 
 		uint32_t inHeight) override;
 	virtual void CreateDepthAttachment(

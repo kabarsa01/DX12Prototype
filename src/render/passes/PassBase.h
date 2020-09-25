@@ -44,7 +44,7 @@ protected:
 	virtual void OnDestroy() = 0;
 	virtual void CreateColorAttachments(
 		std::vector<ImageResource>& outAttachments, 
-//		std::vector<ImageView>& outAttachmentViews,
+		std::vector<ResourceView>& outAttachmentViews,
 		uint32_t inWidth,
 		uint32_t inHeight) = 0;
 	virtual void CreateDepthAttachment(
@@ -61,7 +61,7 @@ protected:
 	//	uint32_t inWidth,
 	//	uint32_t inHeight);
 	PipelineData& FindPipeline(MaterialPtr inMaterial);
-	ComPtr<ID3D12RootSignature> CreateRootSignature();// std::vector<DescriptorSetLayout>& inDescriptorSetLayouts);
+	ComPtr<ID3D12RootSignature> CreateRootSignature(MaterialPtr inMaterial);// std::vector<DescriptorSetLayout>& inDescriptorSetLayouts);
 //	DescriptorSetLayout CreateDescriptorSetLayout(MaterialPtr inMaterial);
 private:
 	HashString name;
@@ -71,7 +71,7 @@ private:
 	//RenderPass renderPass;
 	//Framebuffer framebuffer;
 	std::vector<ImageResource> attachments;
-//	std::vector<ImageView> attachmentViews;
+	std::vector<ResourceView> attachmentViews;
 	ImageResource depthAttachment;
 //	ImageView depthAttachmentView;
 	DescriptorBlock descriptorViews;

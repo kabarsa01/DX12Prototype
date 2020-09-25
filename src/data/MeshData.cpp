@@ -70,25 +70,20 @@ MeshData::~MeshData()
 
 void MeshData::OnDestroy()
 {
-	DestroyBuffer();
+	DestroyBuffers();
 }
 
-void MeshData::CreateBuffer()
+void MeshData::CreateBuffers()
 {
-	SetupBuffer<Vertex>(vertexBuffer, vertices, BufferUsageFlagBits::eVertexBuffer);
-	SetupBuffer<uint32_t>(indexBuffer, indices, BufferUsageFlagBits::eIndexBuffer);
+	SetupBuffer<Vertex>(vertexBuffer, vertices);
+	SetupBuffer<uint32_t>(indexBuffer, indices);
 }
 
-void MeshData::DestroyBuffer()
+void MeshData::DestroyBuffers()
 {
 	// buffers
 	vertexBuffer.Destroy();
 	indexBuffer.Destroy();
-}
-
-void MeshData::Draw()
-{
-	// bind VAO and draw
 }
 
 //VertexInputBindingDescription MeshData::GetBindingDescription(uint32_t inDesiredBinding)
@@ -107,6 +102,16 @@ BufferResource& MeshData::GetVertexBuffer()
 	return vertexBuffer;
 }
 
+D3D12_VERTEX_BUFFER_VIEW MeshData::GetVertexBufferView()
+{
+	D3D12_VERTEX_BUFFER_VIEW view;
+	view.SizeInBytes = vertexBuffer.GetSize();
+	view.BufferLocation = vertexBuffer.GetGpuVirtualAddress();
+	view.StrideInBytes = sizeof(Vertex);
+
+	return view;
+}
+
 uint32_t MeshData::GetVertexBufferSizeBytes()
 {
 	return static_cast<uint32_t>( sizeof(Vertex) * vertices.size() );
@@ -120,6 +125,16 @@ uint32_t MeshData::GetVertexCount()
 BufferResource& MeshData::GetIndexBuffer()
 {
 	return indexBuffer;
+}
+
+D3D12_INDEX_BUFFER_VIEW MeshData::GetIndexBufferView()
+{
+	D3D12_INDEX_BUFFER_VIEW view;
+	view.SizeInBytes = indexBuffer.GetSize();
+	view.BufferLocation = indexBuffer.GetGpuVirtualAddress();
+	view.Format = DXGI_FORMAT_R32_UINT;
+
+	return view;
 }
 
 uint32_t MeshData::GetIndexBufferSizeBytes()
@@ -148,7 +163,7 @@ bool MeshData::Load()
 
 bool MeshData::Cleanup()
 {
-	DestroyBuffer();
+	DestroyBuffers();
 	return true;
 }
 

@@ -184,7 +184,7 @@ void Renderer::Cleanup()
 
 	ScenePtr scene = Engine::GetSceneInstance();
 	MeshComponentPtr meshComp = scene->GetSceneComponent<MeshComponent>();
-	meshComp->meshData->DestroyBuffer();
+	meshComp->meshData->DestroyBuffers();
 
 	perFrameData->Destroy();
 	delete perFrameData;

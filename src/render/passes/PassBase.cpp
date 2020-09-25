@@ -29,16 +29,16 @@ void PassBase::Create()
 {
 	renderer = Engine::GetRendererInstance();
 	device = &renderer->GetDevice();
-	//width = renderer->GetWidth();
-	//height = renderer->GetHeight();
+	width = renderer->GetWidth();
+	height = renderer->GetHeight();
 
 //	renderPass = CreateRenderPass();
 //	if (renderPass)
 //	{
-//		CreateColorAttachments(attachments, attachmentViews, width, height);
+	CreateColorAttachments(attachments, attachmentViews, width, height);
 //		if (!isDepthExternal)
 //		{
-//			CreateDepthAttachment(depthAttachment, depthAttachmentView, width, height);
+	CreateDepthAttachment(depthAttachment, width, height);
 //		}
 ////		std::vector<ImageView> views = attachmentViews;
 //		if (depthAttachmentView)
@@ -102,7 +102,7 @@ void PassBase::SetExternalDepth(const ImageResource& inDepthAttachment/*const Im
 //	return vulkanDevice->GetDevice().createFramebuffer(framebufferInfo);
 //}
 
-ComPtr<ID3D12RootSignature> PassBase::CreateRootSignature()// std::vector<DescriptorSetLayout>& inDescriptorSetLayouts)
+ComPtr<ID3D12RootSignature> PassBase::CreateRootSignature(MaterialPtr inMaterial)// std::vector<DescriptorSetLayout>& inDescriptorSetLayouts)
 {
 //	Device& device = vulkanDevice->GetDevice();
 
@@ -118,9 +118,24 @@ ComPtr<ID3D12RootSignature> PassBase::CreateRootSignature()// std::vector<Descri
 
 	//pipelineLayoutInfo.setPushConstantRangeCount(1);
 	//pipelineLayoutInfo.setPPushConstantRanges(&pushConstRange);
-	ComPtr<ID3D12RootSignature> signature;
-	ThrowIfFailed( device->GetNativeDevice()->CreateRootSignature(0, nullptr, 0, IID_PPV_ARGS(&signature)) );
-	return signature;
+
+	CD3DX12_ROOT_PARAMETER1 rootParams[3];
+	rootParams[2] = inMaterial->GetRootParameter();
+
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootDesc;
+	// TODO samplers
+	rootDesc.Init_1_1(3, rootParams, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE);
+	ComPtr<ID3DBlob> serializedRootSig;
+	ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rootDesc, &serializedRootSig, nullptr));
+
+	ComPtr<ID3D12RootSignature> rootSignature;
+	ThrowIfFailed(GetDevice()->GetNativeDevice()->CreateRootSignature(
+		0,
+		serializedRootSig->GetBufferPointer(),
+		serializedRootSig->GetBufferSize(),
+		IID_PPV_ARGS(&rootSignature)));
+
+	return rootSignature;
 }
 
 PipelineData& PassBase::FindPipeline(MaterialPtr inMaterial)

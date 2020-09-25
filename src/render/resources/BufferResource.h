@@ -30,8 +30,11 @@ public:
 //	BufferMemoryBarrier CreateMemoryBarrier(uint32_t inSrcQueue, uint32_t inDstQueue, AccessFlags inSrcAccessMask, AccessFlags inDstAccessMask);
 //	DescriptorBufferInfo& GetDescriptorInfo();
 
-	ComPtr<ID3D12Resource> GetResource() const;
-	MemoryRecord& GetMemoryRecord();
+	inline ComPtr<ID3D12Resource> GetResource() const { return resource; }
+	inline D3D12_GPU_VIRTUAL_ADDRESS GetGpuVirtualAddress() { return resource->GetGPUVirtualAddress(); }
+	inline MemoryRecord& GetMemoryRecord() { return memRecord; }
+	inline MemoryPosition& GetMemoryPosition() { return memRecord.pos; }
+	inline uint64_t GetSize() { return size; }
 
 	operator ComPtr<ID3D12Resource>() const { return resource; }
 	operator bool() const { return resource; }

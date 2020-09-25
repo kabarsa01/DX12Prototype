@@ -9,6 +9,7 @@
 using namespace Microsoft::WRL;
 
 class Device;
+class ResourceView;
 
 class DescriptorHeaps
 {

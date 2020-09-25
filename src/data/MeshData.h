@@ -49,14 +49,15 @@ public:
 	virtual bool Load() override;
 	virtual bool Cleanup() override;
 
-	void CreateBuffer();
-	void DestroyBuffer();
-	void Draw();
+	void CreateBuffers();
+	void DestroyBuffers();
 
 	BufferResource& GetVertexBuffer();
+	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView();
 	uint32_t GetVertexBufferSizeBytes();
 	uint32_t GetVertexCount();
 	BufferResource& GetIndexBuffer();
+	D3D12_INDEX_BUFFER_VIEW GetIndexBufferView();
 	uint32_t GetIndexBufferSizeBytes();
 	uint32_t GetIndexCount();
 
@@ -70,7 +71,7 @@ private:
 	MeshData() : Resource(HashString::NONE) {}
 
 	template<class T>
-	void SetupBuffer(BufferResource& inBuffer, std::vector<T>& inDataVector, BufferUsageFlags usage);
+	void SetupBuffer(BufferResource& inBuffer, std::vector<T>& inDataVector);
 };
 
 typedef std::shared_ptr<MeshData> MeshDataPtr;
@@ -80,23 +81,13 @@ typedef std::shared_ptr<MeshData> MeshDataPtr;
 //--------------------------------------------------------------------------------------------------------------------------
 
 template<class T>
-void MeshData::SetupBuffer(BufferResource& inBuffer, std::vector<T>& inDataVector, BufferUsageFlags usage)
+void MeshData::SetupBuffer(BufferResource& inBuffer, std::vector<T>& inDataVector)
 {
-	if (indexBuffer)
-	{
-		return;
-	}
+	uint64_t size = static_cast<uint64_t>(sizeof(T) * inDataVector.size());
 
-	DeviceSize size = static_cast<DeviceSize>(sizeof(T) * inDataVector.size());
-
-	inBuffer.createInfo.setSize(size);
-	inBuffer.createInfo.setUsage(usage | BufferUsageFlagBits::eTransferDst);
-	inBuffer.createInfo.setSharingMode(SharingMode::eExclusive);
-	inBuffer.Create(&Engine::GetRendererInstance()->GetDevice());
-	inBuffer.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
-	inBuffer.SetData(size, reinterpret_cast<char*>( inDataVector.data() ));
-
-//	VulkanBuffer::SubmitCopyCommand(*inBuffer.CreateStagingBuffer(), inBuffer);
+	inBuffer.Create(&Engine::GetRendererInstance()->GetDevice(), size, D3D12_HEAP_TYPE_DEFAULT);
+	inBuffer.CreateStagingBuffer();
+	inBuffer.CopyTo(size, reinterpret_cast<char*>( inDataVector.data() ), true);
 }
 
 

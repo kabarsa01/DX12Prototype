@@ -75,6 +75,7 @@ DescriptorBlock DescriptorPool::Allocate(uint16_t inSize)
 		block.heap = heap;
 		block.cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(heap->GetCPUDescriptorHandleForHeapStart()).Offset(block.head, descriptorIncrementSize);
 		block.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(heap->GetGPUDescriptorHandleForHeapStart()).Offset(block.head, descriptorIncrementSize);
+		block.descriptorIncrementSize = descriptorIncrementSize;
 	}
 
 	return block;

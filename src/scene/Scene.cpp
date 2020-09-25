@@ -105,7 +105,7 @@ void Scene::Init()
 		for (unsigned int MeshIndex = 0; MeshIndex < importer.GetMeshes().size(); MeshIndex++)
 		{
 			MeshDataPtr meshData = importer.GetMeshes()[MeshIndex];
-			meshData->CreateBuffer();
+			meshData->CreateBuffers();
 			tl->PushBuffers(meshData);
 
 			float width = 100;
@@ -130,7 +130,7 @@ void Scene::Init()
 
 	}
 
-	MeshData::FullscreenQuad()->CreateBuffer();
+	MeshData::FullscreenQuad()->CreateBuffers();
 	tl->PushBuffers(MeshData::FullscreenQuad());
 }
 

@@ -53,7 +53,7 @@ void BufferResource::Create(Device* inDevice, uint64_t inSize, D3D12_HEAP_TYPE i
 		&clearValue, 
 		IID_PPV_ARGS(&resource)) );
 
-	size = inSize;
+	size = allocInfo.SizeInBytes;
 	heapType = inHeapType;
 }
 
@@ -160,14 +160,6 @@ BufferResource* BufferResource::CreateStagingBuffer()
 //	return descriptorInfo;
 //}
 
-ComPtr<ID3D12Resource> BufferResource::GetResource() const
-{
-	return resource;
-}
 
-MemoryRecord& BufferResource::GetMemoryRecord()
-{
-	return memRecord;
-}
 
 

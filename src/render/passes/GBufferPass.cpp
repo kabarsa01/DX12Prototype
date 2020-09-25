@@ -83,11 +83,8 @@ void GBufferPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList
 				HashString meshId = meshData->GetResourceId();
 
 				inCommandList->SetGraphicsRoot32BitConstant(0, scene->GetMeshDataToIndex(materialId)[meshId], 0);
-				D3D12_VERTEX_BUFFER_VIEW vbView;
-				inCommandList->IASetVertexBuffers(0, 1, &vbView);
-				D3D12_INDEX_BUFFER_VIEW ibView;
-				ibView.Format = DXGI_FORMAT_R32_UINT;
-				inCommandList->IASetIndexBuffer(&ibView);
+				inCommandList->IASetVertexBuffers(0, 1, & meshData->GetVertexBufferView());
+				inCommandList->IASetIndexBuffer(& meshData->GetIndexBufferView());
 //				inCommandList->pushConstants(pipelineData.pipelineLayout, ShaderStageFlagBits::eAllGraphics, 0, sizeof(uint32_t), & scene->GetMeshDataToIndex(materialId)[meshId]);
 //				inCommandList->bindVertexBuffers(0, 1, &meshData->GetVertexBuffer().GetBuffer(), &offset);
 //				inCommandList->bindIndexBuffer(meshData->GetIndexBuffer().GetBuffer(), 0, IndexType::eUint32);
@@ -177,7 +174,7 @@ void GBufferPass::OnCreate()
 //	return GetVulkanDevice()->GetDevice().createRenderPass(renderPassInfo);
 //}
 
-void GBufferPass::CreateColorAttachments(std::vector<ImageResource>& outAttachments, /*std::vector<ImageView>& outAttachmentViews, */uint32_t inWidth, uint32_t inHeight)
+void GBufferPass::CreateColorAttachments(std::vector<ImageResource>& outAttachments, std::vector<ResourceView>& outAttachmentViews, uint32_t inWidth, uint32_t inHeight)
 {
 	Device* device = GetDevice();
 
@@ -319,21 +316,6 @@ ComPtr<ID3D12PipelineState> GBufferPass::CreatePipeline(MaterialPtr inMaterial, 
 	depthDesc.FrontFace = depthStencilOp;
 	depthDesc.StencilEnable = FALSE;
 
-	CD3DX12_ROOT_PARAMETER1 rootParams[10];
-	rootParams[0] = inMaterial->GetRootParameter();
-
-	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootDesc;
-	rootDesc.Init_1_1(10, rootParams, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE);
-	ComPtr<ID3DBlob> serializedRootSig;
-	ThrowIfFailed( D3D12SerializeVersionedRootSignature(&rootDesc, &serializedRootSig, nullptr) );
-
-	ComPtr<ID3D12RootSignature> rootSignature;
-	ThrowIfFailed( GetDevice()->GetNativeDevice()->CreateRootSignature(
-		0, 
-		serializedRootSig->GetBufferPointer(), 
-		serializedRootSig->GetBufferSize(), 
-		IID_PPV_ARGS(&rootSignature)) );
-
 	D3D12_RASTERIZER_DESC rasterizerDesc;
 	rasterizerDesc.AntialiasedLineEnable = FALSE;
 	rasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
@@ -369,7 +351,7 @@ ComPtr<ID3D12PipelineState> GBufferPass::CreatePipeline(MaterialPtr inMaterial, 
 	psoDesc.SampleDesc = sampleDesc;
 	psoDesc.SampleMask = 0;
 	psoDesc.RasterizerState = rasterizerDesc;
-	psoDesc.pRootSignature = rootSignature.Get();
+	psoDesc.pRootSignature = inRootSignature.Get();
 
 	ComPtr<ID3D12PipelineState> pipelineState;
 	ThrowIfFailed( GetDevice()->GetNativeDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState)) );

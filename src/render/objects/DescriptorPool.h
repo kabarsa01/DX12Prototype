@@ -17,8 +17,25 @@ struct DescriptorBlock
 	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle;
 	uint16_t head;
 	uint16_t size;
+	uint32_t descriptorIncrementSize;
 
 	DescriptorBlock() : head(0), size(0) {}
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE GetCpuHandle(uint16_t inIndex)
+	{
+		// copy handle
+		CD3DX12_CPU_DESCRIPTOR_HANDLE handle = cpuHandle;
+		// return after offset
+		return handle.Offset(inIndex, descriptorIncrementSize);
+	}
+
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGpuHandle(uint16_t inIndex)
+	{
+		// copy handle
+		CD3DX12_GPU_DESCRIPTOR_HANDLE handle = gpuHandle;
+		// return after offset
+		return handle.Offset(inIndex, descriptorIncrementSize);
+	}
 };
 
 // simplified descriptor block version without additional data for heap tracking. it should minimize the space required
