@@ -4,6 +4,7 @@
 #include "scene/mesh/MeshComponent.h"
 #include "d3dx12.h"
 #include "utils/HelperUtils.h"
+#include "../objects/DescriptorPool.h"
 
 GBufferPass::GBufferPass(HashString inName)
 	:PassBase(inName)
@@ -56,7 +57,8 @@ void GBufferPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList
 	inCommandList->RSSetViewports(1, &viewport);
 	inCommandList->RSSetScissorRects(1, &scissorsRect);
 
-	inCommandList->OMSetRenderTargets(0, nullptr, FALSE, nullptr);
+	DescriptorBlock& descBlock = GetRtvBlock();
+	inCommandList->OMSetRenderTargets(descBlock.size, & descBlock.cpuHandle, TRUE, & GetDsvBlock().cpuHandle);
 //	inCommandList->ClearRenderTargetView(
 
 	//------------------------------------------------------------------------------------------------------------
@@ -74,7 +76,8 @@ void GBufferPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList
 			HashString materialId = material->GetResourceId();
 
 //			material->CreateDescriptorSet(GetVulkanDevice());
-			inCommandList->SetDescriptorHeaps(0, nullptr);
+			std::array<ID3D12DescriptorHeap*, 3> heaps = { GetRtvBlock().heap.Get(), GetDsvBlock().heap.Get(), material->GetDescriptorBlock().heap.Get() };
+			inCommandList->SetDescriptorHeaps(heaps.size(), heaps.data());
 			inCommandList->SetGraphicsRootDescriptorTable(2, material->GetDescriptorBlock().gpuHandle);
 //			inCommandList->bindDescriptorSets(PipelineBindPoint::eGraphics, pipelineData.pipelineLayout, 1, material->GetDescriptorSets(), {});
 
@@ -174,24 +177,35 @@ void GBufferPass::OnCreate()
 //	return GetVulkanDevice()->GetDevice().createRenderPass(renderPassInfo);
 //}
 
-void GBufferPass::CreateColorAttachments(std::vector<ImageResource>& outAttachments, std::vector<ResourceView>& outAttachmentViews, uint32_t inWidth, uint32_t inHeight)
+void GBufferPass::CreateColorAttachments(std::vector<ImageResource>& outAttachments, uint32_t inWidth, uint32_t inHeight)
 {
 	Device* device = GetDevice();
 
 	// albedo
 	ImageResource albedoAttachmentImage = ImageUtils::CreateColorAttachment(device, inWidth, inHeight);
 	outAttachments.push_back(albedoAttachmentImage);
-//	outAttachmentViews.push_back( albedoAttachmentImage.CreateView({ ImageAspectFlagBits::eColor, 0, 1, 0, 1 }, ImageViewType::e2D) );
 	// normal
 	ImageResource normalAttachmentImage = ImageUtils::CreateColorAttachment(device, inWidth, inHeight, true);
 	outAttachments.push_back(normalAttachmentImage);
 //	outAttachmentViews.push_back(normalAttachmentImage.CreateView({ ImageAspectFlagBits::eColor, 0, 1, 0, 1 }, ImageViewType::e2D));
 }
 
-void GBufferPass::CreateDepthAttachment(ImageResource& outDepthAttachment, /*ImageView& outDepthAttachmentView, */uint32_t inWidth, uint32_t inHeight)
+void GBufferPass::CreateColorAttachmentViews(const std::vector<ImageResource>& inAttachments, DescriptorBlock inBlock, std::vector<ResourceView>& outAttachmentViews)
 {
-	outDepthAttachment = ImageUtils::CreateDepthAttachment(GetDevice(), inWidth, inHeight);
-//	outDepthAttachmentView = outDepthAttachment.CreateView({ ImageAspectFlagBits::eDepth, 0, 1, 0, 1 }, ImageViewType::e2D);
+	for (uint32_t index = 0; index < inAttachments.size(); index++)
+	{
+		outAttachmentViews.push_back(ResourceView::CreateSRVTexture2D(inAttachments[index], inBlock, index));
+	}
+}
+
+ImageResource GBufferPass::CreateDepthAttachment(uint32_t inWidth, uint32_t inHeight)
+{
+	return ImageUtils::CreateDepthAttachment(GetDevice(), inWidth, inHeight);
+}
+
+ResourceView GBufferPass::CreateDepthAttachmentView(const ImageResource& inDepthAttachment, DescriptorBlock inBlock)
+{
+	return ResourceView::CreateDSVTexture2D(inDepthAttachment, inBlock, 0);
 }
 
 ComPtr<ID3D12PipelineState> GBufferPass::CreatePipeline(MaterialPtr inMaterial, ComPtr<ID3D12RootSignature> inRootSignature)
@@ -358,4 +372,5 @@ ComPtr<ID3D12PipelineState> GBufferPass::CreatePipeline(MaterialPtr inMaterial, 
 
 	return pipelineState;
 }
+
 

@@ -37,6 +37,7 @@ public:
 	inline uint64_t GetSize() { return size; }
 
 	operator ComPtr<ID3D12Resource>() const { return resource; }
+	operator ID3D12Resource*() const { return resource.Get(); }
 	operator bool() const { return resource; }
 
 	void SetCleanup(bool inCleanup) { cleanup = inCleanup; }

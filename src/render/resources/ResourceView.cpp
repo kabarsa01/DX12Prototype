@@ -19,6 +19,19 @@ ResourceView::~ResourceView()
 
 }
 
+ResourceView ResourceView::CreateCBV(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex)
+{
+	Device& device = Engine::GetRendererInstance()->GetDevice();
+
+	D3D12_CONSTANT_BUFFER_VIEW_DESC viewDesc;
+	viewDesc.BufferLocation = inResource->GetGPUVirtualAddress();
+	viewDesc.SizeInBytes = inResource->GetDesc().Width;
+
+	device.GetNativeDevice()->CreateConstantBufferView(&viewDesc, inBlock.GetCpuHandle(inIndex));
+
+	return ResourceView(inIndex, inBlock);
+}
+
 ResourceView ResourceView::CreateSRVTexture2D(ID3D12Resource* inResource, D3D12_TEX2D_SRV inSRV, DescriptorBlock& inBlock, uint16_t inIndex)
 {
 	Device& device = Engine::GetRendererInstance()->GetDevice();

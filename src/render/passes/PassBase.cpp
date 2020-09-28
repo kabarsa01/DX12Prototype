@@ -13,6 +13,7 @@
 #include "../PerFrameData.h"
 #include "utils/ImageUtils.h"
 #include "utils/HelperUtils.h"
+#include "../GlobalSamplers.h"
 
 PassBase::PassBase(HashString inName)
 	: name(inName)
@@ -35,11 +36,18 @@ void PassBase::Create()
 //	renderPass = CreateRenderPass();
 //	if (renderPass)
 //	{
-	CreateColorAttachments(attachments, attachmentViews, width, height);
-//		if (!isDepthExternal)
-//		{
-	CreateDepthAttachment(depthAttachment, width, height);
-//		}
+	CreateColorAttachments(attachments, width, height);
+	if (!isDepthExternal)
+	{
+		depthAttachment = CreateDepthAttachment(width, height);
+	}
+	uint32_t descriptorsCount = attachments.size();
+
+	rtvViews = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsRTV(attachments.size());
+	dsvViews = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsDSV(1);
+
+	CreateColorAttachmentViews(attachments, rtvViews, attachmentViews);
+	depthAttachmentView = CreateDepthAttachmentView(depthAttachment, dsvViews);
 ////		std::vector<ImageView> views = attachmentViews;
 //		if (depthAttachmentView)
 //		{
@@ -71,6 +79,9 @@ void PassBase::Destroy()
 //		device.destroyImageView(depthAttachmentView);
 		depthAttachment.Destroy();
 	}
+
+	DescriptorHeaps::ReleaseDescriptors(rtvViews);
+	DescriptorHeaps::ReleaseDescriptors(dsvViews);
 }
 
 void PassBase::SetResolution(uint32_t inWidth, uint32_t inHeight)
@@ -119,12 +130,17 @@ ComPtr<ID3D12RootSignature> PassBase::CreateRootSignature(MaterialPtr inMaterial
 	//pipelineLayoutInfo.setPushConstantRangeCount(1);
 	//pipelineLayoutInfo.setPPushConstantRanges(&pushConstRange);
 
+	D3D12_STATIC_SAMPLER_DESC samplerDesc;
+	CD3DX12_STATIC_SAMPLER_DESC samplerDesc;
+
 	CD3DX12_ROOT_PARAMETER1 rootParams[3];
+	rootParams[0].InitAsConstants(1, 0);
+	rootParams[1] = renderer->GetPerFrameData()->GetRootParameter();
 	rootParams[2] = inMaterial->GetRootParameter();
 
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootDesc;
-	// TODO samplers
-	rootDesc.Init_1_1(3, rootParams, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE);
+	GlobalSamplers* samplers = GlobalSamplers::GetInstance();
+	rootDesc.Init_1_1(3, rootParams, samplers->GetSamplersCounter(), samplers->GetSamplersDescriptions(), D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE);
 	ComPtr<ID3DBlob> serializedRootSig;
 	ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rootDesc, &serializedRootSig, nullptr));
 
@@ -153,7 +169,7 @@ PipelineData& PassBase::FindPipeline(MaterialPtr inMaterial)
 //		pipelineData.descriptorSets = { renderer->GetPerFrameData()->GetSet(), inMaterial->GetDescriptorSet() };
 
 //		std::vector<DescriptorSetLayout> setLayouts = { renderer->GetPerFrameData()->GetLayout(), inMaterial->GetDescriptorSetLayout() };
-		pipelineData.rootSignature = CreateRootSignature();
+		pipelineData.rootSignature = CreateRootSignature(inMaterial);
 		pipelineData.pipeline = CreatePipeline(inMaterial, pipelineData.rootSignature);
 
 		pipelineRegistry.StorePipeline(name, inMaterial->GetShaderHash(), pipelineData);

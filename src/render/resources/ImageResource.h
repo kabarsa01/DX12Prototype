@@ -70,7 +70,8 @@ public:
 	void DestroyStagingBuffer();
 
 	operator ComPtr<ID3D12Resource>() const { return resource; }
-	operator bool() const { return resource; }
+	operator ID3D12Resource*() const { return resource.Get(); }
+	operator bool() const { return resource.Get() != nullptr; }
 protected:
 	Device* device;
 	ComPtr<ID3D12Resource> resource;

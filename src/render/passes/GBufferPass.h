@@ -21,13 +21,18 @@ protected:
 //	virtual RenderPass CreateRenderPass() override;
 	virtual void CreateColorAttachments(
 		std::vector<ImageResource>& outAttachments, 
-		std::vector<ResourceView>& outAttachmentViews,
 		uint32_t inWidth, 
 		uint32_t inHeight) override;
-	virtual void CreateDepthAttachment(
-		ImageResource& outDepthAttachment,
-//		ImageView& outDepthAttachmentView,
-		uint32_t inWidth,
+	virtual void CreateColorAttachmentViews(
+		const std::vector<ImageResource>& inAttachments, 
+		DescriptorBlock inBlock, 
+		std::vector<ResourceView>& outAttachmentViews) override;
+	virtual ImageResource CreateDepthAttachment(
+		uint32_t inWidth, 
 		uint32_t inHeight) override;
+	virtual ResourceView CreateDepthAttachmentView(
+		const ImageResource& inDepthAttachment, 
+		DescriptorBlock inBlock) override;
+
 	virtual ComPtr<ID3D12PipelineState> CreatePipeline(MaterialPtr inMaterial, ComPtr<ID3D12RootSignature> inRootSignature) override;
 };

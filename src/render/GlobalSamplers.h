@@ -1,18 +1,18 @@
 #pragma once
 
-#include "vulkan/vulkan.hpp"
-#include "objects/Device.h"
+#include <d3d12.h>
+#include "d3dx12.h"
 
-using namespace VULKAN_HPP_NAMESPACE;
+#include "objects/Device.h"
 
 // samplers to be used as immutable samplers
 class GlobalSamplers
 {
 public:
-	Sampler repeatLinearMipLinear;
-	Sampler repeatMirrorLinearMipLinear;
-	Sampler borderBlackLinearMipLinear;
-	Sampler borderWhiteLinearMipLinear;
+	D3D12_STATIC_SAMPLER_DESC repeatLinearMipLinear;
+	D3D12_STATIC_SAMPLER_DESC repeatMirrorLinearMipLinear;
+	D3D12_STATIC_SAMPLER_DESC borderBlackLinearMipLinear;
+	D3D12_STATIC_SAMPLER_DESC borderWhiteLinearMipLinear;
 
 	static GlobalSamplers* GetInstance() { return instance; }
 
@@ -20,20 +20,17 @@ public:
 	void Destroy();
 
 	inline void SetMipLodBias(float inMipLodBias) { mipLodBias = inMipLodBias; }
-
-	std::vector<DescriptorSetLayoutBinding> GetBindings(uint32_t inStartIndex = 0);
+	inline uint32_t GetSamplersCounter() { return samplersDesc.size(); }
+	inline D3D12_STATIC_SAMPLER_DESC* GetSamplersDescriptions() { return samplersDesc.data(); }
 private:
 	static GlobalSamplers* instance;
 
 	Device* vulkanDevice;
-	std::vector<DescriptorSetLayoutBinding> bindings;
-	std::vector<Sampler*> samplers;
+	std::vector<D3D12_STATIC_SAMPLER_DESC> samplersDesc;
 	float mipLodBias;
 
 	GlobalSamplers();
 	GlobalSamplers(const GlobalSamplers& inOther);
 	virtual ~GlobalSamplers();
 	void operator=(const GlobalSamplers& inOther);
-
-	void ConstructBindings();
 };

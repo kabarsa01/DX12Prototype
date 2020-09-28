@@ -9,6 +9,7 @@
 #include "../resources/ImageResource.h"
 #include "../PipelineRegistry.h"
 #include "data/Material.h"
+#include "../resources/ResourceView.h"
 
 class Device;
 class Renderer;
@@ -28,8 +29,11 @@ public:
 
 	inline HashString& GetName() { return name; }
 	inline const std::vector<ImageResource>& GetAttachments() { return attachments; }
+	inline const std::vector<ResourceView>& GetAttachmentViews() { return attachmentViews; }
 	inline ImageResource& GetDepthAttachment() { return depthAttachment; }
-//	inline ImageView& GetDepthAttachmentView() { return depthAttachmentView; }
+	inline ResourceView& GetDepthAttachmentView() { return depthAttachmentView; }
+	inline DescriptorBlock& GetRtvBlock() { return rtvViews; }
+	inline DescriptorBlock& GetDsvBlock() { return dsvViews; }
 	inline uint32_t GetWidth() { return width; }
 	inline uint32_t GetHeight() { return height; }
 
@@ -43,15 +47,19 @@ protected:
 	virtual void OnCreate() = 0;
 	virtual void OnDestroy() = 0;
 	virtual void CreateColorAttachments(
-		std::vector<ImageResource>& outAttachments, 
-		std::vector<ResourceView>& outAttachmentViews,
+		std::vector<ImageResource>& outAttachments,
 		uint32_t inWidth,
 		uint32_t inHeight) = 0;
-	virtual void CreateDepthAttachment(
-		ImageResource& outDepthAttachment,
-//		ImageView& outDepthAttachmentView,
+	virtual void CreateColorAttachmentViews(
+		const std::vector<ImageResource>& inAttachments,
+		DescriptorBlock inBlock,
+		std::vector<ResourceView>& outAttachmentViews) = 0;
+	virtual ImageResource CreateDepthAttachment(
 		uint32_t inWidth,
 		uint32_t inHeight) = 0;
+	virtual ResourceView CreateDepthAttachmentView(
+		const ImageResource& inDepthAttachment,
+		DescriptorBlock inBlock) = 0;
 	virtual ComPtr<ID3D12PipelineState> CreatePipeline(MaterialPtr inMaterial, ComPtr<ID3D12RootSignature> inRootSignature) = 0;
 
 
@@ -73,8 +81,9 @@ private:
 	std::vector<ImageResource> attachments;
 	std::vector<ResourceView> attachmentViews;
 	ImageResource depthAttachment;
-//	ImageView depthAttachmentView;
-	DescriptorBlock descriptorViews;
+	ResourceView depthAttachmentView;
+	DescriptorBlock rtvViews;
+	DescriptorBlock dsvViews;
 
 	uint32_t width = 1280;
 	uint32_t height = 720;

@@ -28,7 +28,7 @@ public:
 	DescriptorBlock AllocateDescriptorsRTV(uint16_t inBlockSize);
 	DescriptorBlock AllocateDescriptorsDSV(uint16_t inBlockSize);
 
-	void ReleaseDescriptors(const DescriptorBlock& inBlock);
+	static void ReleaseDescriptors(const DescriptorBlock& inBlock);
 private:
 	Device* device;
 	std::vector<DescriptorPool> CBV_SRV_UAVPools;

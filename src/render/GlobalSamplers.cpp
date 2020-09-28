@@ -21,82 +21,57 @@ void GlobalSamplers::operator=(const GlobalSamplers& inOther)
 
 void GlobalSamplers::Create(Device* inVulkanDevice)
 {
-	if (samplers.size() > 0)
+	if (samplersDesc.size() > 0)
 	{
 		return;
 	}
 
 	vulkanDevice = inVulkanDevice;
 
-	SamplerCreateInfo samplerInfo;
-	samplerInfo.setAddressModeU(SamplerAddressMode::eRepeat);
-	samplerInfo.setAddressModeV(SamplerAddressMode::eRepeat);
-	samplerInfo.setAddressModeW(SamplerAddressMode::eRepeat);
-	samplerInfo.setAnisotropyEnable(VK_FALSE);
-	samplerInfo.setBorderColor(BorderColor::eIntOpaqueBlack);
-	samplerInfo.setCompareEnable(VK_FALSE);
-	samplerInfo.setMagFilter(Filter::eLinear);
-	samplerInfo.setMaxAnisotropy(2);
-	samplerInfo.setMinLod(0.0f);
-	samplerInfo.setMaxLod(12.0f);
-	samplerInfo.setMipLodBias(mipLodBias);
-	samplerInfo.setMinFilter(Filter::eLinear);
-	samplerInfo.setMipmapMode(SamplerMipmapMode::eLinear);
-	samplerInfo.setUnnormalizedCoordinates(VK_FALSE);
-	repeatLinearMipLinear = vulkanDevice->GetNativeDevice().createSampler(samplerInfo);
-	samplers.push_back(&repeatLinearMipLinear);
+	uint32_t shaderRegisterCounter = 0;
 
-	samplerInfo.setAddressModeU(SamplerAddressMode::eMirroredRepeat);
-	samplerInfo.setAddressModeV(SamplerAddressMode::eMirroredRepeat);
-	samplerInfo.setAddressModeW(SamplerAddressMode::eMirroredRepeat);
-	repeatMirrorLinearMipLinear = vulkanDevice->GetNativeDevice().createSampler(samplerInfo);
-	samplers.push_back(&repeatMirrorLinearMipLinear);
+	repeatLinearMipLinear.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	repeatLinearMipLinear.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	repeatLinearMipLinear.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	repeatLinearMipLinear.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+	repeatLinearMipLinear.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	repeatLinearMipLinear.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	repeatLinearMipLinear.MaxAnisotropy = 16;
+	repeatLinearMipLinear.MaxLOD = D3D12_FLOAT32_MAX;
+	repeatLinearMipLinear.MinLOD = 0.0f;
+	repeatLinearMipLinear.MipLODBias = mipLodBias;
+	repeatLinearMipLinear.RegisterSpace = 0;
+	repeatLinearMipLinear.ShaderRegister = shaderRegisterCounter++;
+	repeatLinearMipLinear.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	samplerInfo.setAddressModeU(SamplerAddressMode::eClampToBorder);
-	samplerInfo.setAddressModeV(SamplerAddressMode::eClampToBorder);
-	samplerInfo.setAddressModeW(SamplerAddressMode::eClampToBorder);
-	borderBlackLinearMipLinear = vulkanDevice->GetNativeDevice().createSampler(samplerInfo);
-	samplers.push_back(&borderBlackLinearMipLinear);
+	samplersDesc.push_back(repeatLinearMipLinear);
 
-	samplerInfo.setBorderColor(BorderColor::eIntOpaqueWhite);
-	borderWhiteLinearMipLinear = vulkanDevice->GetNativeDevice().createSampler(samplerInfo);
-	samplers.push_back(&borderWhiteLinearMipLinear);
+	repeatMirrorLinearMipLinear = repeatLinearMipLinear;
+	repeatMirrorLinearMipLinear.AddressU = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+	repeatMirrorLinearMipLinear.AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+	repeatMirrorLinearMipLinear.AddressW = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+	repeatMirrorLinearMipLinear.ShaderRegister = shaderRegisterCounter++;
 
-	// construct bindings 
-	ConstructBindings();
+	samplersDesc.push_back(repeatMirrorLinearMipLinear);
+
+	borderBlackLinearMipLinear = repeatLinearMipLinear;
+	borderBlackLinearMipLinear.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	borderBlackLinearMipLinear.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	borderBlackLinearMipLinear.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	borderBlackLinearMipLinear.ShaderRegister = shaderRegisterCounter++;
+
+	samplersDesc.push_back(borderBlackLinearMipLinear);
+
+	borderWhiteLinearMipLinear = borderBlackLinearMipLinear;
+	borderWhiteLinearMipLinear.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	borderWhiteLinearMipLinear.ShaderRegister = shaderRegisterCounter++;
+
+	samplersDesc.push_back(borderWhiteLinearMipLinear);
 }
 
 void GlobalSamplers::Destroy()
 {
-	for (uint32_t index = 0; index < samplers.size(); index++)
-	{
-		vulkanDevice->GetNativeDevice().destroySampler(*samplers[index]);
-	}
-	samplers.clear();
 }
 
-std::vector<DescriptorSetLayoutBinding> GlobalSamplers::GetBindings(uint32_t inStartIndex /*= 0*/)
-{
-	for (uint32_t index = 0; index < bindings.size(); index++)
-	{
-		bindings[index].setBinding(inStartIndex + index);
-	}
-	return bindings;
-}
 
-void GlobalSamplers::ConstructBindings()
-{
-	bindings.clear();
-	for (uint32_t index = 0; index < samplers.size(); index++)
-	{
-		DescriptorSetLayoutBinding binding;
-		binding.setBinding(index);
-		binding.setDescriptorType(DescriptorType::eSampler);
-		binding.setDescriptorCount(1);
-		binding.setStageFlags(ShaderStageFlagBits::eAllGraphics | ShaderStageFlagBits::eCompute);
-		binding.setPImmutableSamplers(samplers[index]);
-
-		bindings.push_back(binding);
-	}
-}
 

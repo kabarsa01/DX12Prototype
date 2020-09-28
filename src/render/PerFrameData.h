@@ -1,11 +1,13 @@
 #pragma once
 
+#include <d3d12.h>
+#include <wrl.h>
+#include "d3dx12.h"
+
 #include "render/DataStructures.h"
 #include "objects/VulkanDescriptorSet.h"
 #include "resources/BufferResource.h"
-#include "vulkan/vulkan.hpp"
-
-using namespace VULKAN_HPP_NAMESPACE;
+#include "objects/DescriptorPool.h"
 
 class PerFrameData
 {
@@ -16,24 +18,28 @@ public:
 	void Create(Device* inDevice);
 	void Destroy();
 	void UpdateBufferData();
-	VulkanDescriptorSet& GetVulkanDescriptorSet() { return set; }
-	DescriptorSet& GetSet() { return set.GetSet(); }
-	DescriptorSetLayout& GetLayout() { return set.GetLayout(); }
+	inline VulkanDescriptorSet& GetVulkanDescriptorSet() { return set; }
+	inline CD3DX12_ROOT_PARAMETER1& GetRootParameter() { return descriptorTable; }
+//	DescriptorSet& GetSet() { return set.GetSet(); }
+//	DescriptorSetLayout& GetLayout() { return set.GetLayout(); }
 private:
 	Device* device;
 
 	BufferResource shaderDataBuffer;
 	BufferResource transformDataBuffer;
-	DescriptorSetLayoutBinding shaderDataBinding;
-	DescriptorSetLayoutBinding transformDataBinding;
+	CD3DX12_ROOT_PARAMETER1 descriptorTable;
+	DescriptorBlock descriptorBlock;
 
-	VulkanDescriptorSet set;
-	std::vector<WriteDescriptorSet> descriptorWrites;
+	//DescriptorSetLayoutBinding shaderDataBinding;
+	//DescriptorSetLayoutBinding transformDataBinding;
+
+	//VulkanDescriptorSet set;
+	//std::vector<WriteDescriptorSet> descriptorWrites;
 
 	GlobalShaderData* globalShaderData;
 	GlobalTransformData* globalTransformData;
 
-	std::vector<DescriptorSetLayoutBinding> ProduceBindings();
-	std::vector<WriteDescriptorSet> ProduceWrites(VulkanDescriptorSet& inSet);
+	//std::vector<DescriptorSetLayoutBinding> ProduceBindings();
+	//std::vector<WriteDescriptorSet> ProduceWrites(VulkanDescriptorSet& inSet);
 	void GatherData();
 };

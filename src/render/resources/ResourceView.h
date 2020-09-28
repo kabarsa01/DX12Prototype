@@ -17,6 +17,8 @@ public:
 	inline operator CD3DX12_CPU_DESCRIPTOR_HANDLE() { return descriptorBlock.GetCpuHandle(blockOffset); }
 	inline operator CD3DX12_GPU_DESCRIPTOR_HANDLE() { return descriptorBlock.GetGpuHandle(blockOffset); }
 
+	static ResourceView CreateCBV(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex);
+
 	static ResourceView CreateSRVTexture2D(ID3D12Resource* inResource, D3D12_TEX2D_SRV inSRV, DescriptorBlock& inBlock, uint16_t inIndex);
 	static ResourceView CreateSRVTexture2D(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex);
 
