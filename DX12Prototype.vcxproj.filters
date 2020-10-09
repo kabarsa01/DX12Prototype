@@ -174,9 +174,6 @@
     <ClCompile Include="src\render\objects\VulkanDescriptorSet.cpp">
       <Filter>Source Files\src\render\objects</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\objects\VulkanPhysicalDevice.cpp">
-      <Filter>Source Files\src\render\objects</Filter>
-    </ClCompile>
     <ClCompile Include="src\render\objects\DescriptorHeaps.cpp">
       <Filter>Source Files\src\render\objects</Filter>
     </ClCompile>
@@ -208,9 +205,6 @@
       <Filter>Source Files\src\render\passes</Filter>
     </ClCompile>
     <ClCompile Include="src\render\shader\Shader.cpp">
-      <Filter>Source Files\src\render\shader</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\shader\VulkanShaderModule.cpp">
       <Filter>Source Files\src\render\shader</Filter>
     </ClCompile>
     <ClCompile Include="src\render\objects\CommandBuffers.cpp">
@@ -347,9 +341,6 @@
     <ClInclude Include="src\render\objects\VulkanDescriptorSet.h">
       <Filter>Source Files\src\render\objects</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\objects\VulkanPhysicalDevice.h">
-      <Filter>Source Files\src\render\objects</Filter>
-    </ClInclude>
     <ClInclude Include="src\render\objects\DescriptorHeaps.h">
       <Filter>Source Files\src\render\objects</Filter>
     </ClInclude>
@@ -381,9 +372,6 @@
       <Filter>Source Files\src\render\passes</Filter>
     </ClInclude>
     <ClInclude Include="src\render\shader\Shader.h">
-      <Filter>Source Files\src\render\shader</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\shader\VulkanShaderModule.h">
       <Filter>Source Files\src\render\shader</Filter>
     </ClInclude>
     <ClInclude Include="src\render\objects\CommandBuffers.h">

@@ -25,6 +25,7 @@ public:
 	void CopyToStagingBuffer(uint64_t inSize, const char* inData);
 
 	BufferResource* CreateStagingBuffer();
+	inline BufferResource* GetStagingBuffer() { return stagingBuffer; }
 //	VulkanBuffer* CreateStagingBuffer(uint64_t inSize, char* inData);
 //	BufferCopy CreateBufferCopy();
 //	BufferMemoryBarrier CreateMemoryBarrier(uint32_t inSrcQueue, uint32_t inDstQueue, AccessFlags inSrcAccessMask, AccessFlags inDstAccessMask);

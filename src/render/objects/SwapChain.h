@@ -6,6 +6,7 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include "Fence.h"
+#include "../resources/ResourceView.h"
 
 using namespace Microsoft::WRL;
 
@@ -27,6 +28,7 @@ public:
 	void WaitForPresentQueue();
 
 	ComPtr<ID3D12Resource> GetCurrentImage() { return images[swapChain4->GetCurrentBackBufferIndex()]; }
+	ResourceView GetCurrentView() { return views[swapChain4->GetCurrentBackBufferIndex()]; }
 //	ComPtr<ID3D12Resource> GetPrevImage() { return images[prevImageIndex]; }
 	uint32_t GetCurrentImageIndex() { return swapChain4->GetCurrentBackBufferIndex(); }
 //	uint32_t GetPrevImageIndex() { return prevImageIndex; }
@@ -55,7 +57,9 @@ private:
 	Device* device;
 	ComPtr<IDXGISwapChain4> swapChain4;
 	std::vector< ComPtr<ID3D12Resource> > images;
+	std::vector< ResourceView > views;
 	std::vector< Fence > fences;
+	DescriptorBlock RTVs;
 
 	uint32_t buffersCount = 2;
 	bool isTearingSupported = true;

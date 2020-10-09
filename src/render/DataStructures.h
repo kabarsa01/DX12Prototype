@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "vulkan/vulkan.hpp"
 
 inline constexpr uint32_t g_GlobalTransformDataSize = 1024 * 1024;
 inline constexpr uint32_t g_LightsListSize = 1024;

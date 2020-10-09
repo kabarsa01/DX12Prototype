@@ -9,6 +9,8 @@
 
 using namespace Microsoft::WRL;
 
+class DescriptorPool;
+
 struct DescriptorBlock
 {
 	DescriptorPool* parent;

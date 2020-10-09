@@ -5,6 +5,10 @@
 #include "../DataStructures.h"
 #include "DeferredLightingPass.h"
 #include "LightClusteringPass.h"
+#include "data/MeshData.h"
+#include "PassBase.h"
+#include "../PerFrameData.h"
+#include "utils/HelperUtils.h"
 
 PostProcessPass::PostProcessPass(HashString inName)
 	: PassBase(inName)
@@ -14,8 +18,8 @@ PostProcessPass::PostProcessPass(HashString inName)
 
 void PostProcessPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList)
 {
-	VulkanSwapChain& swapChain = GetRenderer()->GetSwapChain();
-	Image swapChainImage = swapChain.GetImage();
+	SwapChain& swapChain = GetRenderer()->GetSwapChain();
+	ComPtr<ID3D12Resource> swapChainImage = swapChain.GetCurrentImage();
 
 	// barriers ----------------------------------------------
 	//ImageMemoryBarrier attachmentBarrier;
@@ -40,50 +44,74 @@ void PostProcessPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommand
 
 	PipelineData& pipelineData = FindPipeline(postProcessMaterial);
 
-	ClearValue clearValue;
-	clearValue.setColor(ClearColorValue(std::array<float, 4>({ 0.0f, 0.0f, 0.0f, 1.0f })));
+	//ClearValue clearValue;
+	//clearValue.setColor(ClearColorValue(std::array<float, 4>({ 0.0f, 0.0f, 0.0f, 1.0f })));
 
-	RenderPassBeginInfo passBeginInfo;
-	passBeginInfo.setRenderPass(swapChain.GetRenderPass());
-	passBeginInfo.setFramebuffer(swapChain.GetFramebuffer());
-	passBeginInfo.setRenderArea(Rect2D(Offset2D(0, 0), GetRenderer()->GetSwapChain().GetExtent()));
-	passBeginInfo.setClearValueCount(1);
-	passBeginInfo.setPClearValues(&clearValue);
+	uint64_t offset = 0;
 
-	DeviceSize offset = 0;
-	inCommandList->beginRenderPass(passBeginInfo, SubpassContents::eInline);
-	inCommandList->bindPipeline(PipelineBindPoint::eGraphics, pipelineData.pipeline);
-	inCommandList->bindDescriptorSets(PipelineBindPoint::eGraphics, pipelineData.pipelineLayout, 0, pipelineData.descriptorSets, {});
+	D3D12_VIEWPORT viewport;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+	viewport.Width = static_cast<float>(GetWidth());
+	viewport.Height = static_cast<float>(GetHeight());
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
 
-	inCommandList->bindVertexBuffers(0, 1, &meshData->GetVertexBuffer().GetResource(), &offset);
-	inCommandList->bindIndexBuffer(meshData->GetIndexBuffer().GetResource(), 0, IndexType::eUint32);
-	inCommandList->drawIndexed(meshData->GetIndexCount(), 1, 0, 0, 0);
-	inCommandList->endRenderPass();
+	D3D12_RECT scissorsRect;
+	scissorsRect.top = 0;
+	scissorsRect.left = 0;
+	scissorsRect.right = GetWidth();
+	scissorsRect.bottom = GetHeight();
 
-	ImageMemoryBarrier presentBarrier;
-	presentBarrier.setImage(swapChainImage);
-	presentBarrier.setOldLayout(ImageLayout::eColorAttachmentOptimal);
-	presentBarrier.setNewLayout(ImageLayout::ePresentSrcKHR);
-	presentBarrier.subresourceRange.setAspectMask(ImageAspectFlagBits::eColor);
-	presentBarrier.subresourceRange.setBaseMipLevel(0);
-	presentBarrier.subresourceRange.setLevelCount(1);
-	presentBarrier.subresourceRange.setBaseArrayLayer(0);
-	presentBarrier.subresourceRange.setLayerCount(1);
-	presentBarrier.setSrcAccessMask(AccessFlagBits::eMemoryWrite);
-	presentBarrier.setDstAccessMask(AccessFlagBits::eMemoryRead);
-	inCommandList->pipelineBarrier(
-		PipelineStageFlagBits::eFragmentShader,
-		PipelineStageFlagBits::eHost,
-		DependencyFlags(),
-		0, nullptr, 0, nullptr,
-		1, &presentBarrier);
+	inCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	inCommandList->RSSetViewports(1, &viewport);
+	inCommandList->RSSetScissorRects(1, &scissorsRect);
+
+	DescriptorBlock& descBlock = GetRtvBlock();
+	inCommandList->OMSetRenderTargets(descBlock.size, &descBlock.cpuHandle, TRUE, &GetDsvBlock().cpuHandle);
+	inCommandList->SetPipelineState(pipelineData.pipeline.Get());
+	inCommandList->SetGraphicsRootSignature(pipelineData.rootSignature.Get());
+
+	std::array<ID3D12DescriptorHeap*, 3> heaps = { GetRtvBlock().heap.Get(), GetDsvBlock().heap.Get(), postProcessMaterial->GetDescriptorBlock().heap.Get() };
+	inCommandList->SetDescriptorHeaps(static_cast<UINT>(heaps.size()), heaps.data());
+	inCommandList->SetGraphicsRootDescriptorTable(1, GetRenderer()->GetPerFrameData()->GetGPUDescriptorHandle());
+	inCommandList->SetGraphicsRootDescriptorTable(2, postProcessMaterial->GetDescriptorBlock().gpuHandle);
+
+	HashString meshId = meshData->GetResourceId();
+
+//	inCommandList->SetGraphicsRoot32BitConstant(0, meshData, 0);
+	inCommandList->IASetVertexBuffers(0, 1, &meshData->GetVertexBufferView());
+	inCommandList->IASetIndexBuffer(&meshData->GetIndexBufferView());
+	//				inCommandList->pushConstants(pipelineData.pipelineLayout, ShaderStageFlagBits::eAllGraphics, 0, sizeof(uint32_t), & scene->GetMeshDataToIndex(materialId)[meshId]);
+	//				inCommandList->bindVertexBuffers(0, 1, &meshData->GetVertexBuffer().GetBuffer(), &offset);
+	//				inCommandList->bindIndexBuffer(meshData->GetIndexBuffer().GetBuffer(), 0, IndexType::eUint32);
+	inCommandList->DrawIndexedInstanced(meshData->GetIndexCount(), 1, 0, 0, 0);
+
+	//ImageMemoryBarrier presentBarrier;
+	//presentBarrier.setImage(swapChainImage);
+	//presentBarrier.setOldLayout(ImageLayout::eColorAttachmentOptimal);
+	//presentBarrier.setNewLayout(ImageLayout::ePresentSrcKHR);
+	//presentBarrier.subresourceRange.setAspectMask(ImageAspectFlagBits::eColor);
+	//presentBarrier.subresourceRange.setBaseMipLevel(0);
+	//presentBarrier.subresourceRange.setLevelCount(1);
+	//presentBarrier.subresourceRange.setBaseArrayLayer(0);
+	//presentBarrier.subresourceRange.setLayerCount(1);
+	//presentBarrier.setSrcAccessMask(AccessFlagBits::eMemoryWrite);
+	//presentBarrier.setDstAccessMask(AccessFlagBits::eMemoryRead);
+	//inCommandList->pipelineBarrier(
+	//	PipelineStageFlagBits::eFragmentShader,
+	//	PipelineStageFlagBits::eHost,
+	//	DependencyFlags(),
+	//	0, nullptr, 0, nullptr,
+	//	1, &presentBarrier);
 }
 
 void PostProcessPass::OnCreate()
 {
-	DeferredLightingPass* lightingPass = GetRenderer()->GetDeferredLightingPass();
-	screenImage = ObjectBase::NewObject<Texture2D, const HashString&>("SceneImageTexture");
-	screenImage->CreateFromExternal(lightingPass->GetAttachments()[0], lightingPass->GetAttachmentViews()[0]);
+	//DeferredLightingPass* lightingPass = GetRenderer()->GetDeferredLightingPass();
+	//screenImage = ObjectBase::NewObject<Texture2D, const HashString&>("SceneImageTexture");
+	//screenImage->CreateFromExternal(lightingPass->GetAttachments()[0]);
+	screenImage = DataManager::RequestResourceType<Texture2D, bool, bool, bool, bool>("content/meshes/root/Aset_wood_root_M_rkswd_4K_Albedo.jpg", false, true, false, true);
 
 	postProcessMaterial = DataManager::RequestResourceType<Material, const std::string&, const std::string&>(
 		"PostProcessMaterial",
@@ -96,122 +124,88 @@ void PostProcessPass::OnCreate()
 	postProcessMaterial->LoadResources();
 }
 
-RenderPass PostProcessPass::CreateRenderPass()
-{
-	SubpassDescription subpassDesc;
-	subpassDesc.setColorAttachmentCount(0);
-	subpassDesc.setPColorAttachments(nullptr);
-	subpassDesc.setPDepthStencilAttachment(nullptr);
-	subpassDesc.setPipelineBindPoint(PipelineBindPoint::eGraphics);
-
-	SubpassDependency subpassDependency;
-	subpassDependency.setSrcSubpass(VK_SUBPASS_EXTERNAL);
-	subpassDependency.setDstSubpass(0);
-	subpassDependency.setSrcStageMask(PipelineStageFlagBits::eColorAttachmentOutput);
-	subpassDependency.setSrcAccessMask(AccessFlags());
-	subpassDependency.setDstStageMask(PipelineStageFlagBits::eColorAttachmentOutput);
-	subpassDependency.setDstAccessMask(AccessFlagBits::eColorAttachmentRead | AccessFlagBits::eColorAttachmentWrite);
-
-	RenderPassCreateInfo renderPassInfo;
-	renderPassInfo.setAttachmentCount(0);
-	renderPassInfo.setPAttachments(nullptr);
-	renderPassInfo.setSubpassCount(1);
-	renderPassInfo.setPSubpasses(&subpassDesc);
-	renderPassInfo.setDependencyCount(1);
-	renderPassInfo.setPDependencies(&subpassDependency);
-
-	return GetVulkanDevice()->GetDevice().createRenderPass(renderPassInfo);
-}
-
-void PostProcessPass::CreateColorAttachments(std::vector<ImageResource>& outAttachments, std::vector<ImageView>& outAttachmentViews, uint32_t inWidth, uint32_t inHeight)
+void PostProcessPass::CreateColorAttachments(std::vector<ImageResource>& outAttachments, uint32_t inWidth, uint32_t inHeight)
 {
 }
 
-void PostProcessPass::CreateDepthAttachment(ImageResource& outDepthAttachment, ImageView& outDepthAttachmentView, uint32_t inWidth, uint32_t inHeight)
+ImageResource PostProcessPass::CreateDepthAttachment(uint32_t inWidth, uint32_t inHeight)
 {
+	return ImageResource();
 }
 
-Pipeline PostProcessPass::CreatePipeline(MaterialPtr inMaterial, PipelineLayout inLayout, RenderPass inRenderPass)
+ResourceView PostProcessPass::CreateDepthAttachmentView(const ImageResource& inDepthAttachment, DescriptorBlock inBlock)
 {
-	VulkanSwapChain& swapChain = GetRenderer()->GetSwapChain();
+	return ResourceView();
+}
 
-	std::vector<PipelineShaderStageCreateInfo> shaderStageInfoArray = { inMaterial->GetVertexStageInfo(), inMaterial->GetFragmentStageInfo() };
+Microsoft::WRL::ComPtr<ID3D12PipelineState> PostProcessPass::CreatePipeline(MaterialPtr inMaterial, ComPtr<ID3D12RootSignature> inRootSignature)
+{
+	DXGI_SAMPLE_DESC sampleDesc;
+	sampleDesc.Count = 1;
+	sampleDesc.Quality = 0;
 
-	VertexInputBindingDescription bindingDesc = MeshData::GetBindingDescription(0);
-	std::array<VertexInputAttributeDescription, 5> attributeDesc = Vertex::GetAttributeDescriptions(0);
-	PipelineVertexInputStateCreateInfo vertexInputInfo;
-	vertexInputInfo.setVertexBindingDescriptionCount(1);
-	vertexInputInfo.setPVertexBindingDescriptions(&bindingDesc);
-	vertexInputInfo.setVertexAttributeDescriptionCount(static_cast<uint32_t>(attributeDesc.size()));
-	vertexInputInfo.setPVertexAttributeDescriptions(attributeDesc.data());
+	std::array<D3D12_INPUT_ELEMENT_DESC, 5> attributes = Vertex::GetAttributeDescriptions();
+	D3D12_INPUT_LAYOUT_DESC inputLayout;
+	inputLayout.NumElements = static_cast<UINT>(attributes.size());
+	inputLayout.pInputElementDescs = attributes.data();
 
-	PipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
-	inputAssemblyInfo.setTopology(PrimitiveTopology::eTriangleList);
-	inputAssemblyInfo.setPrimitiveRestartEnable(VK_FALSE);
+	D3D12_DEPTH_STENCILOP_DESC depthStencilOp;
+	depthStencilOp.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+	depthStencilOp.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	depthStencilOp.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	depthStencilOp.StencilPassOp = D3D12_STENCIL_OP_KEEP;
 
-	Viewport viewport;
-	viewport.setX(0.0f);
-	viewport.setY(0.0f);
-	viewport.setWidth((float)swapChain.GetExtent().width);
-	viewport.setHeight((float)swapChain.GetExtent().height);
-	viewport.setMinDepth(0.0f);
-	viewport.setMaxDepth(1.0f);
+	CD3DX12_DEPTH_STENCIL_DESC depthState(D3D12_DEFAULT);
+	D3D12_DEPTH_STENCIL_DESC depthDesc;
+	depthDesc.BackFace = depthStencilOp;
+	depthDesc.DepthEnable = FALSE;
+	depthDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	depthDesc.FrontFace = depthStencilOp;
+	depthDesc.StencilEnable = FALSE;
 
-	Rect2D scissor;
-	scissor.setOffset(Offset2D(0, 0));
-	scissor.setExtent(swapChain.GetExtent());
+	D3D12_RASTERIZER_DESC rasterizerDesc;
+	rasterizerDesc.AntialiasedLineEnable = FALSE;
+	rasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	rasterizerDesc.DepthBias = 0;
+	rasterizerDesc.DepthBiasClamp = 0.0f;
+	rasterizerDesc.DepthClipEnable = TRUE;
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	rasterizerDesc.ForcedSampleCount = 0;
+	rasterizerDesc.FrontCounterClockwise = TRUE;
+	rasterizerDesc.MultisampleEnable = FALSE;
+	rasterizerDesc.SlopeScaledDepthBias = 0.0f;
 
-	PipelineViewportStateCreateInfo viewportInfo;
-	viewportInfo.setViewportCount(1);
-	viewportInfo.setPViewports(&viewport);
-	viewportInfo.setScissorCount(1);
-	viewportInfo.setPScissors(&scissor);
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
+	psoDesc.VS = inMaterial->GetVertexShader()->GetBytecode();
+	psoDesc.PS = inMaterial->GetFragmentShader()->GetBytecode();
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	psoDesc.DepthStencilState = depthDesc;
+	psoDesc.NumRenderTargets = 1;
+	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	psoDesc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFFFFFF;
 
-	PipelineRasterizationStateCreateInfo rasterizationInfo;
-	rasterizationInfo.setDepthClampEnable(VK_FALSE);
-	rasterizationInfo.setRasterizerDiscardEnable(VK_FALSE);
-	rasterizationInfo.setPolygonMode(PolygonMode::eFill);
-	rasterizationInfo.setLineWidth(1.0f);
-	rasterizationInfo.setCullMode(CullModeFlagBits::eNone);
-	rasterizationInfo.setFrontFace(FrontFace::eClockwise);
-	rasterizationInfo.setDepthBiasEnable(VK_FALSE);
+	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+#if defined(DEBUG) || defined(_DEBUG)
+	psoDesc.Flags |= D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG;
+#endif
 
-	PipelineMultisampleStateCreateInfo multisampleInfo;
+	psoDesc.InputLayout = inputLayout;
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.SampleDesc = sampleDesc;
+	psoDesc.SampleMask = 0;
+	psoDesc.RasterizerState = rasterizerDesc;
+	psoDesc.pRootSignature = inRootSignature.Get();
 
-	PipelineColorBlendAttachmentState colorBlendAttachment;
-	colorBlendAttachment.setColorWriteMask(ColorComponentFlagBits::eR | ColorComponentFlagBits::eG | ColorComponentFlagBits::eB | ColorComponentFlagBits::eA);
-	colorBlendAttachment.setBlendEnable(VK_FALSE);
-	colorBlendAttachment.setSrcColorBlendFactor(BlendFactor::eOne);
-	colorBlendAttachment.setDstColorBlendFactor(BlendFactor::eZero);
-	colorBlendAttachment.setColorBlendOp(BlendOp::eAdd);
-	colorBlendAttachment.setSrcAlphaBlendFactor(BlendFactor::eOne);
-	colorBlendAttachment.setDstAlphaBlendFactor(BlendFactor::eZero);
-	colorBlendAttachment.setAlphaBlendOp(BlendOp::eAdd);
+	ComPtr<ID3D12PipelineState> pipelineState;
+	ThrowIfFailed(GetDevice()->GetNativeDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState)));
 
-	PipelineColorBlendStateCreateInfo colorBlendInfo;
-	colorBlendInfo.setLogicOpEnable(VK_FALSE);
-	colorBlendInfo.setLogicOp(LogicOp::eCopy);
-	colorBlendInfo.setAttachmentCount(1);
-	colorBlendInfo.setPAttachments(&colorBlendAttachment);
-	colorBlendInfo.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
+	return pipelineState;
+}
 
-	GraphicsPipelineCreateInfo pipelineInfo;
-	pipelineInfo.setStageCount(2);
-	pipelineInfo.setPStages(shaderStageInfoArray.data());
-	pipelineInfo.setPVertexInputState(&vertexInputInfo);
-	pipelineInfo.setPInputAssemblyState(&inputAssemblyInfo);
-	pipelineInfo.setPViewportState(&viewportInfo);
-	pipelineInfo.setPRasterizationState(&rasterizationInfo);
-	pipelineInfo.setPMultisampleState(&multisampleInfo);
-	pipelineInfo.setPDepthStencilState(nullptr);
-	pipelineInfo.setPColorBlendState(&colorBlendInfo);
-	pipelineInfo.setPDynamicState(nullptr);
-	pipelineInfo.setLayout(inLayout);
-	pipelineInfo.setRenderPass(GetRenderer()->GetSwapChain().GetRenderPass());
-	pipelineInfo.setSubpass(0);
-	pipelineInfo.setBasePipelineHandle(Pipeline());
-	pipelineInfo.setBasePipelineIndex(-1);
-
-	return GetVulkanDevice()->GetDevice().createGraphicsPipeline(GetVulkanDevice()->GetPipelineCache(), pipelineInfo);
+void PostProcessPass::CreateColorAttachmentViews(const std::vector<ImageResource>& inAttachments, DescriptorBlock inBlock, std::vector<ResourceView>& outAttachmentViews)
+{
 }
 

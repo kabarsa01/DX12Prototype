@@ -27,8 +27,8 @@ void DescriptorHeaps::Create(Device* inDevice)
 	DSVPools.push_back(DescriptorPool());
 
 	CBV_SRV_UAVPools[0].Create(inDevice, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, SHADER_RESOURCES_HEAP_SIZE, true);
-	RTVPools[0].Create(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RTV_HEAP_SIZE, true);
-	DSVPools[0].Create(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, DSV_HEAP_SIZE, true);
+	RTVPools[0].Create(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RTV_HEAP_SIZE, false);
+	DSVPools[0].Create(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, DSV_HEAP_SIZE, false);
 }
 
 void DescriptorHeaps::Destroy()
@@ -41,22 +41,17 @@ void DescriptorHeaps::Destroy()
 
 DescriptorBlock DescriptorHeaps::AllocateDescriptorsCBV_SRV_UAV(uint16_t inBlockSize)
 {
-	AllocateDescriptors(inBlockSize, CBV_SRV_UAVPools, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, SHADER_RESOURCES_HEAP_SIZE, true);
+	return AllocateDescriptors(inBlockSize, CBV_SRV_UAVPools, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, SHADER_RESOURCES_HEAP_SIZE, true);
 }
 
 DescriptorBlock DescriptorHeaps::AllocateDescriptorsRTV(uint16_t inBlockSize)
 {
-	AllocateDescriptors(inBlockSize, RTVPools, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RTV_HEAP_SIZE, true);
+	return AllocateDescriptors(inBlockSize, RTVPools, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RTV_HEAP_SIZE, false);
 }
 
 DescriptorBlock DescriptorHeaps::AllocateDescriptorsDSV(uint16_t inBlockSize)
 {
-	AllocateDescriptors(inBlockSize, DSVPools, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, DSV_HEAP_SIZE, true);
-}
-
-void DescriptorHeaps::ReleaseDescriptors(const DescriptorBlock& inBlock)
-{
-
+	return AllocateDescriptors(inBlockSize, DSVPools, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, DSV_HEAP_SIZE, false);
 }
 
 DescriptorBlock DescriptorHeaps::AllocateDescriptors(uint16_t inBlockSize, std::vector<DescriptorPool>& inPools, D3D12_DESCRIPTOR_HEAP_TYPE inType, uint16_t inHeapSize, bool inShaderVisible)

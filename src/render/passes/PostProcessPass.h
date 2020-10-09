@@ -1,7 +1,11 @@
 #pragma once
 
-#include "vulkan/vulkan.hpp"
+#include <wrl.h>
+#include <d3d12.h>
+
 #include "render/passes/PassBase.h"
+
+using namespace Microsoft::WRL;
 
 class PostProcessPass : public PassBase
 {
@@ -14,9 +18,11 @@ protected:
 
 	virtual void OnCreate() override;
 	virtual void OnDestroy() override {}
-	RenderPass CreateRenderPass() override;
-	void CreateColorAttachments(std::vector<ImageResource>& outAttachments, std::vector<ImageView>& outAttachmentViews, uint32_t inWidth, uint32_t inHeight) override;
-	void CreateDepthAttachment(ImageResource& outDepthAttachment, ImageView& outDepthAttachmentView, uint32_t inWidth, uint32_t inHeight) override;
-	Pipeline CreatePipeline(MaterialPtr inMaterial, PipelineLayout inLayout, RenderPass inRenderPass) override;
+
+	void CreateColorAttachmentViews(const std::vector<ImageResource>& inAttachments, DescriptorBlock inBlock, std::vector<ResourceView>& outAttachmentViews) override;
+	void CreateColorAttachments(std::vector<ImageResource>& outAttachments, uint32_t inWidth, uint32_t inHeight) override;
+	ImageResource CreateDepthAttachment(uint32_t inWidth, uint32_t inHeight) override;
+	ResourceView CreateDepthAttachmentView(const ImageResource& inDepthAttachment, DescriptorBlock inBlock) override;
+	ComPtr<ID3D12PipelineState> CreatePipeline(MaterialPtr inMaterial, ComPtr<ID3D12RootSignature> inRootSignature) override;
 private:
 };

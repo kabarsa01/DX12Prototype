@@ -43,13 +43,13 @@ bool Shader::Load()
 	D3D12_SHADER_DESC desc;
 	ThrowIfFailed( reflection->GetDesc(&desc) );
 	bindings.resize(desc.BoundResources);
-	for (uint32_t index; index < desc.BoundResources; index++)
+	for (uint32_t index = 0; index < desc.BoundResources; index++)
 	{
 		D3D12_SHADER_INPUT_BIND_DESC bindingDesc;
 		ThrowIfFailed( reflection->GetResourceBindingDesc(index, &bindingDesc) );
 		bindings[index] = bindingDesc;
 	}
-	bindingsCount = bindings.size();
+	bindingsCount = static_cast<uint32_t>( bindings.size() );
 
 	return true;
 }

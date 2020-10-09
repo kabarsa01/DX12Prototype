@@ -20,7 +20,7 @@ public:
 	void Destroy();
 
 	inline void SetMipLodBias(float inMipLodBias) { mipLodBias = inMipLodBias; }
-	inline uint32_t GetSamplersCounter() { return samplersDesc.size(); }
+	inline uint32_t GetSamplersCounter() { return static_cast<uint32_t>( samplersDesc.size() ); }
 	inline D3D12_STATIC_SAMPLER_DESC* GetSamplersDescriptions() { return samplersDesc.data(); }
 private:
 	static GlobalSamplers* instance;

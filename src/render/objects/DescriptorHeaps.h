@@ -36,7 +36,6 @@ private:
 	std::vector<DescriptorPool> DSVPools;
 
 	DescriptorBlock AllocateDescriptors(uint16_t inBlockSize, std::vector<DescriptorPool>& inPools, D3D12_DESCRIPTOR_HEAP_TYPE inType, uint16_t inHeapSize, bool inShaderVisible);
-	void ReleaseDescriptors(const DescriptorBlock& inBlock);
 };
 
 

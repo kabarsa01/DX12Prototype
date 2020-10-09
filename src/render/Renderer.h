@@ -5,8 +5,7 @@
 #include <core/ObjectBase.h>
 #include "glm/fwd.hpp"
 #include <set>
-#include "data/MeshData.h"
-#include "objects/VulkanPhysicalDevice.h"
+//#include "data/MeshData.h"
 #include "objects/Device.h"
 #include "objects/SwapChain.h"
 #include "objects/CommandBuffers.h"
@@ -65,10 +64,10 @@ public:
 //	Queue GetGraphicsQueue();
 
 	PerFrameData* GetPerFrameData() { return perFrameData; }
-	ZPrepass* GetZPrepass() { return zPrepass; }
-	LightClusteringPass* GetLightClusteringPass() { return lightClusteringPass; }
-	GBufferPass* GetGBufferPass() { return gBufferPass; }
-	DeferredLightingPass* GetDeferredLightingPass() { return deferredLightingPass; }
+	//ZPrepass* GetZPrepass() { return zPrepass; }
+	//LightClusteringPass* GetLightClusteringPass() { return lightClusteringPass; }
+	//GBufferPass* GetGBufferPass() { return gBufferPass; }
+	//DeferredLightingPass* GetDeferredLightingPass() { return deferredLightingPass; }
 protected:
 private:
 	// TEMP
@@ -79,10 +78,6 @@ private:
 	int height = 900;
 	bool framebufferResized = false;
 
-	const std::vector<const char*> validationLayers = {
-		"VK_LAYER_KHRONOS_validation"
-	};
-
 #ifdef NDEBUG
 	const bool enableValidationLayers = false;
 #else
@@ -90,22 +85,21 @@ private:
 #endif
 
 	Device device;
+	DescriptorHeaps descriptorHeaps;
 	SwapChain swapChain;
 	CommandBuffers commandBuffers;
-	DescriptorHeaps descriptorPools;
-//	Viewport viewport;
 
 	PerFrameData* perFrameData;
 
-	ZPrepass* zPrepass;
-	LightClusteringPass* lightClusteringPass;
-	GBufferPass* gBufferPass;
-	DeferredLightingPass* deferredLightingPass;
+	//ZPrepass* zPrepass;
+	//LightClusteringPass* lightClusteringPass;
+	//GBufferPass* gBufferPass;
+	//DeferredLightingPass* deferredLightingPass;
 	PostProcessPass* postProcessPass;
 
 	//==================== METHODS ===============================
 
-	//void TransferResources(CommandBuffer& inCmdBuffer, uint32_t inQueueFamilyIndex);
+	void TransferResources(ComPtr<ID3D12GraphicsCommandList> inCmdList);
 	//void GenerateMips(CommandBuffer& inCmdBuffer, std::vector<VulkanImage*>& inImages);
 	void OnResolutionChange();
 };

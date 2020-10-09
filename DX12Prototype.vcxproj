@@ -72,15 +72,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <LibraryPath>D:\GitHub\DX12Prototype\3rdparty\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <LibraryPath>D:\GitHub\DX12Prototype\3rdparty\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <LibraryPath>D:\GitHub\DX12Prototype\3rdparty\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <LibraryPath>D:\GitHub\DX12Prototype\3rdparty\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -97,6 +101,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>D3D12.lib;DXGI.lib;D3DCompiler.lib;glfw\lib-vc2019\glfw3.lib;assimp\assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -114,6 +119,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>D3D12.lib;DXGI.lib;D3DCompiler.lib;glfw\lib-vc2019\glfw3.lib;assimp\assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -135,6 +141,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>D3D12.lib;DXGI.lib;D3DCompiler.lib;glfw\lib-vc2019\glfw3.lib;assimp\assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -156,6 +163,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>D3D12.lib;DXGI.lib;D3DCompiler.lib;glfw\lib-vc2019\glfw3.lib;assimp\assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -183,7 +191,6 @@
     <ClCompile Include="src\render\objects\Fence.cpp" />
     <ClCompile Include="src\render\objects\VulkanDescriptorSet.cpp" />
     <ClCompile Include="src\render\objects\Device.cpp" />
-    <ClCompile Include="src\render\objects\VulkanPhysicalDevice.cpp" />
     <ClCompile Include="src\render\objects\SwapChain.cpp" />
     <ClCompile Include="src\render\passes\DeferredLightingPass.cpp" />
     <ClCompile Include="src\render\passes\GBufferPass.cpp" />
@@ -199,7 +206,6 @@
     <ClCompile Include="src\render\resources\ImageResource.cpp" />
     <ClCompile Include="src\render\resources\ResourceView.cpp" />
     <ClCompile Include="src\render\shader\Shader.cpp" />
-    <ClCompile Include="src\render\shader\VulkanShaderModule.cpp" />
     <ClCompile Include="src\render\TransferList.cpp" />
     <ClCompile Include="src\scene\camera\CameraComponent.cpp" />
     <ClCompile Include="src\scene\camera\CameraObject.cpp" />
@@ -241,7 +247,6 @@
     <ClInclude Include="src\render\objects\Fence.h" />
     <ClInclude Include="src\render\objects\VulkanDescriptorSet.h" />
     <ClInclude Include="src\render\objects\Device.h" />
-    <ClInclude Include="src\render\objects\VulkanPhysicalDevice.h" />
     <ClInclude Include="src\render\objects\SwapChain.h" />
     <ClInclude Include="src\render\passes\DeferredLightingPass.h" />
     <ClInclude Include="src\render\passes\GBufferPass.h" />
@@ -257,7 +262,6 @@
     <ClInclude Include="src\render\resources\ImageResource.h" />
     <ClInclude Include="src\render\resources\ResourceView.h" />
     <ClInclude Include="src\render\shader\Shader.h" />
-    <ClInclude Include="src\render\shader\VulkanShaderModule.h" />
     <ClInclude Include="src\render\TransferList.h" />
     <ClInclude Include="src\scene\camera\CameraComponent.h" />
     <ClInclude Include="src\scene\camera\CameraObject.h" />

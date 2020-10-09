@@ -81,10 +81,10 @@ void Material::LoadResources()
 
 		range.Init(type, 1, binding.BindPoint, binding.Space, D3D12_DESCRIPTOR_RANGE_FLAG_NONE);
 		descriptorRanges.push_back(range);
-		nameToRange[binding.Name] = descriptorRanges.size() - 1;
+		nameToRange[binding.Name] = static_cast<uint32_t>( descriptorRanges.size() - 1 );
 	}
-	descriptorTable.InitAsDescriptorTable(descriptorRanges.size(), descriptorRanges.data(), D3D12_SHADER_VISIBILITY_ALL);
-	descriptorBlock = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsCBV_SRV_UAV(descriptorRanges.size());
+	descriptorTable.InitAsDescriptorTable(static_cast<UINT>(descriptorRanges.size()), descriptorRanges.data(), D3D12_SHADER_VISIBILITY_ALL);
+	descriptorBlock = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsCBV_SRV_UAV(static_cast<UINT>(descriptorRanges.size()));
 
 	// TODO create views
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;

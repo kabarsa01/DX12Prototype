@@ -15,7 +15,6 @@
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 
-#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #define GLM_FORCE_RADIANS
@@ -28,8 +27,26 @@
 #include "core/Engine.h"
 
 int main() {
+	HMODULE d3d12Module;
+	d3d12Module = LoadLibraryW(L"d3d12.dll");
+	if (NULL == d3d12Module)
+	{
+		throw std::exception("failed to load d3d12.dll");
+	}
+
+	HMODULE d3d12SDKLayersModule;
+	d3d12SDKLayersModule = LoadLibraryW(L"D3d12SDKLayers.dll");
+	if (NULL == d3d12SDKLayersModule)
+	{
+		FreeLibrary(d3d12Module);
+		throw std::exception("failed to load D3d12SDKLayers.dll");
+	}
+
 	Engine* Engine = Engine::GetInstance();
 	Engine->Run();
+
+	FreeLibrary(d3d12Module);
+	FreeLibrary(d3d12SDKLayersModule);
 
 	return 0;
 }

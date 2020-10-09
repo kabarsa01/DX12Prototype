@@ -4,6 +4,7 @@
 #include "utils/HelperUtils.h"
 #include "../Renderer.h"
 #include "d3dx12.h"
+#include "../resources/ResourceView.h"
 
 SwapChain::SwapChain()
 {
@@ -42,7 +43,7 @@ void SwapChain::Create(Device* inDevice, uint32_t inBuffersCount/* = 2*/)
 	swapChainDesc.Stereo = FALSE;
 	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 	swapChainDesc.SampleDesc = sampleDesc;
-	swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
+	swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapChainDesc.Flags = isTearingSupported ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
@@ -55,7 +56,7 @@ void SwapChain::Create(Device* inDevice, uint32_t inBuffersCount/* = 2*/)
 		&swapChainDesc, 
 		nullptr, 
 		nullptr, 
-		&swapChain1) );
+		swapChain1.GetAddressOf()) );
 	ThrowIfFailed(swapChain1.As(&swapChain4));
 	//ThrowIfFailed( dxgiFactory4->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER) );
 
@@ -306,23 +307,19 @@ bool SwapChain::CheckTearingSupport()
 
 void SwapChain::CreateRTVs()
 {
+	images.resize(buffersCount);
+	views.resize(buffersCount);
+
 	DescriptorHeaps& heaps = Engine::GetRendererInstance()->GetDescriptorHeaps();
-
-	ComPtr<ID3D12Device2> d3dDevice = device->GetNativeDevice();
-	uint32_t descSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-	CD3DX12_CPU_DESCRIPTOR_HANDLE handle(heaps.GetRTVHeap()->GetCPUDescriptorHandleForHeapStart());
+	RTVs = heaps.AllocateDescriptorsRTV(buffersCount);
 
 	for (uint32_t index = 0; index < buffersCount; index++)
 	{
 		ComPtr<ID3D12Resource> buffer;
 		ThrowIfFailed(swapChain4->GetBuffer(index, IID_PPV_ARGS(&buffer)));
 
-		//D3D12_RENDER_TARGET_VIEW_DESC RTVDesc; // not needed
-		d3dDevice->CreateRenderTargetView(buffer.Get(), nullptr, handle);
-
 		images[index] = buffer;
-		handle.Offset(descSize);
+		views[index] = ResourceView::CreateRTVTexture2D(buffer.Get(), RTVs, index);
 	}
 }
 

@@ -1,10 +1,9 @@
 #pragma once
 
 #include "scene/SceneObjectComponent.h"
-#include "render/MeshData.h"
-#include "render/Material.h"
 
 #include <vector>
+#include "data/MeshData.h"
 
 class SkyboxComponent : public SceneObjectComponent
 {

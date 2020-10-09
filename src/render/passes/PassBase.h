@@ -89,5 +89,5 @@ private:
 	uint32_t height = 720;
 	bool isDepthExternal;
 
-	PassBase() {}
+	PassBase();
 };

@@ -4,19 +4,16 @@
 
 ResourceView::ResourceView()
 {
-
 }
 
 ResourceView::ResourceView(uint16_t inBlockOffset, DescriptorBlock inDescriptorBlock)
 	: blockOffset(inBlockOffset)
 	, descriptorBlock(inDescriptorBlock)
 {
-
 }
 
 ResourceView::~ResourceView()
 {
-
 }
 
 ResourceView ResourceView::CreateCBV(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex)
@@ -25,9 +22,25 @@ ResourceView ResourceView::CreateCBV(ID3D12Resource* inResource, DescriptorBlock
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC viewDesc;
 	viewDesc.BufferLocation = inResource->GetGPUVirtualAddress();
-	viewDesc.SizeInBytes = inResource->GetDesc().Width;
+	viewDesc.SizeInBytes = static_cast<UINT>(inResource->GetDesc().Width);
 
 	device.GetNativeDevice()->CreateConstantBufferView(&viewDesc, inBlock.GetCpuHandle(inIndex));
+
+	return ResourceView(inIndex, inBlock);
+}
+
+ResourceView ResourceView::CreateUAV(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex)
+{
+	Device& device = Engine::GetRendererInstance()->GetDevice();
+
+	D3D12_UNORDERED_ACCESS_VIEW_DESC viewDesc = {};
+	viewDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	viewDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+	viewDesc.Buffer.FirstElement = 0;
+	viewDesc.Buffer.NumElements = static_cast<UINT>(inResource->GetDesc().Width / sizeof(UINT32));
+	viewDesc.Buffer.StructureByteStride = 0;
+	viewDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_RAW;
+	device.GetNativeDevice()->CreateUnorderedAccessView(inResource, nullptr, &viewDesc, inBlock.GetCpuHandle(inIndex));
 
 	return ResourceView(inIndex, inBlock);
 }

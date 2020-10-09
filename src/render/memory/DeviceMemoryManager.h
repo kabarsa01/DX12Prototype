@@ -25,7 +25,7 @@ class DeviceMemoryManager
 public:
 	static DeviceMemoryManager* GetInstance();
 
-	MemoryRecord RequestMemory(uint32_t inSize, D3D12_HEAP_TYPE inHeapType);
+	MemoryRecord RequestMemory(uint64_t inSize, D3D12_HEAP_TYPE inHeapType);
 	void ReturnMemory(const MemoryRecord& inMemoryRecord);
 	void CleanupMemory();
 

@@ -19,7 +19,7 @@ BufferResource::~BufferResource()
 	}
 }
 
-void BufferResource::Create(Device* inDevice, uint64_t inSize, D3D12_HEAP_TYPE inHeapType = D3D12_HEAP_TYPE_DEFAULT)
+void BufferResource::Create(Device* inDevice, uint64_t inSize, D3D12_HEAP_TYPE inHeapType/* = D3D12_HEAP_TYPE_DEFAULT*/)
 {
 	if (resource.Get())
 	{
@@ -27,7 +27,11 @@ void BufferResource::Create(Device* inDevice, uint64_t inSize, D3D12_HEAP_TYPE i
 	}
 	device = inDevice;
 
-	D3D12_RESOURCE_DESC desc;
+	bool isUpload = inHeapType == D3D12_HEAP_TYPE_UPLOAD;
+	bool isReadback = inHeapType == D3D12_HEAP_TYPE_READBACK;
+	bool isCpuVisible = isUpload || isReadback;
+
+	D3D12_RESOURCE_DESC desc = {};
 	desc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
 	desc.DepthOrArraySize = 1;
 	desc.Height = 1;
@@ -36,21 +40,22 @@ void BufferResource::Create(Device* inDevice, uint64_t inSize, D3D12_HEAP_TYPE i
 	desc.SampleDesc.Quality = 0;
 	desc.SampleDesc.Count = 1;
 	desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+	desc.Flags = isCpuVisible ? D3D12_RESOURCE_FLAG_NONE : D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 	desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 	desc.Width = inSize;
 
 	D3D12_RESOURCE_ALLOCATION_INFO allocInfo = device->GetNativeDevice()->GetResourceAllocationInfo(0, 1, &desc);
 	DeviceMemoryManager* dmm = DeviceMemoryManager::GetInstance();
-	memRecord = dmm->RequestMemory(allocInfo.SizeInBytes, inHeapType);
+	memRecord = dmm->RequestMemory(static_cast<uint64_t>(allocInfo.SizeInBytes), inHeapType);
 
-	D3D12_CLEAR_VALUE clearValue;
+	D3D12_RESOURCE_STATES initialState = isUpload ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COMMON;
+
 	ThrowIfFailed( device->GetNativeDevice()->CreatePlacedResource(
 		memRecord.pos.memory.GetHeap().Get(), 
 		memRecord.pos.offset,
 		&desc, 
-		D3D12_RESOURCE_STATE_COMMON, 
-		&clearValue, 
+		initialState,
+		NULL, 
 		IID_PPV_ARGS(&resource)) );
 
 	size = allocInfo.SizeInBytes;

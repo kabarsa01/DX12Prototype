@@ -42,13 +42,8 @@ void PerFrameData::Create(Device* inDevice)
 
 	descriptorBlock = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsCBV_SRV_UAV(2);
 	// don't even need to store these views
-	ResourceView::CreateCBV(shaderDataBuffer, descriptorBlock, 0);
-	ResourceView::CreateCBV(transformDataBuffer, descriptorBlock, 1);
-	//set.SetBindings(ProduceBindings());
-	//set.Create(device);
-
-	//descriptorWrites = ProduceWrites(set);
-	//device->GetNativeDevice().updateDescriptorSets(static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+	ResourceView::CreateUAV(shaderDataBuffer, descriptorBlock, 0);
+	ResourceView::CreateUAV(transformDataBuffer, descriptorBlock, 1);
 }
 
 void PerFrameData::Destroy()
@@ -58,8 +53,8 @@ void PerFrameData::Destroy()
 
 	shaderDataBuffer.Destroy();
 	transformDataBuffer.Destroy();
-	//set.Destroy();
-	//GlobalSamplers::GetInstance()->Destroy();
+
+	DescriptorHeaps::ReleaseDescriptors(descriptorBlock);
 }
 
 void PerFrameData::UpdateBufferData()
@@ -68,51 +63,6 @@ void PerFrameData::UpdateBufferData()
 	shaderDataBuffer.CopyTo(sizeof(GlobalShaderData), reinterpret_cast<const char*>( globalShaderData ), true);
 	transformDataBuffer.CopyTo(sizeof(GlobalTransformData), reinterpret_cast<const char*>( globalTransformData ), true);
 }
-//
-//std::vector<DescriptorSetLayoutBinding> PerFrameData::ProduceBindings()
-//{
-//	GlobalSamplers::GetInstance()->Create(device);
-//	std::vector<DescriptorSetLayoutBinding> bindings = GlobalSamplers::GetInstance()->GetBindings(0);
-//
-//	shaderDataBinding.setBinding(static_cast<uint32_t>( bindings.size() ));
-//	shaderDataBinding.setDescriptorCount(1);
-//	shaderDataBinding.setDescriptorType(DescriptorType::eUniformBuffer);
-//	shaderDataBinding.setStageFlags(ShaderStageFlagBits::eAllGraphics | ShaderStageFlagBits::eCompute);
-//	bindings.push_back(shaderDataBinding);
-//
-//	transformDataBinding.setBinding(static_cast<uint32_t>( bindings.size()) );
-//	transformDataBinding.setDescriptorCount(1);
-//	transformDataBinding.setDescriptorType(DescriptorType::eStorageBuffer);
-//	transformDataBinding.setStageFlags(ShaderStageFlagBits::eAllGraphics | ShaderStageFlagBits::eCompute);
-//	bindings.push_back(transformDataBinding);
-//
-//	return bindings;
-//}
-//
-//std::vector<WriteDescriptorSet> PerFrameData::ProduceWrites(VulkanDescriptorSet& inSet)
-//{
-//	std::vector<WriteDescriptorSet> writes;
-//
-//	WriteDescriptorSet shaderDataWrite;
-//	shaderDataWrite.setDescriptorCount(1);
-//	shaderDataWrite.setDescriptorType(shaderDataBinding.descriptorType);
-//	shaderDataWrite.setDstArrayElement(0);
-//	shaderDataWrite.setDstBinding(shaderDataBinding.binding);
-//	shaderDataWrite.setDstSet(inSet.GetSet());
-//	shaderDataWrite.setPBufferInfo(&shaderDataBuffer.GetDescriptorInfo());
-//	writes.push_back(shaderDataWrite);
-//
-//	WriteDescriptorSet transformDataWrite;
-//	transformDataWrite.setDescriptorCount(1);
-//	transformDataWrite.setDescriptorType(transformDataBinding.descriptorType);
-//	transformDataWrite.setDstArrayElement(0);
-//	transformDataWrite.setDstBinding(transformDataBinding.binding);
-//	transformDataWrite.setDstSet(inSet.GetSet());
-//	transformDataWrite.setPBufferInfo(&transformDataBuffer.GetDescriptorInfo());
-//	writes.push_back(transformDataWrite);
-//
-//	return writes;
-//}
 
 void PerFrameData::GatherData()
 {

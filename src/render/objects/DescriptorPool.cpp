@@ -39,7 +39,7 @@ void DescriptorPool::Destroy()
 DescriptorBlock DescriptorPool::Allocate(uint16_t inSize)
 {
 	DescriptorBlock block;
-	if (freeBlocks.empty())
+	if (freeBlocks.empty() || inSize == 0)
 	{
 		return block;
 	}
@@ -97,12 +97,12 @@ void DescriptorPool::Release(const DescriptorBlock& inBlock)
 	std::vector<DescriptorBlockRecord>::iterator itemIter = std::lower_bound(freeBlocks.begin(), freeBlocks.end(), rec);
 	if (itemIter == freeBlocks.end())
 	{
-		index = freeBlocks.size();
+		index = static_cast<uint16_t>( freeBlocks.size() );
 		freeBlocks.push_back(rec);
 	}
 	else
 	{
-		index = std::distance(freeBlocks.begin(), itemIter);
+		index = static_cast<uint16_t>( std::distance(freeBlocks.begin(), itemIter) );
 		freeBlocks.insert(itemIter, rec);
 	}
 

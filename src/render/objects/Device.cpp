@@ -80,10 +80,10 @@ void Device::Create(const char* inAppName, const char* inEngine, HWND inHwnd)
 		D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE
 	};
 
-	D3D12_INFO_QUEUE_FILTER infoQueueFilter;
-	infoQueueFilter.DenyList.NumSeverities = std::size(deniedSeverities);
+	D3D12_INFO_QUEUE_FILTER infoQueueFilter = {};
+	infoQueueFilter.DenyList.NumSeverities = static_cast<UINT>( std::size(deniedSeverities) );
 	infoQueueFilter.DenyList.pSeverityList = deniedSeverities;
-	infoQueueFilter.DenyList.NumIDs = std::size(deniedIDs);
+	infoQueueFilter.DenyList.NumIDs = static_cast<UINT>( std::size(deniedIDs) );
 	infoQueueFilter.DenyList.pIDList = deniedIDs;
 
 	infoQueue->PushStorageFilter(&infoQueueFilter);
@@ -98,7 +98,7 @@ void Device::Destroy()
 
 ComPtr<IDXGIAdapter4> Device::PickAdapter()
 {
-
+	return ComPtr<IDXGIAdapter4>();
 }
 
 ComPtr<ID3D12CommandQueue> Device::CreateCommandQueue(ComPtr<ID3D12Device2> inDevice, D3D12_COMMAND_LIST_TYPE inType)

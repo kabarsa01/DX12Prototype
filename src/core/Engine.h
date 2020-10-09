@@ -1,6 +1,6 @@
 #pragma once
 
-//#define GLFW_INCLUDE_VULKAN
+#include <windows.h>
 #include <GLFW/glfw3.h>
 
 #include "core/ObjectBase.h"

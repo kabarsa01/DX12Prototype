@@ -16,6 +16,11 @@ public:
 	static const Class& Get();
 	static const Class& Get(ObjectBase* InObject);
 
+	Class(const std::string& InName);
+	Class(const HashString& InName);
+	Class(const Class& InClass);
+	virtual ~Class();
+
 	const HashString& GetName() const;
 
 	bool operator==(const Class& Other) const;
@@ -27,17 +32,12 @@ public:
 private:
 	friend class ObjectBase;
 	friend class std::shared_ptr<Class>;
-	friend class std::_Ref_count_obj<Class>;
+//	friend class std::_Ref_count_obj2<Class>;
 
-	static std::map<size_t, std::shared_ptr<Class>> Classes;
-	HashString Name;
+	static std::map<size_t, std::shared_ptr<Class>> classes;
+	HashString name;
 
 	Class();
-	Class(const std::string& InName);
-	Class(const HashString& InName);
-	Class(const Class& InClass);
-	virtual ~Class();
-
 	Class& operator=(const Class& Other);
 	const Class* operator&() const;
 

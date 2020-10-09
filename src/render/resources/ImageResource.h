@@ -67,6 +67,7 @@ public:
 	inline D3D12_RESOURCE_ALLOCATION_INFO GetAllocationInfo() { return allocInfo; }
 	inline ComPtr<ID3D12Resource> GetResource() const { return resource; }
 	BufferResource* CreateStagingBuffer();
+	inline BufferResource* GetStagingBuffer() { return stagingBuffer; }
 	void DestroyStagingBuffer();
 
 	operator ComPtr<ID3D12Resource>() const { return resource; }

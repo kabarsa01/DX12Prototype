@@ -20,7 +20,7 @@ DeviceMemoryManager* DeviceMemoryManager::GetInstance()
 	return staticInstance;
 }
 
-MemoryRecord DeviceMemoryManager::RequestMemory(uint32_t inSize, D3D12_HEAP_TYPE inHeapType)
+MemoryRecord DeviceMemoryManager::RequestMemory(uint64_t inSize, D3D12_HEAP_TYPE inHeapType)
 {
 	auto startTime = std::chrono::high_resolution_clock::now();
 

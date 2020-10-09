@@ -5,6 +5,8 @@
 #include "d3dx12.h"
 #include "utils/HelperUtils.h"
 #include "../objects/DescriptorPool.h"
+#include "../Renderer.h"
+#include "../PerFrameData.h"
 
 GBufferPass::GBufferPass(HashString inName)
 	:PassBase(inName)
@@ -77,7 +79,8 @@ void GBufferPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList
 
 //			material->CreateDescriptorSet(GetVulkanDevice());
 			std::array<ID3D12DescriptorHeap*, 3> heaps = { GetRtvBlock().heap.Get(), GetDsvBlock().heap.Get(), material->GetDescriptorBlock().heap.Get() };
-			inCommandList->SetDescriptorHeaps(heaps.size(), heaps.data());
+			inCommandList->SetDescriptorHeaps(static_cast<UINT>( heaps.size() ), heaps.data());
+			inCommandList->SetGraphicsRootDescriptorTable(1, GetRenderer()->GetPerFrameData()->GetGPUDescriptorHandle());
 			inCommandList->SetGraphicsRootDescriptorTable(2, material->GetDescriptorBlock().gpuHandle);
 //			inCommandList->bindDescriptorSets(PipelineBindPoint::eGraphics, pipelineData.pipelineLayout, 1, material->GetDescriptorSets(), {});
 
@@ -91,7 +94,12 @@ void GBufferPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList
 //				inCommandList->pushConstants(pipelineData.pipelineLayout, ShaderStageFlagBits::eAllGraphics, 0, sizeof(uint32_t), & scene->GetMeshDataToIndex(materialId)[meshId]);
 //				inCommandList->bindVertexBuffers(0, 1, &meshData->GetVertexBuffer().GetBuffer(), &offset);
 //				inCommandList->bindIndexBuffer(meshData->GetIndexBuffer().GetBuffer(), 0, IndexType::eUint32);
-				inCommandList->DrawIndexedInstanced(meshData->GetIndexCount(), scene->GetMeshDataToTransform(materialId)[meshId].size(), 0, 0, 0);
+				inCommandList->DrawIndexedInstanced(
+					static_cast<UINT>( meshData->GetIndexCount() ), 
+					static_cast<UINT>(scene->GetMeshDataToTransform(materialId)[meshId].size()), 
+					0, 
+					0, 
+					0);
 			}
 		}		
 	}
@@ -210,109 +218,13 @@ ResourceView GBufferPass::CreateDepthAttachmentView(const ImageResource& inDepth
 
 ComPtr<ID3D12PipelineState> GBufferPass::CreatePipeline(MaterialPtr inMaterial, ComPtr<ID3D12RootSignature> inRootSignature)
 {
-	//std::vector<PipelineShaderStageCreateInfo> shaderStageInfoArray = { inMaterial->GetVertexStageInfo(), inMaterial->GetFragmentStageInfo() };
-
-	//VertexInputBindingDescription bindingDesc = MeshData::GetBindingDescription(0);
-	//std::array<VertexInputAttributeDescription, 5> attributeDesc = Vertex::GetAttributeDescriptions(0);
-	//PipelineVertexInputStateCreateInfo vertexInputInfo;
-	//vertexInputInfo.setVertexBindingDescriptionCount(1);
-	//vertexInputInfo.setPVertexBindingDescriptions(&bindingDesc);
-	//vertexInputInfo.setVertexAttributeDescriptionCount(static_cast<uint32_t>(attributeDesc.size()));
-	//vertexInputInfo.setPVertexAttributeDescriptions(attributeDesc.data());
-
-	//PipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
-	//inputAssemblyInfo.setTopology(PrimitiveTopology::eTriangleList);
-	//inputAssemblyInfo.setPrimitiveRestartEnable(VK_FALSE);
-
-	//Viewport viewport;
-	//viewport.setX(0.0f);
-	//viewport.setY(0.0f);
-	//viewport.setWidth(static_cast<float>(GetWidth()));
-	//viewport.setHeight(static_cast<float>(GetHeight()));
-	//viewport.setMinDepth(0.0f);
-	//viewport.setMaxDepth(1.0f);
-
-	//Rect2D scissor;
-	//scissor.setOffset(Offset2D(0, 0));
-	//scissor.setExtent(Extent2D{ GetWidth(), GetHeight() });
-
-	//PipelineViewportStateCreateInfo viewportInfo;
-	//viewportInfo.setViewportCount(1);
-	//viewportInfo.setPViewports(&viewport);
-	//viewportInfo.setScissorCount(1);
-	//viewportInfo.setPScissors(&scissor);
-
-	//PipelineRasterizationStateCreateInfo rasterizationInfo;
-	//rasterizationInfo.setDepthClampEnable(VK_FALSE);
-	//rasterizationInfo.setRasterizerDiscardEnable(VK_FALSE);
-	//rasterizationInfo.setPolygonMode(PolygonMode::eFill);
-	//rasterizationInfo.setLineWidth(1.0f);
-	//rasterizationInfo.setCullMode(CullModeFlagBits::eBack);
-	//rasterizationInfo.setFrontFace(FrontFace::eClockwise);
-	//rasterizationInfo.setDepthBiasEnable(VK_FALSE);
-
-	//PipelineMultisampleStateCreateInfo multisampleInfo;
-
-	//PipelineDepthStencilStateCreateInfo depthStencilInfo;
-	//depthStencilInfo.setDepthBoundsTestEnable(VK_FALSE);
-	//depthStencilInfo.setDepthCompareOp(CompareOp::eEqual);
-	//depthStencilInfo.setDepthTestEnable(VK_TRUE);
-	//depthStencilInfo.setDepthWriteEnable(VK_FALSE);
-	////depthStencilInfo.setMaxDepthBounds(1.0f);
-	////depthStencilInfo.setMinDepthBounds(0.0f);
-	//depthStencilInfo.setStencilTestEnable(VK_FALSE);
-
-	//PipelineColorBlendAttachmentState albedoBlendAttachment;
-	//albedoBlendAttachment.setColorWriteMask(ColorComponentFlagBits::eR | ColorComponentFlagBits::eG | ColorComponentFlagBits::eB | ColorComponentFlagBits::eA);
-	//albedoBlendAttachment.setBlendEnable(VK_FALSE);
-	//albedoBlendAttachment.setSrcColorBlendFactor(BlendFactor::eOne);
-	//albedoBlendAttachment.setDstColorBlendFactor(BlendFactor::eZero);
-	//albedoBlendAttachment.setColorBlendOp(BlendOp::eAdd);
-	//albedoBlendAttachment.setSrcAlphaBlendFactor(BlendFactor::eOne);
-	//albedoBlendAttachment.setDstAlphaBlendFactor(BlendFactor::eZero);
-	//albedoBlendAttachment.setAlphaBlendOp(BlendOp::eAdd);
-	//PipelineColorBlendAttachmentState normalBlendAttachment;
-	//normalBlendAttachment.setColorWriteMask(ColorComponentFlagBits::eR | ColorComponentFlagBits::eG | ColorComponentFlagBits::eB | ColorComponentFlagBits::eA);
-	//normalBlendAttachment.setBlendEnable(VK_FALSE);
-	//normalBlendAttachment.setSrcColorBlendFactor(BlendFactor::eOne);
-	//normalBlendAttachment.setDstColorBlendFactor(BlendFactor::eZero);
-	//normalBlendAttachment.setColorBlendOp(BlendOp::eAdd);
-	//normalBlendAttachment.setSrcAlphaBlendFactor(BlendFactor::eOne);
-	//normalBlendAttachment.setDstAlphaBlendFactor(BlendFactor::eZero);
-	//normalBlendAttachment.setAlphaBlendOp(BlendOp::eAdd);
-
-	//std::array<PipelineColorBlendAttachmentState, 2> colorBlendAttachmentStates{ albedoBlendAttachment, normalBlendAttachment };
-	//PipelineColorBlendStateCreateInfo colorBlendInfo;
-	//colorBlendInfo.setLogicOpEnable(VK_FALSE);
-	//colorBlendInfo.setLogicOp(LogicOp::eCopy);
-	//colorBlendInfo.setAttachmentCount(static_cast<uint32_t>( colorBlendAttachmentStates.size() ));
-	//colorBlendInfo.setPAttachments(colorBlendAttachmentStates.data());
-	//colorBlendInfo.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
-
-	//GraphicsPipelineCreateInfo pipelineInfo;
-	//pipelineInfo.setStageCount(2);
-	//pipelineInfo.setPStages(shaderStageInfoArray.data());
-	//pipelineInfo.setPVertexInputState(&vertexInputInfo);
-	//pipelineInfo.setPInputAssemblyState(&inputAssemblyInfo);
-	//pipelineInfo.setPViewportState(&viewportInfo);
-	//pipelineInfo.setPRasterizationState(&rasterizationInfo);
-	//pipelineInfo.setPMultisampleState(&multisampleInfo);
-	//pipelineInfo.setPDepthStencilState(&depthStencilInfo);
-	//pipelineInfo.setPColorBlendState(&colorBlendInfo);
-	//pipelineInfo.setPDynamicState(nullptr);
-	//pipelineInfo.setLayout(inLayout);
-	//pipelineInfo.setRenderPass(inRenderPass);
-	//pipelineInfo.setSubpass(0);
-	//pipelineInfo.setBasePipelineHandle(Pipeline());
-	//pipelineInfo.setBasePipelineIndex(-1);
-
 	DXGI_SAMPLE_DESC sampleDesc;
 	sampleDesc.Count = 1;
 	sampleDesc.Quality = 0;
 
 	std::array<D3D12_INPUT_ELEMENT_DESC, 5> attributes = Vertex::GetAttributeDescriptions();
 	D3D12_INPUT_LAYOUT_DESC inputLayout;
-	inputLayout.NumElements = attributes.size();
+	inputLayout.NumElements = static_cast<UINT>( attributes.size() );
 	inputLayout.pInputElementDescs = attributes.data();
 
 	D3D12_DEPTH_STENCILOP_DESC depthStencilOp;

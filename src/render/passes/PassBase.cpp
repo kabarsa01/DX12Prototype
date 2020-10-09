@@ -2,7 +2,6 @@
 #include "../Renderer.h"
 #include "core/Engine.h"
 #include "../shader/Shader.h"
-#include "../shader/VulkanShaderModule.h"
 #include "scene/camera/CameraComponent.h"
 #include "scene/mesh/MeshComponent.h"
 #include "scene/SceneObjectComponent.h"
@@ -17,6 +16,11 @@
 
 PassBase::PassBase(HashString inName)
 	: name(inName)
+{
+
+}
+
+PassBase::PassBase()
 {
 
 }
@@ -41,13 +45,18 @@ void PassBase::Create()
 	{
 		depthAttachment = CreateDepthAttachment(width, height);
 	}
-	uint32_t descriptorsCount = attachments.size();
+	uint32_t descriptorsCount = static_cast<uint32_t>(attachments.size());
 
-	rtvViews = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsRTV(attachments.size());
-	dsvViews = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsDSV(1);
-
-	CreateColorAttachmentViews(attachments, rtvViews, attachmentViews);
-	depthAttachmentView = CreateDepthAttachmentView(depthAttachment, dsvViews);
+	if (attachments.size() > 0)
+	{
+		rtvViews = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsRTV(static_cast<uint16_t>(attachments.size()));
+		CreateColorAttachmentViews(attachments, rtvViews, attachmentViews);
+	}
+	if (depthAttachment)
+	{
+		dsvViews = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsDSV(1);
+		depthAttachmentView = CreateDepthAttachmentView(depthAttachment, dsvViews);
+	}
 ////		std::vector<ImageView> views = attachmentViews;
 //		if (depthAttachmentView)
 //		{
@@ -129,9 +138,6 @@ ComPtr<ID3D12RootSignature> PassBase::CreateRootSignature(MaterialPtr inMaterial
 
 	//pipelineLayoutInfo.setPushConstantRangeCount(1);
 	//pipelineLayoutInfo.setPPushConstantRanges(&pushConstRange);
-
-	D3D12_STATIC_SAMPLER_DESC samplerDesc;
-	CD3DX12_STATIC_SAMPLER_DESC samplerDesc;
 
 	CD3DX12_ROOT_PARAMETER1 rootParams[3];
 	rootParams[0].InitAsConstants(1, 0);

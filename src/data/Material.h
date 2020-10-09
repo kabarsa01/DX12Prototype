@@ -23,10 +23,6 @@ public:
 
 //	void CreateDescriptorSet(Device* inDevice);
 
-	ShaderPtr GetVertexShader();
-	ShaderPtr GetFragmentShader();
-	ShaderPtr GetComputeShader();
-
 	void SetEntrypoints(const std::string& inVertexEntrypoint, const std::string& inFragmentEntrypoint);
 	void SetVertexEntrypoint(const std::string& inEntrypoint);
 	void SetFragmentEntrypoint(const std::string& inEntrypoint);
