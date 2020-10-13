@@ -7,6 +7,7 @@
 
 Material::Material(HashString inId)
 	: Resource(inId)
+	, device(nullptr)
 	, vertexEntrypoint("main")
 	, fragmentEntrypoint("main")
 	, computeEntrypoint("main")
@@ -16,6 +17,7 @@ Material::Material(HashString inId)
 
 Material::Material(HashString inId, const std::string& inVertexShaderPath, const std::string& inFragmentShaderPath)
 	: Resource(inId)
+	, device(nullptr)
 	, vertexShaderPath(inVertexShaderPath)
 	, fragmentShaderPath(inFragmentShaderPath)
 	, vertexEntrypoint("main")
@@ -35,18 +37,17 @@ void Material::LoadResources()
 	// TODO: process all the material resources
 	descriptorRanges.clear();
 
-	vertexShader = InitShader(vertexShaderPath);
-	fragmentShader = InitShader(fragmentShaderPath);
-	computeShader = InitShader(computeShaderPath);
+	vertexShader = InitShader(vertexShaderPath, vertexEntrypoint, "vs_5_1");
+	fragmentShader = InitShader(fragmentShaderPath, fragmentEntrypoint, "ps_5_1");
+	computeShader = InitShader(computeShaderPath, computeEntrypoint, "cs_5_1");
 
 	// all the bindings are united for now
 	// we have a very primitive system of assigning a range per binding, which is not beautiful but will do for now
 	// TODO: group bindings by type, space and consecutive indices
 	std::vector<D3D12_SHADER_INPUT_BIND_DESC> bindings;
-	bindings.reserve(vertexShader->GetBindingsCount() + fragmentShader->GetBindingsCount() + computeShader->GetBindingsCount());
-	bindings.insert(bindings.end(), vertexShader->GetBindings().begin(), vertexShader->GetBindings().end());
-	bindings.insert(bindings.end(), fragmentShader->GetBindings().begin(), fragmentShader->GetBindings().end());
-	bindings.insert(bindings.end(), computeShader->GetBindings().begin(), computeShader->GetBindings().end());
+	if (vertexShader) bindings.insert(bindings.end(), vertexShader->GetBindings().begin(), vertexShader->GetBindings().end());
+	if (fragmentShader) bindings.insert(bindings.end(), fragmentShader->GetBindings().begin(), fragmentShader->GetBindings().end());
+	if (computeShader) bindings.insert(bindings.end(), computeShader->GetBindings().begin(), computeShader->GetBindings().end());
 
 	for (uint32_t index = 0; index < bindings.size(); index++)
 	{
@@ -54,7 +55,7 @@ void Material::LoadResources()
 
 		// zero space is reserved for per frame data, it's simpler to divide for now
 		// TODO: manage spaces
-		if (binding.Space == 0)
+		if (binding.Space == 0 || (nameToRange.find(binding.Name) != nameToRange.end()))
 		{
 			continue;
 		}
@@ -68,6 +69,8 @@ void Material::LoadResources()
 			type = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 			break;
 		case D3D_SHADER_INPUT_TYPE::D3D_SIT_TEXTURE:
+		case D3D_SHADER_INPUT_TYPE::D3D_SIT_TBUFFER:
+		case D3D_SHADER_INPUT_TYPE::D3D_SIT_STRUCTURED:
 			type = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 			break;
 		case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWTYPED:
@@ -87,9 +90,27 @@ void Material::LoadResources()
 	descriptorBlock = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsCBV_SRV_UAV(static_cast<UINT>(descriptorRanges.size()));
 
 	// TODO create views
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	srvDesc.Texture2D.MipLevels = 1;
-	Engine::GetRendererInstance()->GetDevice().GetNativeDevice()->CreateShaderResourceView(nullptr, &srvDesc, D3D12_CPU_DESCRIPTOR_HANDLE());
+	for (auto& pair : sampledImages2D)
+	{
+		if (nameToRange.find(pair.first) == nameToRange.end()) continue;
+
+		uint32_t rangeIndex = nameToRange[pair.first];
+		ResourceView::CreateSRVTexture2D(pair.second->GetImage(), descriptorBlock, rangeIndex);
+	}
+	for (auto& pair : buffers)
+	{
+		if (nameToRange.find(pair.first) == nameToRange.end()) continue;
+
+		uint32_t rangeIndex = nameToRange[pair.first];
+		ResourceView::CreateCBV(pair.second, descriptorBlock, rangeIndex);
+	}
+	for (auto& pair : storageBuffers)
+	{
+		if (nameToRange.find(pair.first) == nameToRange.end()) continue;
+
+		uint32_t rangeIndex = nameToRange[pair.first];
+		ResourceView::CreateUAV(pair.second, descriptorBlock, rangeIndex);
+	}
 
 	shaderHash = HashString(vertexShaderPath + fragmentShaderPath + computeShaderPath);
 }
@@ -219,15 +240,17 @@ bool Material::Cleanup()
 	{
 		pair.second.Destroy();
 	}
-	vulkanDescriptorSet.Destroy();
+//	vulkanDescriptorSet.Destroy();
+
+	DescriptorHeaps::ReleaseDescriptors(descriptorBlock);
 	return true;
 }
 
-ShaderPtr Material::InitShader(const std::string& inResourcePath)
+ShaderPtr Material::InitShader(const std::string& inResourcePath, const std::string& inEntryPoint, const std::string& inProfile)
 {
 	if (!inResourcePath.empty())
 	{
-		ShaderPtr shader = DataManager::RequestResourceType<Shader>(inResourcePath);
+		ShaderPtr shader = DataManager::RequestResourceType<Shader, const std::string&, const std::string&>(inResourcePath, inEntryPoint, inProfile);
 		return shader;
 	}
 	return ShaderPtr();

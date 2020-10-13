@@ -22,9 +22,9 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle() { return descriptorBlock.gpuHandle; }
 private:
 	Device* device;
-
 	BufferResource shaderDataBuffer;
 	BufferResource transformDataBuffer;
+	D3D12_DESCRIPTOR_RANGE1 ranges[2];
 	CD3DX12_ROOT_PARAMETER1 descriptorTable;
 	DescriptorBlock descriptorBlock;
 

@@ -179,28 +179,6 @@ bool SwapChain::Present(bool inVSync)
 	UINT syncInterval = inVSync ? 1 : 0;
 	UINT presentFlags = isTearingSupported && !inVSync ? DXGI_PRESENT_ALLOW_TEARING : 0;
 	ThrowIfFailed(swapChain4->Present(syncInterval, presentFlags));
-	//SwapchainKHR swapChains[] = { swapChain4 };
-	//PresentInfoKHR presentInfo;
-	//presentInfo.setWaitSemaphoreCount(1);
-	//presentInfo.setPWaitSemaphores(&renderingFinishedSemaphores[imageIndex]);
-	//presentInfo.setSwapchainCount(1);
-	//presentInfo.setPSwapchains(swapChains);
-	//presentInfo.setPImageIndices(&imageIndex);
-	//presentInfo.setPResults(nullptr);
-
-	//Result presentResult = Result::eSuccess;
-	//try
-	//{
-	//	presentResult = presentQueue.presentKHR(presentInfo);
-	//}
-	//catch (std::exception)
-	//{
-	//}
-
-	//if (presentResult == Result::eErrorOutOfDateKHR || presentResult == Result::eSuboptimalKHR)
-	//{
-	//	return false;
-	//}
 
 	return true;
 }
@@ -255,55 +233,6 @@ bool SwapChain::CheckTearingSupport()
 
 	return allowTearing == TRUE;
 }
-//
-//void SwapChain::CreateRenderPass()
-//{
-//	AttachmentDescription colorAttachment;
-//	colorAttachment.setFormat(imageFormat);
-//	colorAttachment.setSamples(SampleCountFlagBits::e1);
-//	colorAttachment.setLoadOp(AttachmentLoadOp::eClear);
-//	colorAttachment.setStoreOp(AttachmentStoreOp::eStore);
-//	colorAttachment.setStencilLoadOp(AttachmentLoadOp::eDontCare);
-//	colorAttachment.setStencilStoreOp(AttachmentStoreOp::eDontCare);
-//	colorAttachment.setInitialLayout(ImageLayout::eUndefined);
-//	colorAttachment.setFinalLayout(ImageLayout::eColorAttachmentOptimal);
-//
-//	AttachmentReference colorAttachmentRef;
-//	colorAttachmentRef.setAttachment(0);
-//	colorAttachmentRef.setLayout(ImageLayout::eColorAttachmentOptimal);
-//
-//	SubpassDescription subpassDesc;
-//	subpassDesc.setPipelineBindPoint(PipelineBindPoint::eGraphics);
-//	subpassDesc.setColorAttachmentCount(1);
-//	subpassDesc.setPColorAttachments(&colorAttachmentRef); // layout(location = |index| ) out vec4 outColor references attachmant by index
-//
-//	SubpassDependency subpassDependency;
-//	subpassDependency.setSrcSubpass(VK_SUBPASS_EXTERNAL);
-//	subpassDependency.setDstSubpass(0);
-//	subpassDependency.setSrcStageMask(PipelineStageFlagBits::eColorAttachmentOutput);
-//	subpassDependency.setSrcAccessMask(AccessFlags());
-//	subpassDependency.setDstStageMask(PipelineStageFlagBits::eColorAttachmentOutput);
-//	subpassDependency.setDstAccessMask(AccessFlagBits::eColorAttachmentRead | AccessFlagBits::eColorAttachmentWrite);
-//
-//	RenderPassCreateInfo renderPassInfo;
-//	renderPassInfo.setAttachmentCount(1);
-//	renderPassInfo.setPAttachments(&colorAttachment);
-//	renderPassInfo.setSubpassCount(1);
-//	renderPassInfo.setPSubpasses(&subpassDesc);
-//	renderPassInfo.setDependencyCount(1);
-//	renderPassInfo.setPDependencies(&subpassDependency);
-//
-//	renderPass = device->GetDevice().createRenderPass(renderPassInfo);
-//}
-//
-//void SwapChain::DestroyRenderPass()
-//{
-//	if (renderPass && device)
-//	{
-//		device->GetDevice().destroyRenderPass(renderPass);
-//		renderPass = nullptr;
-//	}
-//}
 
 void SwapChain::CreateRTVs()
 {
@@ -345,85 +274,6 @@ void SwapChain::DestroyFences()
 	}
 }
 
-//
-//void SwapChain::DestroyRTV()
-//{
-//	for (uint32_t index = 0; index < imageViews.size(); index++)
-//	{
-//		device->GetDevice().destroyImageView(imageViews[index]);
-//	}
-//	imageViews.clear();
-//}
-//
-//void SwapChain::CreateFramebuffers()
-//{
-//	framebuffers.resize(backBuffersCount);
-//	for (int index = 0; index < imageViews.size(); index++)
-//	{
-//		ImageView attachments[] = { imageViews[index] };
-//
-//		FramebufferCreateInfo framebufferInfo;
-//		framebufferInfo.setRenderPass(renderPass);
-//		framebufferInfo.setAttachmentCount(1);
-//		framebufferInfo.setPAttachments(attachments);
-//		framebufferInfo.setWidth(extent.width);
-//		framebufferInfo.setHeight(extent.height);
-//		framebufferInfo.setLayers(1);
-//
-//		framebuffers[index] = device->GetDevice().createFramebuffer(framebufferInfo);
-//	}
-//}
-//
-//void SwapChain::DestroyFramebuffers()
-//{
-//	for (uint32_t index = 0; index < framebuffers.size(); index++)
-//	{
-//		device->GetDevice().destroyFramebuffer(framebuffers[index]);
-//	}
-//	framebuffers.clear();
-//}
-//
-//SurfaceFormatKHR SwapChain::ChooseSurfaceFormat(const std::vector<SurfaceFormatKHR>& inFormats)
-//{
-//	for (const SurfaceFormatKHR& surfaceFormat : inFormats)
-//	{
-//		if (surfaceFormat.format == Format::eR8G8B8A8Unorm && surfaceFormat.colorSpace == ColorSpaceKHR::eSrgbNonlinear)
-//		{
-//			return surfaceFormat;
-//		}
-//	}
-//
-//	return inFormats[0];
-//}
-//
-//PresentModeKHR SwapChain::ChooseSwapChainPresentMode(const std::vector<PresentModeKHR>& inPresentModes)
-//{
-//	for (const PresentModeKHR& presentMode : inPresentModes)
-//	{
-//		if (presentMode == PresentModeKHR::eMailbox)
-//		{
-//			return presentMode;
-//		}
-//	}
-//
-//	return PresentModeKHR::eFifo;
-//}
-//
-//Extent2D SwapChain::ChooseSwapChainExtent(const SurfaceCapabilitiesKHR& inCapabilities, uint32_t inWidth, uint32_t inHeight)
-//{
-//	if (inCapabilities.currentExtent.width == UINT32_MAX)
-//	{
-//		return inCapabilities.currentExtent;
-//	}
-//	else
-//	{
-//		Extent2D extent;
-//
-//		extent.setWidth(std::clamp<int>(inWidth, inCapabilities.minImageExtent.width, inCapabilities.maxImageExtent.width));
-//		extent.setHeight(std::clamp<int>(inHeight, inCapabilities.minImageExtent.height, inCapabilities.maxImageExtent.height));
-//
-//		return extent;
-//	}
-//}
+
 
 

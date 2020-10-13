@@ -45,6 +45,7 @@ void BufferResource::Create(Device* inDevice, uint64_t inSize, D3D12_HEAP_TYPE i
 	desc.Width = inSize;
 
 	D3D12_RESOURCE_ALLOCATION_INFO allocInfo = device->GetNativeDevice()->GetResourceAllocationInfo(0, 1, &desc);
+
 	DeviceMemoryManager* dmm = DeviceMemoryManager::GetInstance();
 	memRecord = dmm->RequestMemory(static_cast<uint64_t>(allocInfo.SizeInBytes), inHeapType);
 
@@ -58,7 +59,7 @@ void BufferResource::Create(Device* inDevice, uint64_t inSize, D3D12_HEAP_TYPE i
 		NULL, 
 		IID_PPV_ARGS(&resource)) );
 
-	size = allocInfo.SizeInBytes;
+	size = inSize;// allocInfo.SizeInBytes;
 	heapType = inHeapType;
 }
 

@@ -32,17 +32,23 @@ void PerFrameData::Create(Device* inDevice)
 	transformDataBuffer.Create(device, sizeof(GlobalTransformData), D3D12_HEAP_TYPE_DEFAULT);
 	transformDataBuffer.CreateStagingBuffer();
 
-	D3D12_DESCRIPTOR_RANGE1 range;
-	range.RegisterSpace = 0;
-	range.BaseShaderRegister = 0;
-	range.NumDescriptors = 2;
-	range.OffsetInDescriptorsFromTableStart = 0;
-	range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-	descriptorTable.InitAsDescriptorTable(1, &range, D3D12_SHADER_VISIBILITY_ALL);
+	ranges[0].RegisterSpace = 0;
+	ranges[0].BaseShaderRegister = 1;
+	ranges[0].NumDescriptors = 1;
+	ranges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	ranges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+
+	ranges[1].RegisterSpace = 0;
+	ranges[1].BaseShaderRegister = 0;
+	ranges[1].NumDescriptors = 1;
+	ranges[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	ranges[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+
+	descriptorTable.InitAsDescriptorTable(2, ranges, D3D12_SHADER_VISIBILITY_ALL);
 
 	descriptorBlock = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsCBV_SRV_UAV(2);
 	// don't even need to store these views
-	ResourceView::CreateUAV(shaderDataBuffer, descriptorBlock, 0);
+	ResourceView::CreateCBV(shaderDataBuffer, descriptorBlock, 0);
 	ResourceView::CreateUAV(transformDataBuffer, descriptorBlock, 1);
 }
 

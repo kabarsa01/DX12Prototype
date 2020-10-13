@@ -7,10 +7,13 @@
 #include <D3Dcompiler.h>
 #include "utils/HelperUtils.h"
 
-Shader::Shader(const HashString& inPath)
-	: Resource(inPath)
+Shader::Shader(const HashString& inPath, const std::string& inEntryPoint, const std::string& inProfile)
+	: Resource(inPath.GetString() + inEntryPoint + inProfile)
+	, filePath(inPath.GetString())
+	, entryPoint(inEntryPoint)
+	, profile(inProfile)
+	, bindingsCount(0)
 {
-	filePath = inPath.GetString();
 }
 
 Shader::~Shader()
@@ -21,24 +24,22 @@ bool Shader::Load()
 {
 	ComPtr<ID3DBlob> errorBlob;
 
-	D3D_SHADER_MACRO defines[] { "DUMMY", "0" };
-	LPCSTR target = "cs_5_0";
-	UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+	UINT flags = 0;// D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_ALL_RESOURCES_BOUND;
 #if defined( DEBUG ) || defined( _DEBUG )
 	flags |= D3DCOMPILE_DEBUG;
 #endif
+	std::wstring widecharPath = ToWString(filePath);
 	ThrowIfFailed( D3DCompileFromFile(
-		ToWString(filePath).c_str(), 
-		defines, 
+		widecharPath.c_str(), 
+		nullptr, 
 		D3D_COMPILE_STANDARD_FILE_INCLUDE, 
-		"main", 
-		target, 
+		entryPoint.c_str(), 
+		profile.c_str(), 
 		flags, 
 		0, 
 		&shaderBlob, 
 		&errorBlob) );
 
-	ComPtr<ID3D12ShaderReflection> reflection;
 	ThrowIfFailed( D3DReflect(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), IID_PPV_ARGS(&reflection)) );
 	D3D12_SHADER_DESC desc;
 	ThrowIfFailed( reflection->GetDesc(&desc) );
@@ -67,6 +68,12 @@ D3D12_SHADER_BYTECODE Shader::GetBytecode()
 	return bytecode;
 }
 
+D3D12_SHADER_INPUT_BIND_DESC Shader::GetBindingDesc(const std::string& inName)
+{
+	D3D12_SHADER_INPUT_BIND_DESC bindingDesc = {};
+	reflection->GetResourceBindingDescByName(inName.c_str(), &bindingDesc);
+	return bindingDesc;
+}
 
 
 

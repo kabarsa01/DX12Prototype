@@ -30,6 +30,7 @@
 #include "passes/LightClusteringPass.h"
 #include "objects/SwapChain.h"
 #include "utils/HelperUtils.h"
+#include "GlobalSamplers.h"
 
 //const std::vector<Vertex> verticesTest = {
 //	{{0.0f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}},
@@ -69,6 +70,8 @@ void Renderer::Init()
 //	swapChain.CreateForResolution(width, height);
 	commandBuffers.Create(&device, 2, 1);
 
+	GlobalSamplers::GetInstance()->Create(&device);
+
 	perFrameData = new PerFrameData();
 	perFrameData->Create(&device);
 
@@ -99,9 +102,10 @@ void Renderer::RenderFrame()
 	}
 
 	// waiting for the current frame to be available
-	swapChain.GetCurrentFence().Wait();
+	Fence currentFence = swapChain.GetCurrentFence();
+	currentFence.Wait();
 	// resetting our fence object
-	swapChain.GetCurrentFence().Reset();
+	currentFence.Reset();
 
 	uint32_t imageIndex = swapChain.GetCurrentImageIndex();
 	//if (outdated)
@@ -144,19 +148,24 @@ void Renderer::RenderFrame()
 	// post process pass
 	postProcessPass->RecordCommands(cmdList);
 
-	CD3DX12_RESOURCE_BARRIER presentBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		swapChain.GetCurrentImage().Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_PRESENT
-	);
-	cmdList->ResourceBarrier(1, &presentBarrier);
+	//CD3DX12_RESOURCE_BARRIER presentBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+	//	swapChain.GetCurrentImage().Get(),
+	//	D3D12_RESOURCE_STATE_RENDER_TARGET,
+	//	D3D12_RESOURCE_STATE_PRESENT
+	//);
+//	cmdList->ResourceBarrier(1, &presentBarrier);
 	// end commands recording
 	ThrowIfFailed(cmdList->Close());
 
-	ComPtr<ID3D12CommandQueue> queue;
+	ComPtr<ID3D12CommandQueue> queue = device.GetDirectQueue();
 	ID3D12CommandList* lists[] = { cmdList.Get() };
 	queue->ExecuteCommandLists(static_cast<UINT>(std::size(lists)), lists);
 	swapChain.Present(true);
+
+	currentFence.Wait();
+	// resetting our fence object
+	currentFence.Reset();
+
 	// getting current frame fence to signal it on GPU after present
 	swapChain.GetCurrentFence().Signal(queue);
 }
@@ -275,7 +284,7 @@ void Renderer::TransferResources(ComPtr<ID3D12GraphicsCommandList> inCmdList)
 		buffersBarriers.push_back(CD3DX12_RESOURCE_BARRIER::Transition(
 			*buffer, 
 			D3D12_RESOURCE_STATE_COPY_DEST, 
-			D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
+			D3D12_RESOURCE_STATE_COMMON));
 	}
 
 	// images
@@ -286,18 +295,39 @@ void Renderer::TransferResources(ComPtr<ID3D12GraphicsCommandList> inCmdList)
 	afterTransferBarriers.resize(images.size());
 	for (uint32_t index = 0; index < images.size(); index++)
 	{
-		
-		beforeTransferBarriers[index] = CD3DX12_RESOURCE_BARRIER::Transition(*images[index], D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+		// mages are initially create in COPY_DST state
+//		beforeTransferBarriers[index] = CD3DX12_RESOURCE_BARRIER::Transition(*images[index], D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
 		afterTransferBarriers[index] = CD3DX12_RESOURCE_BARRIER::Transition(*images[index], D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 	}
 
-	inCmdList->ResourceBarrier(static_cast<uint32_t>(beforeTransferBarriers.size()), beforeTransferBarriers.data());
+//	inCmdList->ResourceBarrier(static_cast<uint32_t>(beforeTransferBarriers.size()), beforeTransferBarriers.data());
 
 	//submit copy
 	for (ImageResource* image : images)
 	{
 		// copy
-		inCmdList->CopyResource(*image, * image->GetStagingBuffer());
+		//inCmdList->CopyResource(*image, * image->GetStagingBuffer());
+		//D3D12_SUBRESOURCE_DATA subres;
+		//subres.pData = image->GetStagingBuffer()->Get
+
+//		UpdateSubresources(inCmdList.Get(), *image, *image->CreateStagingBuffer(), 0, 0, 1, nullptr);
+		D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
+		UINT numRows;
+		UINT64 rowSizeBytes;
+		UINT64 totalBytes;
+		device.GetNativeDevice()->GetCopyableFootprints(&image->GetResource()->GetDesc(), 0, 1, 0, &footprint, &numRows, &rowSizeBytes, &totalBytes);
+
+		D3D12_TEXTURE_COPY_LOCATION srcLoc;
+		srcLoc.pResource = * image->GetStagingBuffer();
+		srcLoc.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+		srcLoc.PlacedFootprint = footprint;
+		srcLoc.SubresourceIndex = 0;
+		D3D12_TEXTURE_COPY_LOCATION dstLoc;
+		dstLoc.pResource = *image;
+		dstLoc.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+		dstLoc.SubresourceIndex = 0;
+
+		inCmdList->CopyTextureRegion(&dstLoc, 0, 0, 0, &srcLoc, nullptr);
 	}
 
 //	GenerateMips(inCmdBuffer, images);
@@ -306,55 +336,6 @@ void Renderer::TransferResources(ComPtr<ID3D12GraphicsCommandList> inCmdList)
 	inCmdList->ResourceBarrier(static_cast<uint32_t>(afterTransferBarriers.size()), afterTransferBarriers.data());
 	inCmdList->ResourceBarrier(static_cast<uint32_t>(buffersBarriers.size()), buffersBarriers.data());
 }
-//
-//void Renderer::GenerateMips(CommandBuffer& inCmdBuffer, std::vector<ImageResource*>& inImages)
-//{
-//	for (uint32_t index = 0; index < inImages.size(); index++)
-//	{
-//		ImageResource* image = inImages[index];
-//
-//		for (uint32_t mipIndex = 1; mipIndex < image->GetMips(); mipIndex++)
-//		{
-//			uint32_t previousWidth = std::max(image->GetWidth() >> (mipIndex - 1), (uint32_t)1);
-//			uint32_t previousHeight = std::max(image->GetHeight() >> (mipIndex - 1), (uint32_t)1);
-//			uint32_t currentWidth = std::max(previousWidth >> 1, (uint32_t)1);
-//			uint32_t currentHeight = std::max(previousHeight >> 1, (uint32_t)1);
-//
-//			ImageBlit blit;
-//			std::array<Offset3D, 2> srcOffsets = { Offset3D(0, 0, 0), Offset3D(previousWidth, previousHeight, 1) };
-//			blit.setSrcOffsets(srcOffsets);
-//			blit.setSrcSubresource(ImageSubresourceLayers(ImageAspectFlagBits::eColor, mipIndex - 1, 0, 1));
-//			std::array<Offset3D, 2> dstOffsets = { Offset3D(0, 0, 0), Offset3D(currentWidth, currentHeight, 1) };
-//			blit.setDstOffsets(dstOffsets);
-//			blit.setDstSubresource(ImageSubresourceLayers(ImageAspectFlagBits::eColor, mipIndex, 0, 1));
-//
-//			// change layout for source and destination mip to prepare for copy
-//			ImageMemoryBarrier previousMipBarrier = image->CreateLayoutBarrier(
-//				ImageLayout::eUndefined,
-//				ImageLayout::eTransferSrcOptimal,
-//				AccessFlagBits::eTransferWrite,
-//				AccessFlagBits::eTransferRead,
-//				ImageAspectFlagBits::eColor,
-//				mipIndex - 1, 1, 0, 1);
-//			ImageMemoryBarrier currentMipBarrier = image->CreateLayoutBarrier(
-//				ImageLayout::eUndefined,
-//				ImageLayout::eTransferDstOptimal,
-//				AccessFlagBits::eTransferRead,
-//				AccessFlagBits::eTransferWrite,
-//				ImageAspectFlagBits::eColor,
-//				mipIndex, 1, 0, 1);
-//
-//			ImageMemoryBarrier barriers[] = { previousMipBarrier, currentMipBarrier };
-//			inCmdBuffer.pipelineBarrier(
-//				PipelineStageFlagBits::eTransfer,
-//				PipelineStageFlagBits::eTransfer,
-//				DependencyFlags(),
-//				0, nullptr,
-//				0, nullptr,
-//				2, barriers);
-//
-//			inCmdBuffer.blitImage(*image, ImageLayout::eTransferSrcOptimal, *image, ImageLayout::eTransferDstOptimal, { blit }, Filter::eLinear);
-//		}
-//	}
-//}
+
+
 

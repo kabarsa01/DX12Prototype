@@ -9,6 +9,8 @@
 #include "PassBase.h"
 #include "../PerFrameData.h"
 #include "utils/HelperUtils.h"
+#include "../TransferList.h"
+#include "utils/ImageUtils.h"
 
 PostProcessPass::PostProcessPass(HashString inName)
 	: PassBase(inName)
@@ -68,11 +70,11 @@ void PostProcessPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommand
 	inCommandList->RSSetScissorRects(1, &scissorsRect);
 
 	DescriptorBlock& descBlock = GetRtvBlock();
-	inCommandList->OMSetRenderTargets(descBlock.size, &descBlock.cpuHandle, TRUE, &GetDsvBlock().cpuHandle);
+	inCommandList->OMSetRenderTargets(descBlock.size, &descBlock.cpuHandle, TRUE, nullptr);//&GetDsvBlock().cpuHandle);
 	inCommandList->SetPipelineState(pipelineData.pipeline.Get());
 	inCommandList->SetGraphicsRootSignature(pipelineData.rootSignature.Get());
 
-	std::array<ID3D12DescriptorHeap*, 3> heaps = { GetRtvBlock().heap.Get(), GetDsvBlock().heap.Get(), postProcessMaterial->GetDescriptorBlock().heap.Get() };
+	std::array<ID3D12DescriptorHeap*, 1> heaps = { /*GetRtvBlock().heap.Get(),*/ /*GetDsvBlock().heap.Get(),*/ postProcessMaterial->GetDescriptorBlock().heap.Get() };
 	inCommandList->SetDescriptorHeaps(static_cast<UINT>(heaps.size()), heaps.data());
 	inCommandList->SetGraphicsRootDescriptorTable(1, GetRenderer()->GetPerFrameData()->GetGPUDescriptorHandle());
 	inCommandList->SetGraphicsRootDescriptorTable(2, postProcessMaterial->GetDescriptorBlock().gpuHandle);
@@ -112,20 +114,28 @@ void PostProcessPass::OnCreate()
 	//screenImage = ObjectBase::NewObject<Texture2D, const HashString&>("SceneImageTexture");
 	//screenImage->CreateFromExternal(lightingPass->GetAttachments()[0]);
 	screenImage = DataManager::RequestResourceType<Texture2D, bool, bool, bool, bool>("content/meshes/root/Aset_wood_root_M_rkswd_4K_Albedo.jpg", false, true, false, true);
+	//TransferList::GetInstance()->PushImage(&screenImage->GetImage());
 
 	postProcessMaterial = DataManager::RequestResourceType<Material, const std::string&, const std::string&>(
 		"PostProcessMaterial",
-		"content/shaders/PostProcessVert.spv",
-		"content/shaders/PostProcessFrag.spv"
+		"./content/shaders/PostProcessVert.hlsl",
+		"./content/shaders/PostProcessVert.hlsl"
 		);
-	ObjectMVPData objData;
-	postProcessMaterial->SetUniformBuffer<ObjectMVPData>("mvpBuffer", objData);
+	postProcessMaterial->SetEntrypoints("VSmain", "PSmain");
+//	ObjectMVPData objData;
+//	postProcessMaterial->SetUniformBuffer<ObjectMVPData>("mvpBuffer", objData);
 	postProcessMaterial->SetTexture("screenImage", screenImage);//GetRenderer()->GetLightClusteringPass()->texture);
 	postProcessMaterial->LoadResources();
 }
 
 void PostProcessPass::CreateColorAttachments(std::vector<ImageResource>& outAttachments, uint32_t inWidth, uint32_t inHeight)
 {
+	outAttachments.push_back( ImageUtils::CreateColorAttachment(GetDevice(), inWidth, inHeight) );
+}
+
+void PostProcessPass::CreateColorAttachmentViews(const std::vector<ImageResource>& inAttachments, DescriptorBlock inBlock, std::vector<ResourceView>& outAttachmentViews)
+{
+	outAttachmentViews.push_back(ResourceView::CreateRTVTexture2D(inAttachments[0], inBlock, 0));
 }
 
 ImageResource PostProcessPass::CreateDepthAttachment(uint32_t inWidth, uint32_t inHeight)
@@ -177,7 +187,7 @@ Microsoft::WRL::ComPtr<ID3D12PipelineState> PostProcessPass::CreatePipeline(Mate
 	rasterizerDesc.MultisampleEnable = FALSE;
 	rasterizerDesc.SlopeScaledDepthBias = 0.0f;
 
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	psoDesc.VS = inMaterial->GetVertexShader()->GetBytecode();
 	psoDesc.PS = inMaterial->GetFragmentShader()->GetBytecode();
 	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
@@ -189,7 +199,7 @@ Microsoft::WRL::ComPtr<ID3D12PipelineState> PostProcessPass::CreatePipeline(Mate
 
 	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 #if defined(DEBUG) || defined(_DEBUG)
-	psoDesc.Flags |= D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG;
+//	psoDesc.Flags |= D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG;
 #endif
 
 	psoDesc.InputLayout = inputLayout;
@@ -205,7 +215,5 @@ Microsoft::WRL::ComPtr<ID3D12PipelineState> PostProcessPass::CreatePipeline(Mate
 	return pipelineState;
 }
 
-void PostProcessPass::CreateColorAttachmentViews(const std::vector<ImageResource>& inAttachments, DescriptorBlock inBlock, std::vector<ResourceView>& outAttachmentViews)
-{
-}
+
 

@@ -144,11 +144,14 @@ ComPtr<ID3D12RootSignature> PassBase::CreateRootSignature(MaterialPtr inMaterial
 	rootParams[1] = renderer->GetPerFrameData()->GetRootParameter();
 	rootParams[2] = inMaterial->GetRootParameter();
 
-	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootDesc;
 	GlobalSamplers* samplers = GlobalSamplers::GetInstance();
-	rootDesc.Init_1_1(3, rootParams, samplers->GetSamplersCounter(), samplers->GetSamplersDescriptions(), D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE);
+
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootDesc;
+	D3D12_ROOT_SIGNATURE_FLAGS flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+	rootDesc.Init_1_1(3, rootParams, samplers->GetSamplersCounter(), samplers->GetSamplersDescriptions(), flags);
 	ComPtr<ID3DBlob> serializedRootSig;
-	ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rootDesc, &serializedRootSig, nullptr));
+	ComPtr<ID3DBlob> errorBlob;
+	ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rootDesc, &serializedRootSig, &errorBlob));
 
 	ComPtr<ID3D12RootSignature> rootSignature;
 	ThrowIfFailed(GetDevice()->GetNativeDevice()->CreateRootSignature(

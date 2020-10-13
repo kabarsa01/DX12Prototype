@@ -30,19 +30,25 @@ using namespace Microsoft::WRL;
 class Shader : public Resource
 {
 public:
-	Shader(const HashString& inPath);
+	Shader(const HashString& inPath, const std::string& inEntryPoint, const std::string& inProfile);
 	virtual ~Shader();
 
 	virtual bool Load() override;
 	virtual bool Cleanup() override;
 
+	inline void SetEntryPoint(const std::string& inEntryPoint) { entryPoint = inEntryPoint; }
+
 	D3D12_SHADER_BYTECODE GetBytecode();
+	D3D12_SHADER_INPUT_BIND_DESC GetBindingDesc(const std::string& inName);
 	inline ComPtr<ID3DBlob> GetShaderBlob() { return shaderBlob; }
 	inline std::vector<D3D12_SHADER_INPUT_BIND_DESC>& GetBindings() { return bindings; }
 	inline uint32_t GetBindingsCount() { return bindingsCount; }
 protected:
 	std::string filePath;
+	std::string profile;
+	std::string entryPoint;
 	ComPtr<ID3DBlob> shaderBlob;
+	ComPtr<ID3D12ShaderReflection> reflection;
 	std::vector<D3D12_SHADER_INPUT_BIND_DESC> bindings;
 	uint32_t bindingsCount;
 };

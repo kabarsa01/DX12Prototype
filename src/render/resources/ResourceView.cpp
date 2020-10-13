@@ -22,7 +22,9 @@ ResourceView ResourceView::CreateCBV(ID3D12Resource* inResource, DescriptorBlock
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC viewDesc;
 	viewDesc.BufferLocation = inResource->GetGPUVirtualAddress();
-	viewDesc.SizeInBytes = static_cast<UINT>(inResource->GetDesc().Width);
+	uint64_t width = inResource->GetDesc().Width;
+	uint64_t size = 256 * (width / 256 + 1 * (width % 256 > 0));
+	viewDesc.SizeInBytes = static_cast<UINT>( size );
 
 	device.GetNativeDevice()->CreateConstantBufferView(&viewDesc, inBlock.GetCpuHandle(inIndex));
 
@@ -49,9 +51,10 @@ ResourceView ResourceView::CreateSRVTexture2D(ID3D12Resource* inResource, D3D12_
 {
 	Device& device = Engine::GetRendererInstance()->GetDevice();
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc;
+	D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc = {};
 	viewDesc.Format = inResource->GetDesc().Format;
 	viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	viewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	viewDesc.Texture2D = inSRV;
 
 	device.GetNativeDevice()->CreateShaderResourceView(inResource, &viewDesc, inBlock.GetCpuHandle(inIndex));
@@ -75,7 +78,7 @@ ResourceView ResourceView::CreateRTVTexture2D(ID3D12Resource* inResource, D3D12_
 {
 	Device& device = Engine::GetRendererInstance()->GetDevice();
 
-	D3D12_RENDER_TARGET_VIEW_DESC viewDesc;
+	D3D12_RENDER_TARGET_VIEW_DESC viewDesc = {};
 	viewDesc.Format = inResource->GetDesc().Format;
 	viewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 	viewDesc.Texture2D = inRTV;

@@ -2,6 +2,7 @@
 #include "stb/stb_image.h"
 #include "core/Engine.h"
 #include "render/Renderer.h"
+#include "render/TransferList.h"
 
 namespace
 {
@@ -46,9 +47,8 @@ bool TextureData::Load()
 	Device& device = Engine::GetRendererInstance()->GetDevice();
 	image.resourceDescription = GetImageDesc();
 	image.Create(&device);
-//	image.BindMemory(MemoryPropertyFlagBits::eDeviceLocal);
 	image.CreateStagingBuffer()->CopyTo(dataSize, reinterpret_cast<char*>(data));
-//	imageView = CreateImageView(ImageSubresourceRange(ImageAspectFlagBits::eColor, 0, image.GetMips(), 0, 1));
+	TransferList::GetInstance()->PushImage(&image);
 
 	stbi_image_free(data);
 

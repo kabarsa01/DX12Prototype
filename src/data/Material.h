@@ -82,11 +82,10 @@ protected:
 	CD3DX12_ROOT_PARAMETER1 descriptorTable;
 	DescriptorBlock descriptorBlock;
 
-	Device* vulkanDevice;
-	VulkanDescriptorSet vulkanDescriptorSet;
+	Device* device;
+//	VulkanDescriptorSet vulkanDescriptorSet;
 
-	ShaderPtr InitShader(const std::string& inResourcePath);
-	
+	ShaderPtr InitShader(const std::string& inResourcePath, const std::string& inEntryPoint, const std::string& inProfile);
 };
 
 typedef std::shared_ptr<Material> MaterialPtr;

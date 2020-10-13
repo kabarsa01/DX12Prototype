@@ -5,6 +5,7 @@
 ImageResource::ImageResource(bool inScoped)
 	: scoped(inScoped)
 	, resource(nullptr)
+	, stagingBuffer(nullptr)
 {
 
 }
@@ -38,6 +39,11 @@ void ImageResource::Create(Device* inDevice)
 		D3D12_RESOURCE_STATE_COPY_DEST, 
 		nullptr, 
 		IID_PPV_ARGS(&resource));
+
+	width = resourceDescription.Width;
+	height = resourceDescription.Height;
+	depth = resourceDescription.DepthOrArraySize;
+	mips = resourceDescription.MipLevels;
 }
 
 //ImageView VulkanImage::CreateView(ImageSubresourceRange inSubRange, ImageViewType inViewType)
@@ -188,7 +194,8 @@ BufferResource* ImageResource::CreateStagingBuffer()
 		return stagingBuffer;
 	}
 	stagingBuffer = new BufferResource();
-	stagingBuffer->Create(device, 0, D3D12_HEAP_TYPE_UPLOAD);
+	//GetRequiredIntermediateSize
+	stagingBuffer->Create(device, allocInfo.SizeInBytes, D3D12_HEAP_TYPE_UPLOAD);
 	return stagingBuffer;
 }
 

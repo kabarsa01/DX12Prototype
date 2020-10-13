@@ -2,19 +2,24 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h> // For HRESULT
+#include <comdef.h>
 #include <vcruntime_exception.h>
 #include <vector>
+
+std::wstring ToWString(const std::string& inString, UINT inCodePage = CP_UTF8);
+std::string ToString(const std::wstring& inWideString, UINT inCodePage = CP_UTF8);
 
 // Source: https://github.com/Microsoft/DirectX-Graphics-Samples
 inline void ThrowIfFailed(HRESULT hr)
 {
 	if (FAILED(hr))
 	{
-		throw std::exception();
+		_com_error err(hr);
+		throw std::exception(ToString(err.ErrorMessage()).c_str());
 	}
 }
 
-inline std::wstring ToWString(const std::string& inString, UINT inCodePage = CP_UTF8)
+inline std::wstring ToWString(const std::string& inString, UINT inCodePage/* = CP_UTF8*/)
 {
 	if (inString.length() == 0)
 	{
@@ -29,7 +34,7 @@ inline std::wstring ToWString(const std::string& inString, UINT inCodePage = CP_
 	return std::wstring(wideChars.data());
 }
 
-inline std::string ToString(const std::wstring& inWideString, UINT inCodePage = CP_UTF8)
+inline std::string ToString(const std::wstring& inWideString, UINT inCodePage/* = CP_UTF8*/)
 {
 	if (inWideString.length() == 0)
 	{
