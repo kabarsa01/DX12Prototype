@@ -59,7 +59,7 @@ void BufferResource::Create(Device* inDevice, uint64_t inSize, D3D12_HEAP_TYPE i
 		NULL, 
 		IID_PPV_ARGS(&resource)) );
 
-	size = inSize;// allocInfo.SizeInBytes;
+	sizeBytes = inSize;// allocInfo.SizeInBytes;
 	heapType = inHeapType;
 }
 
@@ -132,7 +132,7 @@ BufferResource* BufferResource::CreateStagingBuffer()
 		return stagingBuffer;
 	}
 	stagingBuffer = new BufferResource();
-	stagingBuffer->Create(device, size, D3D12_HEAP_TYPE_UPLOAD);
+	stagingBuffer->Create(device, sizeBytes, D3D12_HEAP_TYPE_UPLOAD);
 	return stagingBuffer;
 }
 

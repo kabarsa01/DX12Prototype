@@ -25,17 +25,18 @@ public:
 	uint32_t AcquireNextImage(bool& outBecameOutdated);
 	bool Present(bool inVSync);
 
-	void WaitForPresentQueue();
+	void WaitForFences();
 
-	ComPtr<ID3D12Resource> GetCurrentImage() { return images[swapChain4->GetCurrentBackBufferIndex()]; }
-	ResourceView GetCurrentView() { return views[swapChain4->GetCurrentBackBufferIndex()]; }
+	inline uint32_t GetBuffersCount() { return buffersCount; }
+	inline ComPtr<ID3D12Resource> GetCurrentImage() { return images[swapChain4->GetCurrentBackBufferIndex()]; }
+	inline ResourceView GetCurrentView() { return views[swapChain4->GetCurrentBackBufferIndex()]; }
 //	ComPtr<ID3D12Resource> GetPrevImage() { return images[prevImageIndex]; }
-	uint32_t GetCurrentImageIndex() { return swapChain4->GetCurrentBackBufferIndex(); }
+	inline uint32_t GetCurrentImageIndex() { return swapChain4->GetCurrentBackBufferIndex(); }
 //	uint32_t GetPrevImageIndex() { return prevImageIndex; }
 	//Semaphore& GetImageAvailableSemaphore() { return imageAvailableSemaphores[prevImageIndex]; }
 	//Semaphore& GetRenderingFinishedSemaphore() { return renderingFinishedSemaphores[imageIndex]; }
-	Fence GetCurrentFence();
-	Fence GetFence(uint32_t inIndex) { return fences[inIndex]; }
+	inline Fence GetCurrentFence() { return fences[swapChain4->GetCurrentBackBufferIndex()]; }
+	inline Fence GetFence(uint32_t inIndex) { return fences[inIndex]; }
 	void SignalFences();
 	void ResetFences();
 //	Fence GetPrevFence();
@@ -43,7 +44,7 @@ public:
 	//Framebuffer& GetFramebuffer(uint32_t inIndex) { return framebuffers[inIndex]; }
 	//uint32_t GetFramebuffersCount() { return static_cast<uint32_t>(framebuffers.size()); }
 
-	ComPtr<IDXGISwapChain4> GetSwapChain() { return swapChain4; }
+	inline ComPtr<IDXGISwapChain4> GetSwapChain() { return swapChain4; }
 	//RenderPass& GetRenderPass() { return renderPass; }
 	//Queue& GetPresentQueue() { return presentQueue; }
 	//Extent2D& GetExtent() { return extent; }

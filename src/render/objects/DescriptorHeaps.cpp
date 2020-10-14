@@ -22,21 +22,20 @@ void DescriptorHeaps::Create(Device* inDevice)
 {
 	device = inDevice;
 
-	CBV_SRV_UAVPools.push_back(DescriptorPool());
-	RTVPools.push_back(DescriptorPool());
-	DSVPools.push_back(DescriptorPool());
+	CBV_SRV_UAVPools.push_back(new DescriptorPool());
+	RTVPools.push_back(new DescriptorPool());
+	DSVPools.push_back(new DescriptorPool());
 
-	CBV_SRV_UAVPools[0].Create(inDevice, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, SHADER_RESOURCES_HEAP_SIZE, true);
-	RTVPools[0].Create(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RTV_HEAP_SIZE, false);
-	DSVPools[0].Create(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, DSV_HEAP_SIZE, false);
+	CBV_SRV_UAVPools[0]->Create(inDevice, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, SHADER_RESOURCES_HEAP_SIZE, true);
+	RTVPools[0]->Create(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RTV_HEAP_SIZE, false);
+	DSVPools[0]->Create(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, DSV_HEAP_SIZE, false);
 }
 
 void DescriptorHeaps::Destroy()
 {
-	//for (DescriptorPool pool : pools)
-	//{
-	//	device->GetDevice().destroyDescriptorPool(pool);
-	//}
+	DeletePools(CBV_SRV_UAVPools);
+	DeletePools(RTVPools);
+	DeletePools(DSVPools);
 }
 
 DescriptorBlock DescriptorHeaps::AllocateDescriptorsCBV_SRV_UAV(uint16_t inBlockSize)
@@ -54,27 +53,40 @@ DescriptorBlock DescriptorHeaps::AllocateDescriptorsDSV(uint16_t inBlockSize)
 	return AllocateDescriptors(inBlockSize, DSVPools, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, DSV_HEAP_SIZE, false);
 }
 
-DescriptorBlock DescriptorHeaps::AllocateDescriptors(uint16_t inBlockSize, std::vector<DescriptorPool>& inPools, D3D12_DESCRIPTOR_HEAP_TYPE inType, uint16_t inHeapSize, bool inShaderVisible)
+DescriptorBlock DescriptorHeaps::AllocateDescriptors(uint16_t inBlockSize, std::vector<DescriptorPool*>& inPools, D3D12_DESCRIPTOR_HEAP_TYPE inType, uint16_t inHeapSize, bool inShaderVisible)
 {
 	for (uint32_t poolIndex = 0; poolIndex < inPools.size(); poolIndex++)
 	{
-		DescriptorPool& pool = inPools[poolIndex];
-		DescriptorBlock block = pool.Allocate(inBlockSize);
+		DescriptorPool* pool = inPools[poolIndex];
+		DescriptorBlock block = pool->Allocate(inBlockSize);
 		if (block.size > 0)
 		{
 			return block;
 		}
 	}
 
-	inPools.push_back(DescriptorPool());
-	inPools.back().Create(device, inType, inHeapSize, inShaderVisible);
+	inPools.push_back(new DescriptorPool());
+	inPools.back()->Create(device, inType, inHeapSize, inShaderVisible);
 
-	return inPools.back().Allocate(inBlockSize);
+	return inPools.back()->Allocate(inBlockSize);
+}
+
+void DescriptorHeaps::DeletePools(std::vector<DescriptorPool*>& inPools)
+{
+	for (DescriptorPool* pool : inPools)
+	{
+		pool->Destroy();
+		delete pool;
+	}
+	inPools.clear();
 }
 
 void DescriptorHeaps::ReleaseDescriptors(const DescriptorBlock& inBlock)
 {
-	inBlock.parent->Release(inBlock);
+	if (inBlock.parent && inBlock.heap)
+	{
+		inBlock.parent->Release(inBlock);
+	}
 }
 
 //

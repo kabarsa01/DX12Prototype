@@ -11,7 +11,7 @@ ImageResource ImageUtils::CreateColorAttachment(Device* inDevice, uint32_t inWid
 		1, 1, 1, 0, // array, mips and sampling
 		D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, 
 		D3D12_TEXTURE_LAYOUT_UNKNOWN);
-	image.Create(inDevice);
+	image.Create(inDevice, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	return image;
 }
@@ -26,7 +26,7 @@ ImageResource ImageUtils::CreateDepthAttachment(Device* inDevice, uint32_t inWid
 		1, 1, 1, 0, // array, mips and sampling
 		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL,
 		D3D12_TEXTURE_LAYOUT_UNKNOWN);
-	image.Create(inDevice);
+	image.Create(inDevice, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	return image;
 }

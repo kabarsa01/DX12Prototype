@@ -57,11 +57,12 @@ public:
 	int GetWidth() const;
 	int GetHeight() const;
 
-	Device& GetDevice();
-	SwapChain& GetSwapChain();
-	CommandBuffers& GetCommandBuffers();
-	DescriptorHeaps& GetDescriptorHeaps();
-//	Queue GetGraphicsQueue();
+	inline Device& GetDevice() { return device; }
+	inline SwapChain& GetSwapChain() { return swapChain; }
+	inline uint32_t GetBuffersCount() { return swapChain.GetBuffersCount(); }
+	inline CommandBuffers& GetCommandBuffers() { return commandBuffers; }
+	inline DescriptorHeaps& GetDescriptorHeaps() { return descriptorHeaps; }
+	inline ComPtr<ID3D12CommandQueue> GetDirectQueue() { return device.GetDirectQueue(); }
 
 	PerFrameData* GetPerFrameData() { return perFrameData; }
 	//ZPrepass* GetZPrepass() { return zPrepass; }

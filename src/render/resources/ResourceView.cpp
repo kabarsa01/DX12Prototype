@@ -7,13 +7,20 @@ ResourceView::ResourceView()
 }
 
 ResourceView::ResourceView(uint16_t inBlockOffset, DescriptorBlock inDescriptorBlock)
-	: blockOffset(inBlockOffset)
-	, descriptorBlock(inDescriptorBlock)
 {
+	Init(inBlockOffset, inDescriptorBlock);
 }
 
 ResourceView::~ResourceView()
 {
+}
+
+void ResourceView::Init(uint16_t inBlockOffset, DescriptorBlock inDescriptorBlock)
+{
+	blockOffset = inBlockOffset;
+	descriptorBlock = inDescriptorBlock;
+	cpuHandle = descriptorBlock.GetCpuHandle(blockOffset);
+	gpuHandle = descriptorBlock.GetGpuHandle(blockOffset);
 }
 
 ResourceView ResourceView::CreateCBV(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex)

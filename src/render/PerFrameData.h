@@ -19,7 +19,8 @@ public:
 	void Destroy();
 	void UpdateBufferData();
 	inline CD3DX12_ROOT_PARAMETER1& GetRootParameter() { return descriptorTable; }
-	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle() { return descriptorBlock.gpuHandle; }
+	inline D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle() { return descriptorBlock.gpuHandle; }
+	inline DescriptorBlock& GetDescriptorBlock() { return descriptorBlock; }
 private:
 	Device* device;
 	BufferResource shaderDataBuffer;

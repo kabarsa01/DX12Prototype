@@ -16,7 +16,7 @@ public:
 	ImageResource(bool inScoped = false);
 	virtual ~ImageResource();
 
-	void Create(Device* inDevice);
+	void Create(Device* inDevice, D3D12_RESOURCE_STATES inInitialStates = D3D12_RESOURCE_STATE_COPY_DEST);
 //	ImageView CreateView(ImageSubresourceRange inSubRange, ImageViewType inViewType);
 	void Destroy();
 

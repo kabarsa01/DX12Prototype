@@ -68,6 +68,14 @@ void SwapChain::Create(Device* inDevice, uint32_t inBuffersCount/* = 2*/)
 
 void SwapChain::Destroy()
 {
+	for (Fence& fence : fences)
+	{
+		fence.Destroy();
+	}
+	fences.clear();
+	views.clear();
+	images.clear();
+	DescriptorHeaps::ReleaseDescriptors(RTVs);
 }
 
 
@@ -183,14 +191,13 @@ bool SwapChain::Present(bool inVSync)
 	return true;
 }
 
-void SwapChain::WaitForPresentQueue()
+void SwapChain::WaitForFences()
 {
-//	presentQueue.waitIdle();
-}
-
-Fence SwapChain::GetCurrentFence()
-{
-	return fences[swapChain4->GetCurrentBackBufferIndex()];
+	for (Fence& fence : fences)
+	{
+		fence.Signal(device->GetDirectQueue());
+		fence.Wait();//std::chrono::milliseconds(1000));
+	}
 }
 
 void SwapChain::SignalFences()

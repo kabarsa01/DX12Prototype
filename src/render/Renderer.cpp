@@ -68,7 +68,7 @@ void Renderer::Init()
 	swapChain.Create(&device, 3);
 	swapChain.SignalFences();
 //	swapChain.CreateForResolution(width, height);
-	commandBuffers.Create(&device, 2, 1);
+	commandBuffers.Create(&device, 3, 1);
 
 	GlobalSamplers::GetInstance()->Create(&device);
 
@@ -160,24 +160,23 @@ void Renderer::RenderFrame()
 	ComPtr<ID3D12CommandQueue> queue = device.GetDirectQueue();
 	ID3D12CommandList* lists[] = { cmdList.Get() };
 	queue->ExecuteCommandLists(static_cast<UINT>(std::size(lists)), lists);
+	currentFence.Signal(queue);
 	swapChain.Present(true);
 
 	currentFence.Wait();
 	// resetting our fence object
 	currentFence.Reset();
-
-	// getting current frame fence to signal it on GPU after present
-	swapChain.GetCurrentFence().Signal(queue);
+	currentFence.Signal();
 }
 
 void Renderer::WaitForDevice()
 {
-//	device.GetNativeDevice()->wawaitIdle();
+	swapChain.WaitForFences();
 }
 
 void Renderer::Cleanup()
 {
-	WaitForDevice();
+	swapChain.WaitForFences();
 
 	postProcessPass->Destroy();
 	delete postProcessPass;
@@ -191,17 +190,17 @@ void Renderer::Cleanup()
 	//delete lightClusteringPass;
 
 	ScenePtr scene = Engine::GetSceneInstance();
-	MeshComponentPtr meshComp = scene->GetSceneComponent<MeshComponent>();
-	meshComp->meshData->DestroyBuffers();
+//	MeshComponentPtr meshComp = scene->GetSceneComponent<MeshComponent>();
+//	meshComp->meshData->DestroyBuffers();
 
 	perFrameData->Destroy();
 	delete perFrameData;
 
 	PipelineRegistry::GetInstance()->DestroyPipelines(&device);
 
-	descriptorHeaps.Destroy();
 	commandBuffers.Destroy();
 	swapChain.Destroy();
+	descriptorHeaps.Destroy();
 	device.Destroy();
 }
 
@@ -221,26 +220,6 @@ int Renderer::GetWidth() const
 int Renderer::GetHeight() const
 {
 	return height;
-}
-
-Device& Renderer::GetDevice()
-{
-	return device;
-}
-
-SwapChain& Renderer::GetSwapChain()
-{
-	return swapChain;
-}
-
-CommandBuffers& Renderer::GetCommandBuffers()
-{
-	return commandBuffers;
-}
-
-DescriptorHeaps& Renderer::GetDescriptorHeaps()
-{
-	return descriptorHeaps;
 }
 
 void Renderer::OnResolutionChange()
@@ -279,12 +258,11 @@ void Renderer::TransferResources(ComPtr<ID3D12GraphicsCommandList> inCmdList)
 	std::vector<D3D12_RESOURCE_BARRIER> buffersBarriers;
 	for (BufferResource* buffer : buffers)
 	{
-//		inCmdBuffer->copyBuffer(*buffer->CreateStagingBuffer(), *buffer, 1, &buffer->CreateBufferCopy());
 		inCmdList->CopyResource(*buffer, * buffer->CreateStagingBuffer());
 		buffersBarriers.push_back(CD3DX12_RESOURCE_BARRIER::Transition(
 			*buffer, 
 			D3D12_RESOURCE_STATE_COPY_DEST, 
-			D3D12_RESOURCE_STATE_COMMON));
+			D3D12_RESOURCE_STATE_COMMON | D3D12_RESOURCE_STATE_INDEX_BUFFER | D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
 	}
 
 	// images
@@ -333,8 +311,14 @@ void Renderer::TransferResources(ComPtr<ID3D12GraphicsCommandList> inCmdList)
 //	GenerateMips(inCmdBuffer, images);
 
 	// final barriers for buffers and images
-	inCmdList->ResourceBarrier(static_cast<uint32_t>(afterTransferBarriers.size()), afterTransferBarriers.data());
-	inCmdList->ResourceBarrier(static_cast<uint32_t>(buffersBarriers.size()), buffersBarriers.data());
+	if (afterTransferBarriers.size() > 0)
+	{
+		inCmdList->ResourceBarrier(static_cast<uint32_t>(afterTransferBarriers.size()), afterTransferBarriers.data());
+	}
+	if (buffersBarriers.size() > 0)
+	{
+		inCmdList->ResourceBarrier(static_cast<uint32_t>(buffersBarriers.size()), buffersBarriers.data());
+	}
 }
 
 

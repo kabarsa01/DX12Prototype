@@ -1,12 +1,13 @@
 #pragma once
 
 #include <d3d12.h>
+#include <DirectXMath.h>
 #include <vector>
 #include <array>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+//#include <glm/glm.hpp>
+//#include <glm/gtc/matrix_transform.hpp>
+//#include <glm/gtc/type_ptr.hpp>
 
 #include "data/Resource.h"
 #include "render/resources/BufferResource.h"
@@ -15,7 +16,7 @@
 #include "render/Renderer.h"
 
 using namespace std;
-using namespace glm;
+using namespace DirectX;
 
 //packing should probably be considered, maybe in the future someday
 //#pragma pack(push, 1)
@@ -23,11 +24,11 @@ using namespace glm;
 
 struct Vertex
 {
-	vec3 position;
-	vec3 normal;
-	vec2 texCoord;
-	vec3 tangent;
-	vec3 bitangent;
+	XMFLOAT3 position;
+	XMFLOAT3 normal;
+	XMFLOAT2 texCoord;
+	XMFLOAT3 tangent;
+	XMFLOAT3 bitangent;
 
 	static std::array<D3D12_INPUT_ELEMENT_DESC, 5> GetAttributeDescriptions(uint32_t inInputSlot = 0);
 };
@@ -53,11 +54,11 @@ public:
 	void DestroyBuffers();
 
 	BufferResource& GetVertexBuffer();
-	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView();
+	inline D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() { return vertexBufferView; }
 	uint32_t GetVertexBufferSizeBytes();
 	uint32_t GetVertexCount();
 	BufferResource& GetIndexBuffer();
-	D3D12_INDEX_BUFFER_VIEW GetIndexBufferView();
+	inline D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView() { return indexBufferView; }
 	uint32_t GetIndexBufferSizeBytes();
 	uint32_t GetIndexCount();
 
@@ -67,6 +68,8 @@ public:
 private:
 	BufferResource vertexBuffer;
 	BufferResource indexBuffer;
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+	D3D12_INDEX_BUFFER_VIEW indexBufferView;
 
 	MeshData() : Resource(HashString::NONE) {}
 

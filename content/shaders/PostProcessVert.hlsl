@@ -33,6 +33,8 @@ struct VSInput
 	float3 pos : POSITION;
 	float3 normal : NORMAL;
 	float2 uv : TEXCOORD;
+	float3 tangent : TANGENT;
+	float3 bitangent : BITANGENT;
 };
 
 struct PSInput
@@ -57,6 +59,6 @@ PSInput VSmain(VSInput input)
 
 float4 PSmain(PSInput input) : SV_TARGET
 {
-	float4 texColor = screenImage.Sample(repeatLinearSampler, input.uv);
-	return float4(input.color * texColor, 1.0f);
+	float4 texColor = screenImage.SampleLevel(repeatLinearSampler, input.uv, 0);
+	return texColor;//float4(0.7, 0.7, 0.2, 1.0);//
 }

@@ -10,10 +10,10 @@ namespace
 {
 	std::vector<Vertex> quadVertices = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 	// positions            // normals           // texCoords
-	{{-1.0f,  1.0f,  0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
-	{{-1.0f, -1.0f,  0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-	{{ 1.0f, -1.0f,  0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
-	{{ 1.0f,  1.0f,  0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}}
+	{{-1.0f,  1.0f,  0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+	{{-1.0f, -1.0f,  0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+	{{ 1.0f, -1.0f,  0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+	{{ 1.0f,  1.0f,  0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}
 	};
 
 	std::vector<unsigned int> quadIndices = {
@@ -36,11 +36,11 @@ namespace
 /////////////////
 std::array<D3D12_INPUT_ELEMENT_DESC, 5> Vertex::GetAttributeDescriptions(uint32_t inInputSlot /*= 0*/)
 {
-	D3D12_INPUT_ELEMENT_DESC position = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, inInputSlot, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	D3D12_INPUT_ELEMENT_DESC normal = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, inInputSlot, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	D3D12_INPUT_ELEMENT_DESC texcoord = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, inInputSlot, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	D3D12_INPUT_ELEMENT_DESC tangent = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, inInputSlot, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	D3D12_INPUT_ELEMENT_DESC bitangent = { "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, inInputSlot, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	D3D12_INPUT_ELEMENT_DESC position = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, inInputSlot, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	D3D12_INPUT_ELEMENT_DESC normal = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, inInputSlot, offsetof(Vertex, normal), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	D3D12_INPUT_ELEMENT_DESC texcoord = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, inInputSlot, offsetof(Vertex, texCoord), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	D3D12_INPUT_ELEMENT_DESC tangent = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, inInputSlot, offsetof(Vertex, tangent), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	D3D12_INPUT_ELEMENT_DESC bitangent = { "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, inInputSlot, offsetof(Vertex, bitangent), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	std::array<D3D12_INPUT_ELEMENT_DESC, 5> attributes =
 	{
@@ -83,6 +83,16 @@ void MeshData::CreateBuffers()
 {
 	SetupBuffer<Vertex>(vertexBuffer, vertices);
 	SetupBuffer<uint32_t>(indexBuffer, indices);
+
+	vertexBufferView = {};
+	vertexBufferView.SizeInBytes = static_cast<UINT>(vertexBuffer.GetSizeBytes());
+	vertexBufferView.BufferLocation = vertexBuffer.GetGpuVirtualAddress();
+	vertexBufferView.StrideInBytes = sizeof(Vertex);
+
+	indexBufferView = {};
+	indexBufferView.SizeInBytes = static_cast<UINT>(indexBuffer.GetSizeBytes());
+	indexBufferView.BufferLocation = indexBuffer.GetGpuVirtualAddress();
+	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 }
 
 void MeshData::DestroyBuffers()
@@ -108,16 +118,6 @@ BufferResource& MeshData::GetVertexBuffer()
 	return vertexBuffer;
 }
 
-D3D12_VERTEX_BUFFER_VIEW MeshData::GetVertexBufferView()
-{
-	D3D12_VERTEX_BUFFER_VIEW view;
-	view.SizeInBytes = static_cast<UINT>( vertexBuffer.GetSize() );
-	view.BufferLocation = vertexBuffer.GetGpuVirtualAddress();
-	view.StrideInBytes = sizeof(Vertex);
-
-	return view;
-}
-
 uint32_t MeshData::GetVertexBufferSizeBytes()
 {
 	return static_cast<uint32_t>( sizeof(Vertex) * vertices.size() );
@@ -131,16 +131,6 @@ uint32_t MeshData::GetVertexCount()
 BufferResource& MeshData::GetIndexBuffer()
 {
 	return indexBuffer;
-}
-
-D3D12_INDEX_BUFFER_VIEW MeshData::GetIndexBufferView()
-{
-	D3D12_INDEX_BUFFER_VIEW view;
-	view.SizeInBytes = static_cast<UINT>(indexBuffer.GetSize());
-	view.BufferLocation = indexBuffer.GetGpuVirtualAddress();
-	view.Format = DXGI_FORMAT_R32_UINT;
-
-	return view;
 }
 
 uint32_t MeshData::GetIndexBufferSizeBytes()

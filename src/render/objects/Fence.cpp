@@ -27,6 +27,7 @@ void Fence::Create(Device* inDevice)
 	device = inDevice;
 	ThrowIfFailed(device->GetNativeDevice()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&d3dFence)));
 	eventHandle = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+	isValid = true;
 }
 
 void Fence::Destroy()

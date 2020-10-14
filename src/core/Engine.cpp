@@ -100,7 +100,7 @@ void Engine::InitWindow()
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-	window = glfwCreateWindow(windowWidth, windowHeight, "Vulkan renderer", nullptr, nullptr);
+	window = glfwCreateWindow(windowWidth, windowHeight, "DX12 renderer", nullptr, nullptr);
 	glfwSetWindowUserPointer(window, this);
 	glfwSetFramebufferSizeCallback(window, Engine::FramebufferResizeCallback);
 }

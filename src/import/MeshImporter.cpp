@@ -2,10 +2,11 @@
 #include "core/ObjectBase.h"
 
 #include <iostream>
-#include <glm/glm.hpp>
+#include <DirectXMath.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+using namespace DirectX;
 
 void MeshImporter::Import(std::string inPath)
 {
@@ -83,7 +84,7 @@ std::shared_ptr<MeshData> MeshImporter::ProcessMesh(aiMesh* inAiMesh)
 		}
 		else
 		{
-			V.texCoord = glm::vec2{0.0f, 0.0f};
+			V.texCoord = XMFLOAT2{0.0f, 0.0f};
 		}
 
 		if (inAiMesh->HasTangentsAndBitangents())
@@ -131,26 +132,26 @@ std::shared_ptr<MeshData> MeshImporter::ProcessMesh(aiMesh* inAiMesh)
 
 void MeshImporter::CalculateTangents(Vertex& v0, const Vertex& v1, const Vertex& v2)
 {
-	glm::vec3 edge1 = (v1.position - v0.position) * 100.0f;
-	glm::vec3 edge2 = (v1.position - v2.position) * 100.0f;
+	//glm::vec3 edge1 = (v1.position - v0.position) * 100.0f;
+	//glm::vec3 edge2 = (v1.position - v2.position) * 100.0f;
 
-	glm::vec2 uv0 = { v0.texCoord.x, v0.texCoord.y };
-	glm::vec2 uv1 = { v1.texCoord.x, v1.texCoord.y };
-	glm::vec2 uv2 = { v2.texCoord.x, v2.texCoord.y };
+	//glm::vec2 uv0 = { v0.texCoord.x, v0.texCoord.y };
+	//glm::vec2 uv1 = { v1.texCoord.x, v1.texCoord.y };
+	//glm::vec2 uv2 = { v2.texCoord.x, v2.texCoord.y };
 
-	glm::vec2 deltaUV1 = (uv1 - uv0) * 100.0f;
-	glm::vec2 deltaUV2 = (uv1 - uv2) * 100.0f;
+	//glm::vec2 deltaUV1 = (uv1 - uv0) * 100.0f;
+	//glm::vec2 deltaUV2 = (uv1 - uv2) * 100.0f;
 
-	//deltaUV1 *= glm::vec2(-1.0, -1.0);
-	//deltaUV2 *= glm::vec2(-1.0, -1.0);
+	////deltaUV1 *= glm::vec2(-1.0, -1.0);
+	////deltaUV2 *= glm::vec2(-1.0, -1.0);
 
-	float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+	//float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
 
-	//glm::vec3 t = glm::normalize(edge1 / deltaUV1.x);
-	//glm::vec3 b = glm::cross(v0.normal, t);
+	////glm::vec3 t = glm::normalize(edge1 / deltaUV1.x);
+	////glm::vec3 b = glm::cross(v0.normal, t);
 
-	//t = glm::cross(b, v0.normal);
+	////t = glm::cross(b, v0.normal);
 
-	v0.tangent = glm::normalize<3>((edge1 * deltaUV2.y - edge2 * deltaUV1.y) * r);
-	v0.bitangent = glm::normalize<3>((edge2 * deltaUV1.x - edge1 * deltaUV2.x) * r);
+	//v0.tangent = glm::normalize<3>((edge1 * deltaUV2.y - edge2 * deltaUV1.y) * r);
+	//v0.bitangent = glm::normalize<3>((edge2 * deltaUV1.x - edge1 * deltaUV2.x) * r);
 }

@@ -35,7 +35,7 @@ public:
 	inline D3D12_GPU_VIRTUAL_ADDRESS GetGpuVirtualAddress() { return resource->GetGPUVirtualAddress(); }
 	inline MemoryRecord& GetMemoryRecord() { return memRecord; }
 	inline MemoryPosition& GetMemoryPosition() { return memRecord.pos; }
-	inline uint64_t GetSize() { return size; }
+	inline uint64_t GetSizeBytes() { return sizeBytes; }
 
 	operator ComPtr<ID3D12Resource>() const { return resource; }
 	operator ID3D12Resource*() const { return resource.Get(); }
@@ -47,7 +47,7 @@ protected:
 	ComPtr<ID3D12Resource> resource;
 	MemoryRecord memRecord;
 	std::vector<char> data;
-	uint64_t size;
+	uint64_t sizeBytes;
 	D3D12_HEAP_TYPE heapType;
 
 	bool scoped = false;

@@ -18,7 +18,7 @@ ImageResource::~ImageResource()
 	}
 }
 
-void ImageResource::Create(Device* inDevice)
+void ImageResource::Create(Device* inDevice, D3D12_RESOURCE_STATES inInitialStates/* = D3D12_RESOURCE_STATE_COPY_DEST*/)
 {
 	if (resource || !inDevice)
 	{
@@ -36,7 +36,7 @@ void ImageResource::Create(Device* inDevice)
 		memPos.memory.GetHeap().Get(), 
 		memPos.offset, 
 		&resourceDescription, 
-		D3D12_RESOURCE_STATE_COPY_DEST, 
+		inInitialStates,
 		nullptr, 
 		IID_PPV_ARGS(&resource));
 
