@@ -152,18 +152,15 @@ Microsoft::WRL::ComPtr<ID3D12PipelineState> PostProcessPass::CreatePipeline(Mate
 	D3D12_RASTERIZER_DESC rasterizerDesc;
 	rasterizerDesc.AntialiasedLineEnable = FALSE;
 	rasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 	rasterizerDesc.DepthBias = 0;
 	rasterizerDesc.DepthBiasClamp = 0.0f;
-	rasterizerDesc.DepthClipEnable = FALSE;
+	rasterizerDesc.DepthClipEnable = TRUE;
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	rasterizerDesc.ForcedSampleCount = 0;
-	rasterizerDesc.FrontCounterClockwise = TRUE; // stuff
+	rasterizerDesc.FrontCounterClockwise = TRUE;
 	rasterizerDesc.MultisampleEnable = FALSE;
 	rasterizerDesc.SlopeScaledDepthBias = 0.0f;
-
-	CD3DX12_RASTERIZER_DESC rasterDescEx(D3D12_DEFAULT);
-	rasterDescEx.CullMode = D3D12_CULL_MODE_NONE;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	psoDesc.VS = inMaterial->GetVertexShader()->GetBytecode();
@@ -184,7 +181,7 @@ Microsoft::WRL::ComPtr<ID3D12PipelineState> PostProcessPass::CreatePipeline(Mate
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	psoDesc.SampleDesc = sampleDesc;
 	psoDesc.SampleMask = UINT_MAX;
-	psoDesc.RasterizerState = rasterizerDesc;//rasterDescEx;//
+	psoDesc.RasterizerState = rasterizerDesc;
 	psoDesc.pRootSignature = inRootSignature.Get();
 
 	ComPtr<ID3D12PipelineState> pipelineState;
