@@ -27,7 +27,7 @@ ResourceView ResourceView::CreateCBV(ID3D12Resource* inResource, DescriptorBlock
 {
 	Device& device = Engine::GetRendererInstance()->GetDevice();
 
-	D3D12_CONSTANT_BUFFER_VIEW_DESC viewDesc;
+	D3D12_CONSTANT_BUFFER_VIEW_DESC viewDesc = {};
 	viewDesc.BufferLocation = inResource->GetGPUVirtualAddress();
 	uint64_t width = inResource->GetDesc().Width;
 	uint64_t size = 256 * (width / 256 + 1 * (width % 256 > 0));
@@ -72,7 +72,7 @@ ResourceView ResourceView::CreateSRVTexture2D(ID3D12Resource* inResource, D3D12_
 ResourceView ResourceView::CreateSRVTexture2D(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex)
 {
 	// whole resource
-	D3D12_TEX2D_SRV defaultSRV;
+	D3D12_TEX2D_SRV defaultSRV = {};
 	defaultSRV.MipLevels = -1;
 	defaultSRV.MostDetailedMip = 0;
 	defaultSRV.PlaneSlice = 0;
@@ -98,7 +98,7 @@ ResourceView ResourceView::CreateRTVTexture2D(ID3D12Resource* inResource, D3D12_
 ResourceView ResourceView::CreateRTVTexture2D(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex)
 {
 	// whole resource
-	D3D12_TEX2D_RTV defaultRTV;
+	D3D12_TEX2D_RTV defaultRTV = {};
 	defaultRTV.MipSlice = 0;
 	defaultRTV.PlaneSlice = 0;
 
@@ -109,7 +109,8 @@ ResourceView ResourceView::CreateDSVTexture2D(ID3D12Resource* inResource, D3D12_
 {
 	Device& device = Engine::GetRendererInstance()->GetDevice();
 
-	D3D12_DEPTH_STENCIL_VIEW_DESC viewDesc;
+	D3D12_DEPTH_STENCIL_VIEW_DESC viewDesc = {};
+	viewDesc.Flags = D3D12_DSV_FLAG_NONE;
 	viewDesc.Format = inResource->GetDesc().Format;
 	viewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	viewDesc.Texture2D = inDSV;
@@ -122,7 +123,7 @@ ResourceView ResourceView::CreateDSVTexture2D(ID3D12Resource* inResource, D3D12_
 ResourceView ResourceView::CreateDSVTexture2D(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex)
 {
 	// whole resource
-	D3D12_TEX2D_DSV defaultDSV;
+	D3D12_TEX2D_DSV defaultDSV = {};
 	defaultDSV.MipSlice = 0;
 
 	return CreateDSVTexture2D(inResource, defaultDSV, inBlock, inIndex);

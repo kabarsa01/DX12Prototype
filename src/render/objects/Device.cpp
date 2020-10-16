@@ -22,7 +22,7 @@ void Device::Create(const char* inAppName, const char* inEngine, HWND inHwnd)
 		ComPtr<ID3D12Debug> debugController;
 		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
 		{
-			debugController->EnableDebugLayer();
+//			debugController->EnableDebugLayer();
 		}
 	}
 #endif
@@ -62,7 +62,7 @@ void Device::Create(const char* inAppName, const char* inEngine, HWND inHwnd)
 
 	ThrowIfFailed( D3D12CreateDevice(dxgiAdapter4.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
 
-#if defined(_DEBUG)
+#if !defined(_DEBUG)
 	ComPtr<ID3D12InfoQueue> infoQueue;
 	if (device.As(&infoQueue))
 	{

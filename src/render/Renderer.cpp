@@ -75,15 +75,15 @@ void Renderer::Init()
 	perFrameData = new PerFrameData();
 	perFrameData->Create(&device);
 
-	//zPrepass = new ZPrepass(HashString("ZPrepass"));
-	//zPrepass->SetResolution(width, height);
-	//zPrepass->Create();
+	zPrepass = new ZPrepass(HashString("ZPrepass"));
+	zPrepass->SetResolution(width, height);
+	zPrepass->Create();
 	//lightClusteringPass = new LightClusteringPass(HashString("LightClusteringPass"));
 	//lightClusteringPass->Create();
-	//gBufferPass = new GBufferPass(HashString("GBufferPass"));
-	//gBufferPass->SetExternalDepth(zPrepass->GetDepthAttachment(), zPrepass->GetDepthAttachmentView());
-	//gBufferPass->SetResolution(width, height);
-	//gBufferPass->Create();
+	gBufferPass = new GBufferPass(HashString("GBufferPass"));
+	gBufferPass->SetExternalDepth(zPrepass->GetDepthAttachment());
+	gBufferPass->SetResolution(width, height);
+	gBufferPass->Create();
 	//deferredLightingPass = new DeferredLightingPass(HashString("DeferredLightingPass"));
 	//deferredLightingPass->SetResolution(width, height);
 	//deferredLightingPass->Create();
@@ -133,12 +133,12 @@ void Renderer::RenderFrame()
 
 	// render passes
 	// z prepass
-	//zPrepass->RecordCommands(cmdList);
+	zPrepass->RecordCommands(cmdList);
 	//--------------------------------------------------------
 	//lightClusteringPass->RecordCommands(cmdList);
 	//--------------------------------------------------------
 	// gbuffer pass
-	//gBufferPass->RecordCommands(cmdList);
+	gBufferPass->RecordCommands(cmdList);
 	// barriers ----------------------------------------------
 	//const std::vector<ImageResource>& gBufferAttachments = gBufferPass->GetAttachments();
 	//--------------------------------------------------------
@@ -273,7 +273,7 @@ void Renderer::TransferResources(ComPtr<ID3D12GraphicsCommandList> inCmdList)
 	afterTransferBarriers.resize(images.size());
 	for (uint32_t index = 0; index < images.size(); index++)
 	{
-		// mages are initially create in COPY_DST state
+		// images are initially created in COPY_DST state
 //		beforeTransferBarriers[index] = CD3DX12_RESOURCE_BARRIER::Transition(*images[index], D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
 		afterTransferBarriers[index] = CD3DX12_RESOURCE_BARRIER::Transition(*images[index], D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 	}
@@ -283,12 +283,6 @@ void Renderer::TransferResources(ComPtr<ID3D12GraphicsCommandList> inCmdList)
 	//submit copy
 	for (ImageResource* image : images)
 	{
-		// copy
-		//inCmdList->CopyResource(*image, * image->GetStagingBuffer());
-		//D3D12_SUBRESOURCE_DATA subres;
-		//subres.pData = image->GetStagingBuffer()->Get
-
-//		UpdateSubresources(inCmdList.Get(), *image, *image->CreateStagingBuffer(), 0, 0, 1, nullptr);
 		D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
 		UINT numRows;
 		UINT64 rowSizeBytes;

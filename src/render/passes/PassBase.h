@@ -37,7 +37,7 @@ public:
 	inline uint32_t GetWidth() { return width; }
 	inline uint32_t GetHeight() { return height; }
 
-	void SetExternalDepth(const ImageResource& inDepthAttachment/*const ImageView& inDepthAttachmentView*/);
+	void SetExternalDepth(const ImageResource& inDepthAttachment);
 
 	virtual void RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList) = 0;
 protected:
@@ -62,22 +62,13 @@ protected:
 		DescriptorBlock inBlock) = 0;
 	virtual ComPtr<ID3D12PipelineState> CreatePipeline(MaterialPtr inMaterial, ComPtr<ID3D12RootSignature> inRootSignature) = 0;
 
-
-	//Framebuffer CreateFramebuffer(
-	//	RenderPass inRenderPass,
-	//	std::vector<ImageView>& inAttachmentViews,
-	//	uint32_t inWidth,
-	//	uint32_t inHeight);
 	PipelineData& FindPipeline(MaterialPtr inMaterial);
-	ComPtr<ID3D12RootSignature> CreateRootSignature(MaterialPtr inMaterial);// std::vector<DescriptorSetLayout>& inDescriptorSetLayouts);
-//	DescriptorSetLayout CreateDescriptorSetLayout(MaterialPtr inMaterial);
+	ComPtr<ID3D12RootSignature> CreateRootSignature(MaterialPtr inMaterial);
 private:
 	HashString name;
 	Device* device;
 	Renderer* renderer;
 
-	//RenderPass renderPass;
-	//Framebuffer framebuffer;
 	std::vector<ImageResource> attachments;
 	std::vector<ResourceView> attachmentViews;
 	ImageResource depthAttachment;

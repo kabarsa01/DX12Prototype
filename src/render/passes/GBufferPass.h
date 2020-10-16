@@ -14,11 +14,8 @@ public:
 	GBufferPass(HashString inName);
 	void RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList) override;
 protected:
-//	std::array<ClearValue, 3> clearValues;
-
 	virtual void OnCreate() override;
 	virtual void OnDestroy() override {}
-//	virtual RenderPass CreateRenderPass() override;
 	virtual void CreateColorAttachments(
 		std::vector<ImageResource>& outAttachments, 
 		uint32_t inWidth, 

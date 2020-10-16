@@ -24,12 +24,18 @@ void PostProcessPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommand
 	ComPtr<ID3D12Resource> swapChainImage = swapChain.GetCurrentImage();
 	ResourceView view = swapChain.GetCurrentView();
 
-	CD3DX12_RESOURCE_BARRIER toRenderTargetBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+	std::array<CD3DX12_RESOURCE_BARRIER, 2> startingBarriers;
+	startingBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
 		swapChainImage.Get(),
 		D3D12_RESOURCE_STATE_PRESENT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
-	inCommandList->ResourceBarrier(1, &toRenderTargetBarrier);
+	startingBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+		screenImage->GetImage(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	);
+	inCommandList->ResourceBarrier(static_cast<UINT>(startingBarriers.size()), startingBarriers.data());
 
 	MeshDataPtr meshData = MeshData::FullscreenQuad();
 	PipelineData& pipelineData = FindPipeline(postProcessMaterial);
@@ -54,7 +60,7 @@ void PostProcessPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommand
 	inCommandList->RSSetViewports(1, &viewport);
 	inCommandList->RSSetScissorRects(1, &scissorsRect);
 
-	inCommandList->OMSetRenderTargets(1, view, TRUE, nullptr);//&GetDsvBlock().cpuHandle);
+	inCommandList->OMSetRenderTargets(1, view, TRUE, nullptr);
 	inCommandList->SetPipelineState(pipelineData.pipeline.Get());
 	inCommandList->SetGraphicsRootSignature(pipelineData.rootSignature.Get());
 
@@ -75,26 +81,33 @@ void PostProcessPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommand
 	inCommandList->IASetIndexBuffer(&meshData->GetIndexBufferView());
 	inCommandList->DrawIndexedInstanced(meshData->GetIndexCount(), 1, 0, 0, 0);
 
-	CD3DX12_RESOURCE_BARRIER toPresentBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+	std::array<CD3DX12_RESOURCE_BARRIER, 2> finishingBarriers;
+	finishingBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
 		swapChainImage.Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PRESENT
 	);
-	inCommandList->ResourceBarrier(1, &toPresentBarrier);
+	finishingBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+		screenImage->GetImage(),
+		D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		D3D12_RESOURCE_STATE_RENDER_TARGET
+	);
+	inCommandList->ResourceBarrier(static_cast<UINT>(finishingBarriers.size()), finishingBarriers.data());
 }
 
 void PostProcessPass::OnCreate()
 {
 	//DeferredLightingPass* lightingPass = GetRenderer()->GetDeferredLightingPass();
-	//screenImage = ObjectBase::NewObject<Texture2D, const HashString&>("SceneImageTexture");
-	//screenImage->CreateFromExternal(lightingPass->GetAttachments()[0]);
-	screenImage = DataManager::RequestResourceType<Texture2D, bool, bool, bool, bool>("content/meshes/root/Aset_wood_root_M_rkswd_4K_Albedo.jpg", false, true, false, true);
+	GBufferPass* gBufferPass = GetRenderer()->GetGBufferPass();
+	screenImage = ObjectBase::NewObject<Texture2D, const HashString&>("SceneImageTexture");
+	screenImage->CreateFromExternal(gBufferPass->GetAttachments()[0]);
+	//screenImage = DataManager::RequestResourceType<Texture2D, bool, bool, bool, bool>("content/meshes/root/Aset_wood_root_M_rkswd_4K_Albedo.jpg", false, true, false, true);
 	//TransferList::GetInstance()->PushImage(&screenImage->GetImage());
 
 	postProcessMaterial = DataManager::RequestResourceType<Material, const std::string&, const std::string&>(
 		"PostProcessMaterial",
-		"./content/shaders/PostProcessVert.hlsl",
-		"./content/shaders/PostProcessVert.hlsl"
+		"./content/shaders/PostProcess.hlsl",
+		"./content/shaders/PostProcess.hlsl"
 		);
 	postProcessMaterial->SetEntrypoints("VSmain", "PSmain");
 //	ObjectMVPData objData;

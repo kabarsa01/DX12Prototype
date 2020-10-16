@@ -34,19 +34,20 @@ void Scene::Init()
 	//Texture2DPtr albedo = DataManager::RequestResourceType<Texture2D, bool, bool, bool>("content/meshes/gun/Textures/Cerberus_A.tga", false, true, false);
 	//Texture2DPtr normal = DataManager::RequestResourceType<Texture2D, bool, bool, bool>("content/meshes/gun/Textures/Cerberus_N.tga", false, true, true);
 	//Texture2DPtr albedo = DataManager::RequestResourceType<Texture2D, bool, bool, bool>("content/meshes/uv_base.png", false, true, false);
-	//Texture2DPtr albedo = DataManager::RequestResourceType<Texture2D, bool, bool, bool, bool>("content/meshes/root/Aset_wood_root_M_rkswd_4K_Albedo.jpg", false, true, false, true);
-	//Texture2DPtr normal = DataManager::RequestResourceType<Texture2D, bool, bool, bool, bool>("content/meshes/root/Aset_wood_root_M_rkswd_4K_Normal_LOD0.jpg", false, true, true, true);
+	Texture2DPtr albedo = DataManager::RequestResourceType<Texture2D, bool, bool, bool, bool>("content/meshes/root/Aset_wood_root_M_rkswd_4K_Albedo.jpg", false, true, false, true);
+	Texture2DPtr normal = DataManager::RequestResourceType<Texture2D, bool, bool, bool, bool>("content/meshes/root/Aset_wood_root_M_rkswd_4K_Normal_LOD0.jpg", false, true, true, true);
 	//tl->PushImage(&albedo->GetImage());
 	//tl->PushImage(&normal->GetImage());
 
-	//MaterialPtr mat = DataManager::RequestResourceType<Material>(
-	//	"default",
-	//	"content/shaders/GBufferVert.spv",
-	//	"content/shaders/GBufferFrag.spv"
-	//	);
-	//mat->SetTexture("albedo", albedo);
-	//mat->SetTexture("normal", normal);
-	//mat->LoadResources();
+	MaterialPtr mat = DataManager::RequestResourceType<Material>(
+		"default",
+		"content/shaders/GBuffer.hlsl",
+		"content/shaders/GBuffer.hlsl"
+		);
+	mat->SetEntrypoints("VSmain", "PSmain");
+	mat->SetTexture("albedo", albedo);
+	mat->SetTexture("normal", normal);
+	mat->LoadResources();
 
 	Renderer* renderer = Engine::GetRendererInstance();
 	// hardcoding dirty sample scene 
@@ -97,38 +98,38 @@ void Scene::Init()
 	//	}
 	//}
 
-	//{
-	//	MeshImporter importer;
-	//	//importer.Import("./content/meshes/gun/Cerberus_LP.FBX");
-	//	importer.Import("./content/meshes/root/Aset_wood_root_M_rkswd_LOD0.FBX");
-	//	//importer.Import("./content/meshes/cube/cube.fbx");
-	//	for (unsigned int MeshIndex = 0; MeshIndex < importer.GetMeshes().size(); MeshIndex++)
-	//	{
-	//		MeshDataPtr meshData = importer.GetMeshes()[MeshIndex];
-	//		meshData->CreateBuffers();
-	//		tl->PushBuffers(meshData);
+	{
+		MeshImporter importer;
+		//importer.Import("./content/meshes/gun/Cerberus_LP.FBX");
+		importer.Import("./content/meshes/root/Aset_wood_root_M_rkswd_LOD0.FBX");
+		//importer.Import("./content/meshes/cube/cube.fbx");
+		for (unsigned int MeshIndex = 0; MeshIndex < importer.GetMeshes().size(); MeshIndex++)
+		{
+			MeshDataPtr meshData = importer.GetMeshes()[MeshIndex];
+			meshData->CreateBuffers();
+			//tl->PushBuffers(meshData);
 
-	//		float width = 100;
-	//		float depth = 65.0f;
-	//		for (uint32_t indexX = 0; indexX < 5; indexX++)
-	//		{
-	//			for (uint32_t indexY = 0; indexY < 5; indexY++)
-	//			{
-	//				float randomY = std::rand() / float(RAND_MAX);
-	//				float randomZ = std::rand() / float(RAND_MAX);
+			float width = 100;
+			float depth = 65.0f;
+			for (uint32_t indexX = 0; indexX < 5; indexX++)
+			{
+				for (uint32_t indexY = 0; indexY < 5; indexY++)
+				{
+					float randomY = std::rand() / float(RAND_MAX);
+					float randomZ = std::rand() / float(RAND_MAX);
 
-	//				MeshObjectPtr mo3 = ObjectBase::NewObject<MeshObject>();
-	//				mo3->GetMeshComponent()->meshData = meshData;
-	//				mo3->transform.SetLocation({ -width * 0.5f + indexX * width / 4.0, 0.0f, -1.0 * indexY * depth / 4.0 });
-	//				//mo3->transform.SetLocation({ 0.0f, 0.0f, 0.0f });
-	//				mo3->transform.SetRotation({ randomZ * 180.0f, 0.0f, 90.0 });
-	//				mo3->transform.SetScale({ 1.0f, 1.0f, 1.0f });
-	//				mo3->GetMeshComponent()->SetMaterial(mat);
-	//			}
-	//		}
-	//	}
+					MeshObjectPtr mo3 = ObjectBase::NewObject<MeshObject>();
+					mo3->GetMeshComponent()->meshData = meshData;
+					mo3->transform.SetLocation({ -width * 0.5f + indexX * width / 4.0, 0.0f, -1.0 * indexY * depth / 4.0 });
+					//mo3->transform.SetLocation({ 0.0f, 0.0f, 0.0f });
+					mo3->transform.SetRotation({ randomZ * 180.0f, 0.0f, 90.0 });
+					mo3->transform.SetScale({ 1.0f, 1.0f, 1.0f });
+					mo3->GetMeshComponent()->SetMaterial(mat);
+				}
+			}
+		}
 
-	//}
+	}
 
 	MeshData::FullscreenQuad()->CreateBuffers();
 }

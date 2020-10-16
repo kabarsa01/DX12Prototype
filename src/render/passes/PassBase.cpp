@@ -37,9 +37,6 @@ void PassBase::Create()
 	width = renderer->GetWidth();
 	height = renderer->GetHeight();
 
-//	renderPass = CreateRenderPass();
-//	if (renderPass)
-//	{
 	CreateColorAttachments(attachments, width, height);
 	if (!isDepthExternal)
 	{
@@ -57,13 +54,6 @@ void PassBase::Create()
 		dsvViews = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsDSV(1);
 		depthAttachmentView = CreateDepthAttachmentView(depthAttachment, dsvViews);
 	}
-////		std::vector<ImageView> views = attachmentViews;
-//		if (depthAttachmentView)
-//		{
-////			views.push_back(depthAttachmentView);
-//		}
-////		framebuffer = CreateFramebuffer(renderPass, views, width, height);
-//	}
 
 	OnCreate();
 }
@@ -72,20 +62,13 @@ void PassBase::Destroy()
 {
 	OnDestroy();
 
-//	Device& device = device->GetNativeDevice();
-
 	PipelineRegistry::GetInstance()->DestroyPipelines(device, name);
-
-	//device.destroyRenderPass(renderPass);
-	//device.destroyFramebuffer(framebuffer);
 	for (uint32_t index = 0; index < attachments.size(); index++)
 	{
-//		device.destroyImageView(attachmentViews[index]);
 		attachments[index].Destroy();
 	}
 	if (!isDepthExternal)
 	{
-//		device.destroyImageView(depthAttachmentView);
 		depthAttachment.Destroy();
 	}
 
@@ -99,46 +82,17 @@ void PassBase::SetResolution(uint32_t inWidth, uint32_t inHeight)
 	height = inHeight;
 }
 
-void PassBase::SetExternalDepth(const ImageResource& inDepthAttachment/*const ImageView& inDepthAttachmentView*/)
+void PassBase::SetExternalDepth(const ImageResource& inDepthAttachment)
 {
-	isDepthExternal = inDepthAttachment;//&& inDepthAttachmentView;
+	isDepthExternal = inDepthAttachment;
 	if (isDepthExternal)
 	{
 		depthAttachment = inDepthAttachment;
-//		depthAttachmentView = inDepthAttachmentView;
 	}
 }
 
-//Framebuffer PassBase::CreateFramebuffer(RenderPass inRenderPass, std::vector<ImageView>& inAttachmentViews, uint32_t inWidth, uint32_t inHeight)
-//{
-//	FramebufferCreateInfo framebufferInfo;
-//	framebufferInfo.setRenderPass(inRenderPass);
-//	framebufferInfo.setAttachmentCount(static_cast<uint32_t>( inAttachmentViews.size() ));
-//	framebufferInfo.setPAttachments(inAttachmentViews.data());
-//	framebufferInfo.setWidth(inWidth);
-//	framebufferInfo.setHeight(inHeight);
-//	framebufferInfo.setLayers(1);
-//
-//	return vulkanDevice->GetDevice().createFramebuffer(framebufferInfo);
-//}
-
-ComPtr<ID3D12RootSignature> PassBase::CreateRootSignature(MaterialPtr inMaterial)// std::vector<DescriptorSetLayout>& inDescriptorSetLayouts)
+ComPtr<ID3D12RootSignature> PassBase::CreateRootSignature(MaterialPtr inMaterial)
 {
-//	Device& device = vulkanDevice->GetDevice();
-
-	//PipelineLayoutCreateInfo pipelineLayoutInfo;
-	//pipelineLayoutInfo.setFlags(PipelineLayoutCreateFlags());
-	//pipelineLayoutInfo.setSetLayoutCount(static_cast<uint32_t>( inDescriptorSetLayouts.size() ));
-	//pipelineLayoutInfo.setPSetLayouts(inDescriptorSetLayouts.data());
-
-	//PushConstantRange pushConstRange;
-	//pushConstRange.setOffset(0);
-	//pushConstRange.setSize(sizeof(uint32_t));
-	//pushConstRange.setStageFlags(ShaderStageFlagBits::eAllGraphics);
-
-	//pipelineLayoutInfo.setPushConstantRangeCount(1);
-	//pipelineLayoutInfo.setPPushConstantRanges(&pushConstRange);
-
 	CD3DX12_ROOT_PARAMETER1 rootParams[3];
 	rootParams[0].InitAsConstants(1, 0);
 	rootParams[1] = renderer->GetPerFrameData()->GetRootParameter();
@@ -173,11 +127,6 @@ PipelineData& PassBase::FindPipeline(MaterialPtr inMaterial)
 	{
 		PipelineData pipelineData;
 
-//		inMaterial->CreateDescriptorSet(vulkanDevice);
-		// TODO get two tables to be used in signature
-//		pipelineData.descriptorSets = { renderer->GetPerFrameData()->GetSet(), inMaterial->GetDescriptorSet() };
-
-//		std::vector<DescriptorSetLayout> setLayouts = { renderer->GetPerFrameData()->GetLayout(), inMaterial->GetDescriptorSetLayout() };
 		pipelineData.rootSignature = CreateRootSignature(inMaterial);
 		pipelineData.pipeline = CreatePipeline(inMaterial, pipelineData.rootSignature);
 
@@ -187,14 +136,7 @@ PipelineData& PassBase::FindPipeline(MaterialPtr inMaterial)
 	return pipelineRegistry.GetPipeline(name, inMaterial->GetShaderHash());
 }
 
-//DescriptorSetLayout PassBase::CreateDescriptorSetLayout(MaterialPtr inMaterial)
-//{
-//	DescriptorSetLayoutCreateInfo descriptorSetLayoutInfo;
-//	descriptorSetLayoutInfo.setBindingCount(static_cast<uint32_t>(inMaterial->GetBindings().size()));
-//	descriptorSetLayoutInfo.setPBindings(inMaterial->GetBindings().data());
-//
-//	return vulkanDevice->GetDevice().createDescriptorSetLayout(descriptorSetLayoutInfo);
-//}
+
 
 
 

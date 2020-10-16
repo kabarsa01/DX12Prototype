@@ -65,9 +65,9 @@ public:
 	inline ComPtr<ID3D12CommandQueue> GetDirectQueue() { return device.GetDirectQueue(); }
 
 	PerFrameData* GetPerFrameData() { return perFrameData; }
-	//ZPrepass* GetZPrepass() { return zPrepass; }
+	ZPrepass* GetZPrepass() { return zPrepass; }
 	//LightClusteringPass* GetLightClusteringPass() { return lightClusteringPass; }
-	//GBufferPass* GetGBufferPass() { return gBufferPass; }
+	GBufferPass* GetGBufferPass() { return gBufferPass; }
 	//DeferredLightingPass* GetDeferredLightingPass() { return deferredLightingPass; }
 protected:
 private:
@@ -92,9 +92,9 @@ private:
 
 	PerFrameData* perFrameData;
 
-	//ZPrepass* zPrepass;
+	ZPrepass* zPrepass;
 	//LightClusteringPass* lightClusteringPass;
-	//GBufferPass* gBufferPass;
+	GBufferPass* gBufferPass;
 	//DeferredLightingPass* deferredLightingPass;
 	PostProcessPass* postProcessPass;
 
