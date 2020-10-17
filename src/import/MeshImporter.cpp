@@ -15,13 +15,15 @@ void MeshImporter::Import(std::string inPath)
 	const aiScene* scene = LocalImporter.ReadFile(
 		inPath, 
 		aiProcess_Triangulate
+//		| aiProcess_ConvertToLeftHanded
+		| aiProcess_GenSmoothNormals
 		| aiProcess_CalcTangentSpace
 //		| aiProcess_GenSmoothNormals
 //		| aiProcess_ValidateDataStructure
 //		| aiProcess_FindDegenerates
 		| aiProcess_FindInvalidData
-		| aiProcess_MakeLeftHanded
-		| aiProcess_FlipWindingOrder
+//		| aiProcess_MakeLeftHanded
+//		| aiProcess_FlipWindingOrder
 //		| aiProcess_FlipUVs
 	);
 

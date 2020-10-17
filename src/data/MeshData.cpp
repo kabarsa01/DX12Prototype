@@ -10,10 +10,10 @@ namespace
 {
 	std::vector<Vertex> quadVertices = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 	// positions            // normals           // texCoords
-	{{-1.0f,  1.0f,  0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-	{{-1.0f, -1.0f,  0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-	{{ 1.0f, -1.0f,  0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-	{{ 1.0f,  1.0f,  0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}
+	{{-1.0f,  1.0f,  0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+	{{-1.0f, -1.0f,  0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+	{{ 1.0f, -1.0f,  0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+	{{ 1.0f,  1.0f,  0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}
 	};
 
 	std::vector<unsigned int> quadIndices = {
@@ -101,17 +101,6 @@ void MeshData::DestroyBuffers()
 	vertexBuffer.Destroy();
 	indexBuffer.Destroy();
 }
-
-//VertexInputBindingDescription MeshData::GetBindingDescription(uint32_t inDesiredBinding)
-//{
-//	VertexInputBindingDescription bindingDescription;
-//
-//	bindingDescription.setBinding(inDesiredBinding);
-//	bindingDescription.setStride(sizeof(Vertex));
-//	bindingDescription.setInputRate(VertexInputRate::eVertex);
-//
-//	return bindingDescription;
-//}
 
 BufferResource& MeshData::GetVertexBuffer()
 {

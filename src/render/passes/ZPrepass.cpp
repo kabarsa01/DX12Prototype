@@ -15,20 +15,6 @@ ZPrepass::ZPrepass(HashString inName)
 
 void ZPrepass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList)
 {
-	//ImageMemoryBarrier depthTextureBarrier = GetDepthAttachment().CreateLayoutBarrier(
-//	ImageLayout::eUndefined,
-//	ImageLayout::eDepthAttachmentOptimal,
-//	AccessFlagBits::eShaderRead,
-//	AccessFlagBits::eDepthStencilAttachmentRead,
-//	ImageAspectFlagBits::eDepth | ImageAspectFlagBits::eStencil,
-//	0, 1, 0, 1);
-//inCommandList->pipelineBarrier(
-//	PipelineStageFlagBits::eComputeShader,
-//	PipelineStageFlagBits::eAllGraphics,
-//	DependencyFlags(),
-//	0, nullptr, 0, nullptr,
-//	1, &depthTextureBarrier);
-
 	ScenePtr scene = Engine::GetSceneInstance();
 
 	D3D12_VIEWPORT viewport;
@@ -79,9 +65,6 @@ void ZPrepass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList)
 				inCommandList->SetGraphicsRoot32BitConstant(0, scene->GetMeshDataToIndex(materialId)[meshId], 0);
 				inCommandList->IASetVertexBuffers(0, 1, &meshData->GetVertexBufferView());
 				inCommandList->IASetIndexBuffer(&meshData->GetIndexBufferView());
-				//				inCommandList->pushConstants(pipelineData.pipelineLayout, ShaderStageFlagBits::eAllGraphics, 0, sizeof(uint32_t), & scene->GetMeshDataToIndex(materialId)[meshId]);
-				//				inCommandList->bindVertexBuffers(0, 1, &meshData->GetVertexBuffer().GetBuffer(), &offset);
-				//				inCommandList->bindIndexBuffer(meshData->GetIndexBuffer().GetBuffer(), 0, IndexType::eUint32);
 				inCommandList->DrawIndexedInstanced(
 					static_cast<UINT>(meshData->GetIndexCount()),
 					static_cast<UINT>(scene->GetMeshDataToTransform(materialId)[meshId].size()),

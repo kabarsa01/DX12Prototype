@@ -36,10 +36,6 @@ cbuffer ShaderGlobalData : register(b1, space0)
 	float cameraAspect;
 };
 
-struct GlobalTransformData
-{
-	float4x4 modelToWorld[1024];
-};
 RWStructuredBuffer<float4x4> globalTransformData : register(u0, space0);
 
 #endif //_DEFAULT_INCLUDES_HLSL

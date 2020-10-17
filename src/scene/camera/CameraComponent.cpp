@@ -22,9 +22,7 @@ CameraComponent::~CameraComponent()
 
 glm::mat4 CameraComponent::CalculateViewMatrix() const
 {
-	glm::vec3 eye = parent->transform.GetLocation();
-	glm::vec3 direction = parent->transform.GetForwardVector();
-	return glm::lookAt(eye, eye + direction, glm::vec3{ 0.0f, 1.0f, 0.0f });
+	return parent->transform.CalculateViewMatrix();
 }
 
 glm::mat4 CameraComponent::CalculateProjectionMatrix() const

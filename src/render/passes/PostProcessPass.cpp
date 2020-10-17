@@ -74,8 +74,7 @@ void PostProcessPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommand
 
 	HashString meshId = meshData->GetResourceId();
 
-//	inCommandList->SetGraphicsRoot32BitConstant(0, meshData, 0);
-	float clearColor[4] = { 0.65f, 0.5f, 0.75f, 1.0f };
+	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	inCommandList->ClearRenderTargetView(view, clearColor, 1, &scissorsRect);
 	inCommandList->IASetVertexBuffers(0, 1, &meshData->GetVertexBufferView());
 	inCommandList->IASetIndexBuffer(&meshData->GetIndexBufferView());
@@ -110,8 +109,6 @@ void PostProcessPass::OnCreate()
 		"./content/shaders/PostProcess.hlsl"
 		);
 	postProcessMaterial->SetEntrypoints("VSmain", "PSmain");
-//	ObjectMVPData objData;
-//	postProcessMaterial->SetUniformBuffer<ObjectMVPData>("mvpBuffer", objData);
 	postProcessMaterial->SetTexture("screenImage", screenImage);//GetRenderer()->GetLightClusteringPass()->texture);
 	postProcessMaterial->LoadResources();
 }

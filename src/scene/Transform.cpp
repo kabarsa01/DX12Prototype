@@ -78,37 +78,51 @@ glm::mat4& Transform::GetMatrix()
 
 glm::mat4 Transform::CalculateRotationMatrix() const
 {
-	glm::mat4 Mat(1.0f);
-	Mat = glm::rotate(Mat, glm::radians(rotation.z), glm::vec3(0.0f, 0.0, 1.0f));
-	Mat = glm::rotate(Mat, glm::radians(rotation.y), glm::vec3(0.0f, 1.0, 0.0f));
-	Mat = glm::rotate(Mat, glm::radians(rotation.x), glm::vec3(1.0f, 0.0, 0.0f));
+	glm::mat4 mat(1.0f);
+	mat = glm::rotate(mat, glm::radians(rotation.z), glm::vec3(0.0f, 0.0, 1.0f));
+	mat = glm::rotate(mat, glm::radians(rotation.y), glm::vec3(0.0f, 1.0, 0.0f));
+	mat = glm::rotate(mat, glm::radians(rotation.x), glm::vec3(1.0f, 0.0, 0.0f));
 
-	return Mat;
+	return mat;
 }
 
 glm::mat4 Transform::CalculateViewMatrix() const
 {
-	glm::vec3 Direction = GetForwardVector();
-	return glm::lookAt(location, location + Direction, glm::vec3{ 0.0f, 1.0f, 0.0f });
+	glm::vec3 direction = GetForwardVector();
+	return glm::lookAt(location, location + direction, GetUpVector());
 }
 
 glm::mat4 Transform::CalculateMatrix() const
 {
-	glm::mat4 Mat(1.0f);
-	Mat = glm::translate(Mat, location);
-	Mat = glm::rotate(Mat, glm::radians(rotation.z), glm::vec3(0.0f, 0.0, 1.0f));
-	Mat = glm::rotate(Mat, glm::radians(rotation.y), glm::vec3(0.0f, 1.0, 0.0f));
-	Mat = glm::rotate(Mat, glm::radians(rotation.x), glm::vec3(1.0f, 0.0, 0.0f));
-	Mat = glm::scale(Mat, scale);
+	glm::mat4 mat(1.0f);
+	mat = glm::translate(mat, location);
+	mat = glm::rotate(mat, glm::radians(rotation.z), glm::vec3(0.0f, 0.0, 1.0f));
+	mat = glm::rotate(mat, glm::radians(rotation.y), glm::vec3(0.0f, 1.0, 0.0f));
+	mat = glm::rotate(mat, glm::radians(rotation.x), glm::vec3(1.0f, 0.0, 0.0f));
+	mat = glm::scale(mat, scale);
 
-	return Mat;
+	return mat;
 }
 
 glm::vec3 Transform::GetForwardVector() const
 {
-	glm::vec4 Forward = { 0.0f, 0.0f, 1.0f, 0.0f };
-	Forward = CalculateRotationMatrix() * Forward;
-	return glm::vec3(Forward);
+	glm::vec4 forward = { 0.0f, 0.0f, 1.0f, 0.0f };
+	forward = CalculateRotationMatrix() * forward;
+	return glm::vec3(forward);
+}
+
+glm::vec3 Transform::GetUpVector() const
+{
+	glm::vec4 up = { 0.0f, 1.0f, 0.0f, 0.0f };
+	up = CalculateRotationMatrix() * up;
+	return glm::vec3(up);
+}
+
+glm::vec3 Transform::GetRightVector() const
+{
+	glm::vec4 right = { 1.0f, 0.0f, 0.0f, 0.0f };
+	right = CalculateRotationMatrix() * right;
+	return glm::vec3(right);
 }
 
 

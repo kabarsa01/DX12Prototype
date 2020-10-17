@@ -52,8 +52,8 @@ void Scene::Init()
 	Renderer* renderer = Engine::GetRendererInstance();
 	// hardcoding dirty sample scene 
 	CameraObjectPtr cameraObj = ObjectBase::NewObject<CameraObject>();
-	cameraObj->transform.SetLocation({ 0.0f, -25.0f, 25.0f });
-	cameraObj->transform.SetRotation({ -30.0f, 180.0f, 0.0f });
+	cameraObj->transform.SetLocation({ 0.0f, 25.0f, 25.0f });
+	cameraObj->transform.SetRotation({ 30.0f, 180.0f, 0.0f });
 	cameraObj->GetCameraComponent()->SetFov(90.0f);
 	cameraObj->GetCameraComponent()->SetNearPlane(0.1f);
 	cameraObj->GetCameraComponent()->SetFarPlane(200.0f);
@@ -122,7 +122,7 @@ void Scene::Init()
 					mo3->GetMeshComponent()->meshData = meshData;
 					mo3->transform.SetLocation({ -width * 0.5f + indexX * width / 4.0, 0.0f, -1.0 * indexY * depth / 4.0 });
 					//mo3->transform.SetLocation({ 0.0f, 0.0f, 0.0f });
-					mo3->transform.SetRotation({ randomZ * 180.0f, 0.0f, 90.0 });
+					mo3->transform.SetRotation({ randomZ * 180.0f, 0.0f, -90.0 });
 					mo3->transform.SetScale({ 1.0f, 1.0f, 1.0f });
 					mo3->GetMeshComponent()->SetMaterial(mat);
 				}
