@@ -71,10 +71,13 @@ void Material::LoadResources()
 		case D3D_SHADER_INPUT_TYPE::D3D_SIT_TEXTURE:
 		case D3D_SHADER_INPUT_TYPE::D3D_SIT_TBUFFER:
 		case D3D_SHADER_INPUT_TYPE::D3D_SIT_STRUCTURED:
+		case D3D_SHADER_INPUT_TYPE::D3D_SIT_BYTEADDRESS:
 			type = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 			break;
 		case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWTYPED:
 		case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWSTRUCTURED:
+		case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWBYTEADDRESS:
+		case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
 			type = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
 			break;
 		default:
@@ -95,7 +98,14 @@ void Material::LoadResources()
 		if (nameToRange.find(pair.first) == nameToRange.end()) continue;
 
 		uint32_t rangeIndex = nameToRange[pair.first];
-		ResourceView::CreateSRVTexture2D(pair.second->GetImage(), descriptorBlock, rangeIndex);
+		if (pair.second->GetImage().GetResource()->GetDesc().Format == DXGI_FORMAT_R24G8_TYPELESS)
+		{
+			ResourceView::CreateSRVDepthTexture2D(pair.second->GetImage(), descriptorBlock, rangeIndex);
+		}
+		else
+		{
+			ResourceView::CreateSRVTexture2D(pair.second->GetImage(), descriptorBlock, rangeIndex);
+		}
 	}
 	for (auto& pair : buffers)
 	{

@@ -66,9 +66,9 @@ public:
 
 	PerFrameData* GetPerFrameData() { return perFrameData; }
 	ZPrepass* GetZPrepass() { return zPrepass; }
-	//LightClusteringPass* GetLightClusteringPass() { return lightClusteringPass; }
+	LightClusteringPass* GetLightClusteringPass() { return lightClusteringPass; }
 	GBufferPass* GetGBufferPass() { return gBufferPass; }
-	//DeferredLightingPass* GetDeferredLightingPass() { return deferredLightingPass; }
+	DeferredLightingPass* GetDeferredLightingPass() { return deferredLightingPass; }
 protected:
 private:
 	// TEMP
@@ -93,9 +93,9 @@ private:
 	PerFrameData* perFrameData;
 
 	ZPrepass* zPrepass;
-	//LightClusteringPass* lightClusteringPass;
+	LightClusteringPass* lightClusteringPass;
 	GBufferPass* gBufferPass;
-	//DeferredLightingPass* deferredLightingPass;
+	DeferredLightingPass* deferredLightingPass;
 	PostProcessPass* postProcessPass;
 
 	//==================== METHODS ===============================

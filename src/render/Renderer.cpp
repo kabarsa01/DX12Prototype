@@ -32,23 +32,6 @@
 #include "utils/HelperUtils.h"
 #include "GlobalSamplers.h"
 
-//const std::vector<Vertex> verticesTest = {
-//	{{0.0f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}},
-//	{{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-//	{{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}
-//};
-//
-//const std::vector<Vertex> verticesToIndex = {
-//	{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-//	{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-//	{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-//	{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}}
-//};
-//
-//const std::vector<uint32_t> indices = {
-//	0, 1, 2, 2, 3, 0
-//};
-
 Renderer::Renderer()
 {
 }
@@ -78,15 +61,15 @@ void Renderer::Init()
 	zPrepass = new ZPrepass(HashString("ZPrepass"));
 	zPrepass->SetResolution(width, height);
 	zPrepass->Create();
-	//lightClusteringPass = new LightClusteringPass(HashString("LightClusteringPass"));
-	//lightClusteringPass->Create();
+	lightClusteringPass = new LightClusteringPass(HashString("LightClusteringPass"));
+	lightClusteringPass->Create();
 	gBufferPass = new GBufferPass(HashString("GBufferPass"));
 	gBufferPass->SetExternalDepth(zPrepass->GetDepthAttachment());
 	gBufferPass->SetResolution(width, height);
 	gBufferPass->Create();
-	//deferredLightingPass = new DeferredLightingPass(HashString("DeferredLightingPass"));
-	//deferredLightingPass->SetResolution(width, height);
-	//deferredLightingPass->Create();
+	deferredLightingPass = new DeferredLightingPass(HashString("DeferredLightingPass"));
+	deferredLightingPass->SetResolution(width, height);
+	deferredLightingPass->Create();
 	postProcessPass = new PostProcessPass(HashString("PostProcessPass"));
 	postProcessPass->SetResolution(width, height);
 	postProcessPass->Create();
@@ -135,15 +118,13 @@ void Renderer::RenderFrame()
 	// z prepass
 	zPrepass->RecordCommands(cmdList);
 	//--------------------------------------------------------
-	//lightClusteringPass->RecordCommands(cmdList);
+	lightClusteringPass->RecordCommands(cmdList);
 	//--------------------------------------------------------
 	// gbuffer pass
 	gBufferPass->RecordCommands(cmdList);
-	// barriers ----------------------------------------------
-	//const std::vector<ImageResource>& gBufferAttachments = gBufferPass->GetAttachments();
 	//--------------------------------------------------------
 	// deferred lighting pass
-	//deferredLightingPass->RecordCommands(cmdList);
+	deferredLightingPass->RecordCommands(cmdList);
 	//--------------------------------------------------------
 	// post process pass
 	postProcessPass->RecordCommands(cmdList);
@@ -180,14 +161,14 @@ void Renderer::Cleanup()
 
 	postProcessPass->Destroy();
 	delete postProcessPass;
-	//deferredLightingPass->Destroy();
-	//delete deferredLightingPass;
-	//gBufferPass->Destroy();
-	//delete gBufferPass;
-	//zPrepass->Destroy();
-	//delete zPrepass;
-	//lightClusteringPass->Destroy();
-	//delete lightClusteringPass;
+	deferredLightingPass->Destroy();
+	delete deferredLightingPass;
+	gBufferPass->Destroy();
+	delete gBufferPass;
+	zPrepass->Destroy();
+	delete zPrepass;
+	lightClusteringPass->Destroy();
+	delete lightClusteringPass;
 
 	ScenePtr scene = Engine::GetSceneInstance();
 //	MeshComponentPtr meshComp = scene->GetSceneComponent<MeshComponent>();

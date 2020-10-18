@@ -28,6 +28,8 @@ public:
 
 	static ResourceView CreateSRVTexture2D(ID3D12Resource* inResource, D3D12_TEX2D_SRV inSRV, DescriptorBlock& inBlock, uint16_t inIndex);
 	static ResourceView CreateSRVTexture2D(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex);
+	static ResourceView CreateSRVDepthTexture2D(ID3D12Resource* inResource, D3D12_TEX2D_SRV inSRV, DescriptorBlock& inBlock, uint16_t inIndex);
+	static ResourceView CreateSRVDepthTexture2D(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex);
 
 	static ResourceView CreateRTVTexture2D(ID3D12Resource* inResource, D3D12_TEX2D_RTV inRTV, DescriptorBlock& inBlock, uint16_t inIndex);
 	static ResourceView CreateRTVTexture2D(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex);

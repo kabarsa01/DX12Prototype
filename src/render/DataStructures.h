@@ -27,14 +27,6 @@ struct alignas(16) GlobalTransformData
 	alignas(16) glm::mat4 modelToWorld[g_GlobalTransformDataSize];
 };
 
-// per object update
-struct alignas(16) ObjectMVPData
-{
-	alignas(16) glm::mat4 model;
-	alignas(16) glm::mat4 view;
-	alignas(16) glm::mat4 proj;
-};
-
 struct LightInfo
 {
 	alignas(16) glm::vec4 position;
@@ -63,4 +55,15 @@ struct alignas(16) ClusterLightsData
 	alignas(8) glm::u32vec2 clusters[g_ClusteringResolution.x][g_ClusteringResolution.y][g_ClusteringResolution.z];
 	alignas(4) glm::uint lightIndices[g_ClusteringResolution.x][g_ClusteringResolution.y][g_ClusteringResolution.z][g_LightsPerCluster / 2];
 };
+
+// cluster lights indices
+struct alignas(16) LightClusters
+{
+	alignas(8) glm::u32vec2 clusters[g_ClusteringResolution.x][g_ClusteringResolution.y][g_ClusteringResolution.z];
+};
+struct alignas(16) LightClustersIndices
+{
+	alignas(4) glm::uint lightIndices[g_ClusteringResolution.x][g_ClusteringResolution.y][g_ClusteringResolution.z][g_LightsPerCluster / 2];
+};
+
 

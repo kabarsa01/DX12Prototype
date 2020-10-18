@@ -59,12 +59,12 @@ void Scene::Init()
 	cameraObj->GetCameraComponent()->SetFarPlane(200.0f);
 	cameraObj->GetCameraComponent()->SetAspectRatio(float(renderer->GetWidth()) / float(renderer->GetHeight()));
 
-	//LightObjectPtr lightObj = ObjectBase::NewObject<LightObject>();
-	//lightObj->transform.SetLocation({ 0.0f, 0.0f, 0.0f });
-	//lightObj->transform.SetRotation({ -40.0f, -90.0f, 0.0f });
-	//lightObj->GetLightComponent()->type = LT_Directional;
-	//lightObj->GetLightComponent()->intensity = 3.0f;
-	//lightObj->GetLightComponent()->color = { 1.0f, 0.6f, 0.2f };
+	LightObjectPtr lightObj = ObjectBase::NewObject<LightObject>();
+	lightObj->transform.SetLocation({ 0.0f, 0.0f, 0.0f });
+	lightObj->transform.SetRotation({ -40.0f, -90.0f, 0.0f });
+	lightObj->GetLightComponent()->type = LT_Directional;
+	lightObj->GetLightComponent()->intensity = 3.0f;
+	lightObj->GetLightComponent()->color = { 1.0f, 0.6f, 0.2f };
 
 	//LightObjectPtr lightObj01 = ObjectBase::NewObject<LightObject>();
 	//lightObj01->transform.SetLocation({ -125.0f, 0.0f, 0.0f });
@@ -75,28 +75,28 @@ void Scene::Init()
 	//lightObj01->GetLightComponent()->intensity = 5.0f;
 	//lightObj01->GetLightComponent()->color = { 0.2f, 0.6f, 1.0f };
 
-	//float width = 160.0f;
-	//float depth = 65.0f;
-	//uint32_t counter = 0;
-	//for (uint32_t indexX = 0; indexX < 15; indexX++)
-	//{
-	//	for (uint32_t indexY = 0; indexY < 15; indexY++)
-	//	{
-	//		glm::vec3 color = counter % 3 == 0 ? glm::vec3{1.0f, 0.0f, 0.0f} : (counter % 3 == 1) ? glm::vec3{0.0f, 1.0f, 0.0f} : glm::vec3{0.0f, 0.0f, 1.0f};
-	//		bool isSpot = false;// true;// counter % 2;
+	float width = 160.0f;
+	float depth = 65.0f;
+	uint32_t counter = 0;
+	for (uint32_t indexX = 0; indexX < 15; indexX++)
+	{
+		for (uint32_t indexY = 0; indexY < 15; indexY++)
+		{
+			glm::vec3 color = counter % 3 == 0 ? glm::vec3{1.0f, 0.0f, 0.0f} : (counter % 3 == 1) ? glm::vec3{0.0f, 1.0f, 0.0f} : glm::vec3{0.0f, 0.0f, 1.0f};
+			bool isSpot = false;// true;// counter % 2;
 
-	//		LightObjectPtr lightObj02 = ObjectBase::NewObject<LightObject>();
-	//		lightObj02->transform.SetLocation({ -width * 0.5f + indexX * width / 15.0, isSpot ? 20.0f : -5.0f, -1.0 * indexY * depth / 15.0 });
-	//		lightObj02->transform.SetRotation({ 90.0f, 0.0f, 0.0f });
-	//		lightObj02->GetLightComponent()->type = isSpot ? LT_Spot : LT_Point;
-	//		lightObj02->GetLightComponent()->radius = isSpot ? 40.0f : 5.0f;
-	//		lightObj02->GetLightComponent()->spotHalfAngle = 20.0f;
-	//		lightObj02->GetLightComponent()->intensity = isSpot ? 15.0f : 5.0f;
-	//		lightObj02->GetLightComponent()->color = color;
+			LightObjectPtr lightObj02 = ObjectBase::NewObject<LightObject>();
+			lightObj02->transform.SetLocation({ -width * 0.5f + indexX * width / 15.0, isSpot ? 20.0f : -5.0f, -1.0 * indexY * depth / 15.0 });
+			lightObj02->transform.SetRotation({ 90.0f, 0.0f, 0.0f });
+			lightObj02->GetLightComponent()->type = isSpot ? LT_Spot : LT_Point;
+			lightObj02->GetLightComponent()->radius = isSpot ? 40.0f : 5.0f;
+			lightObj02->GetLightComponent()->spotHalfAngle = 20.0f;
+			lightObj02->GetLightComponent()->intensity = isSpot ? 15.0f : 5.0f;
+			lightObj02->GetLightComponent()->color = color;
 
-	//		++counter;
-	//	}
-	//}
+			++counter;
+		}
+	}
 
 	{
 		MeshImporter importer;

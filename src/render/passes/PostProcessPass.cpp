@@ -96,12 +96,9 @@ void PostProcessPass::RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommand
 
 void PostProcessPass::OnCreate()
 {
-	//DeferredLightingPass* lightingPass = GetRenderer()->GetDeferredLightingPass();
-	GBufferPass* gBufferPass = GetRenderer()->GetGBufferPass();
+	DeferredLightingPass* lightingPass = GetRenderer()->GetDeferredLightingPass();
 	screenImage = ObjectBase::NewObject<Texture2D, const HashString&>("SceneImageTexture");
-	screenImage->CreateFromExternal(gBufferPass->GetAttachments()[0]);
-	//screenImage = DataManager::RequestResourceType<Texture2D, bool, bool, bool, bool>("content/meshes/root/Aset_wood_root_M_rkswd_4K_Albedo.jpg", false, true, false, true);
-	//TransferList::GetInstance()->PushImage(&screenImage->GetImage());
+	screenImage->CreateFromExternal(lightingPass->GetAttachments()[0]);
 
 	postProcessMaterial = DataManager::RequestResourceType<Material, const std::string&, const std::string&>(
 		"PostProcessMaterial",
@@ -109,7 +106,7 @@ void PostProcessPass::OnCreate()
 		"./content/shaders/PostProcess.hlsl"
 		);
 	postProcessMaterial->SetEntrypoints("VSmain", "PSmain");
-	postProcessMaterial->SetTexture("screenImage", screenImage);//GetRenderer()->GetLightClusteringPass()->texture);
+	postProcessMaterial->SetTexture("screenImage", screenImage);
 	postProcessMaterial->LoadResources();
 }
 

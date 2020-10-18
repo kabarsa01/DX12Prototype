@@ -20,7 +20,7 @@ ImageResource ImageUtils::CreateDepthAttachment(Device* inDevice, uint32_t inWid
 {
 	ImageResource image;
 	image.resourceDescription = CD3DX12_RESOURCE_DESC::Tex2D(
-		DXGI_FORMAT_D24_UNORM_S8_UINT,
+		DXGI_FORMAT_R24G8_TYPELESS,
 		inWidth,
 		inHeight,
 		1, 1, 1, 0, // array, mips and sampling

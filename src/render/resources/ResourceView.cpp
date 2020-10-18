@@ -81,6 +81,33 @@ ResourceView ResourceView::CreateSRVTexture2D(ID3D12Resource* inResource, Descri
 	return CreateSRVTexture2D(inResource, defaultSRV, inBlock, inIndex);
 }
 
+ResourceView ResourceView::CreateSRVDepthTexture2D(ID3D12Resource* inResource, D3D12_TEX2D_SRV inSRV, DescriptorBlock& inBlock, uint16_t inIndex)
+{
+	Device& device = Engine::GetRendererInstance()->GetDevice();
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc = {};
+	viewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	viewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	viewDesc.Texture2D = inSRV;
+
+	device.GetNativeDevice()->CreateShaderResourceView(inResource, &viewDesc, inBlock.GetCpuHandle(inIndex));
+
+	return ResourceView(inIndex, inBlock);
+}
+
+ResourceView ResourceView::CreateSRVDepthTexture2D(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex)
+{
+	// whole resource
+	D3D12_TEX2D_SRV defaultSRV = {};
+	defaultSRV.MipLevels = -1;
+	defaultSRV.MostDetailedMip = 0;
+	defaultSRV.PlaneSlice = 0;
+	defaultSRV.ResourceMinLODClamp = 0.0f;
+
+	return CreateSRVDepthTexture2D(inResource, defaultSRV, inBlock, inIndex);
+}
+
 ResourceView ResourceView::CreateRTVTexture2D(ID3D12Resource* inResource, D3D12_TEX2D_RTV inRTV, DescriptorBlock& inBlock, uint16_t inIndex)
 {
 	Device& device = Engine::GetRendererInstance()->GetDevice();
@@ -111,7 +138,7 @@ ResourceView ResourceView::CreateDSVTexture2D(ID3D12Resource* inResource, D3D12_
 
 	D3D12_DEPTH_STENCIL_VIEW_DESC viewDesc = {};
 	viewDesc.Flags = D3D12_DSV_FLAG_NONE;
-	viewDesc.Format = inResource->GetDesc().Format;
+	viewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	viewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	viewDesc.Texture2D = inDSV;
 
