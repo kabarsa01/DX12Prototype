@@ -26,6 +26,7 @@ cbuffer ShaderGlobalData : register(b1, space0)
 {
 	float4x4 worldToView;
 	float4x4 viewToProj;
+    float4x4 cameraToWorld;
 	float3 cameraPos;
 	float3 viewVector;
 	float time;
@@ -37,5 +38,13 @@ cbuffer ShaderGlobalData : register(b1, space0)
 };
 
 RWStructuredBuffer<float4x4> globalTransformData : register(u0, space0);
+
+
+
+
+float nrand(float2 uv)
+{
+    return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
+}
 
 #endif //_DEFAULT_INCLUDES_HLSL

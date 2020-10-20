@@ -50,7 +50,7 @@ PSOut PSmain(PSInput input)
 	PSOut output;
 
     output.albedo = albedo.SampleLevel(repeatLinearSampler, input.uv, 0);
-	float3 tangentNormal = normal.SampleLevel(repeatLinearSampler, input.uv, 0).xyz;
+    float3 tangentNormal = normal.SampleLevel(repeatLinearSampler, input.uv, 0).xyz;
 	tangentNormal = tangentNormal * 2.0 - 1.0;
     output.normal = float4(normalize(mul(input.TBN, tangentNormal)), 1.0);
 

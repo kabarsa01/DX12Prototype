@@ -119,6 +119,8 @@ void DeferredLightingPass::OnCreate()
 	normalTexture->CreateFromExternal(gBufferPass->GetAttachments()[1], false);
 	depthTexture = ObjectBase::NewObject<Texture2D, const HashString&>("DeferredLightingDepthTexture");
 	depthTexture->CreateFromExternal(zPrepass->GetDepthAttachment(), false);
+	clusterDebugTexture = ObjectBase::NewObject<Texture2D, const HashString&>("DeferredLightingClustersTexture");
+	clusterDebugTexture->CreateFromExternal(clusteringPass->debugClustersTexture->GetImage(), false);
 
 	lightingMaterial = DataManager::RequestResourceType<Material, const std::string&, const std::string&>(
 		"DeferredLightingMaterial",
@@ -133,6 +135,7 @@ void DeferredLightingPass::OnCreate()
 	lightingMaterial->SetTexture("albedoTex", albedoTexture);
 	lightingMaterial->SetTexture("normalsTex", normalTexture);
 	lightingMaterial->SetTexture("depthTex", depthTexture);
+	lightingMaterial->SetTexture("debugClustersTexture", clusterDebugTexture);
 	lightingMaterial->LoadResources();
 }
 

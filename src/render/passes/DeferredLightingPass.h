@@ -12,6 +12,7 @@ protected:
 	Texture2DPtr albedoTexture;
 	Texture2DPtr normalTexture;
 	Texture2DPtr depthTexture;
+	Texture2DPtr clusterDebugTexture;
 
 	virtual void OnCreate() override;
 	virtual void OnDestroy() override {}

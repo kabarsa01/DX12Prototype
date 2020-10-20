@@ -38,7 +38,7 @@ ResourceView ResourceView::CreateCBV(ID3D12Resource* inResource, DescriptorBlock
 	return ResourceView(inIndex, inBlock);
 }
 
-ResourceView ResourceView::CreateUAV(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex)
+ResourceView ResourceView::CreateUAVBuffer(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex)
 {
 	Device& device = Engine::GetRendererInstance()->GetDevice();
 
@@ -49,6 +49,20 @@ ResourceView ResourceView::CreateUAV(ID3D12Resource* inResource, DescriptorBlock
 	viewDesc.Buffer.NumElements = static_cast<UINT>(inResource->GetDesc().Width / sizeof(UINT32));
 	viewDesc.Buffer.StructureByteStride = 0;
 	viewDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_RAW;
+	device.GetNativeDevice()->CreateUnorderedAccessView(inResource, nullptr, &viewDesc, inBlock.GetCpuHandle(inIndex));
+
+	return ResourceView(inIndex, inBlock);
+}
+
+ResourceView ResourceView::CreateUAVTexture2D(ID3D12Resource* inResource, DescriptorBlock& inBlock, uint16_t inIndex)
+{
+	Device& device = Engine::GetRendererInstance()->GetDevice();
+
+	D3D12_UNORDERED_ACCESS_VIEW_DESC viewDesc = {};
+	viewDesc.Format = inResource->GetDesc().Format;
+	viewDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+	viewDesc.Texture2D.MipSlice = 0;
+	viewDesc.Texture2D.PlaneSlice = 0;
 	device.GetNativeDevice()->CreateUnorderedAccessView(inResource, nullptr, &viewDesc, inBlock.GetCpuHandle(inIndex));
 
 	return ResourceView(inIndex, inBlock);

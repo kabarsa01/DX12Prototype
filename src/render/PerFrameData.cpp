@@ -49,7 +49,7 @@ void PerFrameData::Create(Device* inDevice)
 	descriptorBlock = Engine::GetRendererInstance()->GetDescriptorHeaps().AllocateDescriptorsCBV_SRV_UAV(2);
 	// don't even need to store these views
 	ResourceView::CreateCBV(shaderDataBuffer, descriptorBlock, 0);
-	ResourceView::CreateUAV(transformDataBuffer, descriptorBlock, 1);
+	ResourceView::CreateUAVBuffer(transformDataBuffer, descriptorBlock, 1);
 }
 
 void PerFrameData::Destroy()
@@ -80,6 +80,7 @@ void PerFrameData::GatherData()
 
 	globalShaderData->worldToView = camComp->CalculateViewMatrix();
 	globalShaderData->viewToProj = camComp->CalculateProjectionMatrix();
+	globalShaderData->cameraToWorld = camComp->GetParent()->transform.GetMatrix();
 	globalShaderData->cameraPos = camComp->GetParent()->transform.GetLocation();
 	globalShaderData->viewVector = camComp->GetParent()->transform.GetForwardVector();
 	globalShaderData->cameraNear = camComp->GetNearPlane();

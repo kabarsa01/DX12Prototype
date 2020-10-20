@@ -14,13 +14,13 @@ class LightClusteringPass : public PassBase
 public:
 	MaterialPtr computeMaterial;
 	Texture2DPtr depthTexture;
+	Texture2DPtr debugClustersTexture;
 
 	LightClusteringPass(HashString inName);
 	void RecordCommands(ComPtr<ID3D12GraphicsCommandList> inCommandList) override;
 protected:
 	LightClusters* lightClusters;
 	LightClustersIndices* lightClustersIndices;
-	ClusterLightsData* clusterLightData;
 	LightsList* lightsList;
 	LightsIndices* lightsIndices;
 

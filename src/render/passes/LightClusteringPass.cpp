@@ -13,6 +13,7 @@
 #include "glm/fwd.hpp"
 #include "core/Engine.h"
 #include "../PerFrameData.h"
+#include "utils/ImageUtils.h"
 
 using namespace glm;
 
@@ -94,9 +95,11 @@ void LightClusteringPass::OnCreate()
 	depthTexture = ObjectBase::NewObject<Texture2D, const HashString&>("ComputeDepthTexture");
 	depthTexture->CreateFromExternal(zPrepass->GetDepthAttachment(), false);
 
+	debugClustersTexture = ObjectBase::NewObject<Texture2D, const HashString&>("ComputeDebugClustersTexture");
+	debugClustersTexture->CreateFromExternal(ImageUtils::CreateTexture2D(GetDevice(), GetWidth(), GetHeight(), true), true);
+
 	lightClusters = new LightClusters();
 	lightClustersIndices = new LightClustersIndices();
-	clusterLightData = new ClusterLightsData();
 	lightsList = new LightsList();
 	lightsIndices = new LightsIndices();
 
@@ -104,10 +107,10 @@ void LightClusteringPass::OnCreate()
 	computeMaterial->SetComputeShaderPath("content/shaders/LightClustering.hlsl");
 	computeMaterial->SetStorageBuffer<LightClusters>("lightClusters", *lightClusters);
 	computeMaterial->SetStorageBuffer<LightClustersIndices>("lightClustersIndices", *lightClustersIndices);
-//	computeMaterial->SetStorageBuffer<ClusterLightsData>("clusterLightsData", *clusterLightData);
 	computeMaterial->SetUniformBuffer<LightsList>("lightsList", *lightsList);
 	computeMaterial->SetUniformBuffer<LightsIndices>("lightsIndices", *lightsIndices);
 	computeMaterial->SetTexture("depthTexture", depthTexture);
+	computeMaterial->SetStorageTexture("debugClustersTexture", debugClustersTexture);
 	computeMaterial->LoadResources();
 }
 
@@ -115,7 +118,6 @@ void LightClusteringPass::OnDestroy()
 {
 	delete lightClusters;
 	delete lightClustersIndices;
-	delete clusterLightData;
 	delete lightsList;
 	delete lightsIndices;
 }

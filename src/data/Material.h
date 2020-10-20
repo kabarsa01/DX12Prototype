@@ -74,7 +74,7 @@ protected:
 	ShaderPtr computeShader;
 	std::map<HashString, Texture2DPtr> sampledImages2D;
 	std::map<HashString, Texture2DPtr> storageImages2D;
-	std::map<HashString, BufferResource> buffers;
+	std::map<HashString, BufferResource> constBuffers;
 	std::map<HashString, BufferResource> storageBuffers;
 
 	std::vector<CD3DX12_DESCRIPTOR_RANGE1> descriptorRanges;

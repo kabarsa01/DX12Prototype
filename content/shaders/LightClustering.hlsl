@@ -3,15 +3,9 @@
 
 Texture2D<float4> depthTexture : register(t0, space1);
 
-// cluster lights indices
-//struct ClusterLightsData
-//{
-//	uint2 clusters[32][32][64];
-//	uint lightIndices[32][32][64][128];
-//};
-//RWStructuredBuffer<ClusterLightsData> clusterLightsData : register(u0, space1);
 RWByteAddressBuffer lightClusters : register(u0, space1);
 RWByteAddressBuffer lightClustersIndices : register(u1, space1);
+RWTexture2D<float4> debugClustersTexture : register(u2, space1);
 
 // cluster lights
 struct LightInfo
@@ -92,10 +86,11 @@ void main(CSInput input)
 	float2 pixelUVHalfSize =  0.5 / float2(screenRes);
 	float2 tileSize = float2(screenRes) / float2(32.0f,32.0f);
 
-	uint2 tileStart = uint2( float2(0.5, 0.5) + tileSize * float2(input.groupId.xy) );
+	uint2 tileStart = uint2(float2(0.5, 0.5) + tileSize * float2(input.groupId.xy) );
     uint2 tileFinish = uint2(float2(0.5, 0.5) + tileSize * (float2(input.groupId.xy + uint2(1,1))));
+    float2 uvTileStart = float2(tileStart) / float2(screenRes);
+    float2 uvTileFinish = float2(tileFinish) / float2(screenRes);
 
-	//uint gl_LocalInvocationIndex
 	uint2 tilePixelSize = tileFinish - tileStart;
 	uint tilePixelsCount = tilePixelSize.x * tilePixelSize.y;
 	if (input.threadIndex >= tilePixelsCount)
@@ -117,12 +112,17 @@ void main(CSInput input)
 		{
 			continue;
 		}
+		
+        float4 projPos = float4((-1.0f + 2.0 * pixelUV.x), (1.0f - 2.0 * pixelUV.y), depth, 1.0);
+        float4 viewPos = mul(inverse(viewToProj), projPos);
+        viewPos /= viewPos.w;
 
-		float linearDepth = 2.0 * near * far / (far + depth * (near - far));
+        //float linearDepth = 2.0 * near * far / (far + depth * (near - far));
 		// depthSlice = near * (far/near) ^ (slice/numSlices) --- pretty good distribution from Doom 2016
 		// cluster index = maxClusters * log(linearDepth/near) / log(far/near);
-		uint clusterIndex = clamp(uint(64.0 * log(linearDepth/near) / log(far/near)), 0, 63); // clump it for zero based index just in case
+        uint clusterIndex = clamp(uint(64.0 * log(abs(viewPos.z / near)) / log(far / near)), 0, 63); // clump it for zero based index just in case
 		uint nextClusterIndex = clusterIndex + 1;
+		
         uint clusterChecked;
         InterlockedOr(clusterStatus[clusterIndex], 1, clusterChecked);
 		if (clusterChecked != 0)
@@ -132,29 +132,31 @@ void main(CSInput input)
 
 		// TODO: find the light source intersections for this cluster
 		// first we find our cluster bounds for AABB. clusters are small so it's an 'okay' approximation
+		// view space is constructed with negative Z looking in camera lens direction, so depth
+		// grows in negative direction, -1.0 multiplier is used
+        float clusterNear = -1.0 * near * pow(abs(far / near), float(clusterIndex) / 64.0);
+        float clusterFar = -1.0 * near * pow(abs(far / near), float(nextClusterIndex) / 64.0);
 
-        float clusterNear = near * pow(far/near, float(clusterIndex) / 64.0);
-		float clusterFar = near * pow(far/near, float(nextClusterIndex)/64.0);
-
+		// while still using glm::perspective remember that FOV is vertical
 		float fovMultiplier = tan(radians(cameraFov * 0.5)) * 2.0;
-		float nearWidth = clusterNear * fovMultiplier;
-		float farWidth = clusterFar * fovMultiplier;
-		float reverseAspectRatio = float(screenRes.y) / float(screenRes.x);
-		float nearHeight = nearWidth * reverseAspectRatio;
-		float farHeight = farWidth * reverseAspectRatio;
+        float nearHeight = abs(clusterNear * fovMultiplier);
+        float farHeight = abs(clusterFar * fovMultiplier);
+        float aspectRatio = float(screenRes.x) / float(screenRes.y);
+        float nearWidth = nearHeight * aspectRatio;
+        float farWidth = farHeight * aspectRatio;
 
-		float clusterLeft = max(nearWidth * 0.5 - input.groupId.x * nearWidth / 32.0, farWidth * 0.5 - input.groupId.x * farWidth / 32.0);
-		float clusterRight = min(nearWidth * 0.5 - (input.groupId.x + 1) * nearWidth / 32.0, farWidth * 0.5 - (input.groupId.x + 1) * farWidth / 32.0);
+        float clusterLeft = min(nearWidth * (-0.5 + input.groupId.x / 32.0), farWidth * (-0.5 + input.groupId.x / 32.0));
+        float clusterRight = max(nearWidth * (-0.5 + (input.groupId.x + 1) / 32.0), farWidth * (-0.5 + (input.groupId.x + 1) / 32.0));
 
-		float clusterBottom = min(-nearHeight * 0.5 + input.groupId.y * nearHeight / 32.0, -farHeight * 0.5 + input.groupId.y * farHeight / 32.0);
-		float clusterTop = max(-nearHeight * 0.5 + (input.groupId.y + 1) * nearHeight / 32.0, -farHeight * 0.5 + (input.groupId.y + 1) * farHeight / 32.0);
+        float clusterTop = max(nearHeight * (0.5 - input.groupId.y / 32.0), farHeight * (0.5 - input.groupId.y / 32.0));
+        float clusterBottom = min(nearHeight * (0.5 - (input.groupId.y + 1) / 32.0), farHeight * (0.5 - (input.groupId.y + 1) / 32.0));
 
 		// we make an AABB from our cluster frustum and then we make a sphere out of it
 		float4 boundingSphere;
-		float3 clusterExtent1 = float3(clusterLeft, clusterTop, clusterFar);
-		float3 clusterExtent2 = float3(clusterRight, clusterBottom, clusterNear);
-		float3 extents = (clusterExtent1 - clusterExtent2) * 0.5;
-		boundingSphere.xyz = clusterExtent2 + extents;
+		float3 clusterExtentMax = float3(clusterRight, clusterTop, clusterNear);
+		float3 clusterExtentMin = float3(clusterLeft, clusterBottom, clusterFar);
+		float3 extents = (clusterExtentMax - clusterExtentMin) * 0.5;
+		boundingSphere.xyz = clusterExtentMin + extents;
 		boundingSphere.w = length(extents);
 
 		uint lightIndexInCluster = 0;
@@ -189,8 +191,10 @@ void main(CSInput input)
 			}
 
             LightInfo lightInfo = lights[spotIndex];
-			float3 lightPos = mul(worldToView, float4(lightInfo.position.xyz, 1.0)).xyz * float3(-1.0, 1.0, -1.0);
-			float3 lightDir = mul(worldToView, float4(lightInfo.direction.xyz, 0.0)).xyz * float3(-1.0, 1.0, -1.0);
+            float4 lightViewPos = mul(worldToView, float4(lightInfo.position.xyz, 1.0));
+            lightViewPos /= lightViewPos.w;
+            float3 lightPos = lightViewPos.xyz;
+            float3 lightDir = normalize(mul(worldToView, float4(lightInfo.direction.xyz, 0.0)).xyz);
 
 			if (!IsConeIntersectsSphere(lightPos, lightDir, lightInfo.rai.x, radians(lightInfo.rai.y), boundingSphere))
 			{
@@ -220,9 +224,11 @@ void main(CSInput input)
 				break;
 			}
             LightInfo lightInfo = lights[pointIndex];
-			float3 lightPos = mul(worldToView, float4(lightInfo.position.xyz, 1.0)).xyz * float3(-1.0, 1.0, -1.0);
+            float4 lightViewPos = mul(worldToView, float4(lightInfo.position.xyz, 1.0));
+            lightViewPos /= lightViewPos.w;
+            float3 lightPos = lightViewPos.xyz;
 
-			float3 lightSphereClippedPos = float3(clamp(lightPos.x, clusterRight, clusterLeft), clamp(lightPos.y, clusterBottom, clusterTop), clamp(lightPos.z, clusterNear, clusterFar));
+			float3 lightSphereClippedPos = clamp(lightPos, clusterExtentMin, clusterExtentMax);
 			float3 centerToAABB = lightSphereClippedPos - lightPos;
 
 			if (dot(centerToAABB, centerToAABB) > (lightInfo.rai.x * lightInfo.rai.x))
@@ -245,5 +251,7 @@ void main(CSInput input)
         clusterLightsOffsetData.y = pointLightOffsetData;
 
         lightClusters.Store2(clusterByteAddress, clusterLightsOffsetData);
-	}
+		
+        debugClustersTexture[tileStart + tileCoord] = float4(clusterLeft, clusterTop, clusterFar, 1.0);
+    }
 }

@@ -78,6 +78,8 @@ void Material::LoadResources()
 		case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWSTRUCTURED:
 		case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWBYTEADDRESS:
 		case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
+		case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_APPEND_STRUCTURED:
+		case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_CONSUME_STRUCTURED:
 			type = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
 			break;
 		default:
@@ -107,7 +109,14 @@ void Material::LoadResources()
 			ResourceView::CreateSRVTexture2D(pair.second->GetImage(), descriptorBlock, rangeIndex);
 		}
 	}
-	for (auto& pair : buffers)
+	for (auto& pair : storageImages2D)
+	{
+		if (nameToRange.find(pair.first) == nameToRange.end()) continue;
+
+		uint32_t rangeIndex = nameToRange[pair.first];
+		ResourceView::CreateUAVTexture2D(pair.second->GetImage(), descriptorBlock, rangeIndex);
+	}
+	for (auto& pair : constBuffers)
 	{
 		if (nameToRange.find(pair.first) == nameToRange.end()) continue;
 
@@ -119,7 +128,7 @@ void Material::LoadResources()
 		if (nameToRange.find(pair.first) == nameToRange.end()) continue;
 
 		uint32_t rangeIndex = nameToRange[pair.first];
-		ResourceView::CreateUAV(pair.second, descriptorBlock, rangeIndex);
+		ResourceView::CreateUAVBuffer(pair.second, descriptorBlock, rangeIndex);
 	}
 
 	shaderHash = HashString(vertexShaderPath + fragmentShaderPath + computeShaderPath);
@@ -180,17 +189,17 @@ void Material::SetUniformBuffer(const std::string& inName, uint64_t inSize, cons
 	buffer.Create(&device, inSize, D3D12_HEAP_TYPE_DEFAULT);
 	buffer.CreateStagingBuffer()->CopyTo(inSize, inData, true);
 
-	buffers[inName].Destroy();
-	buffers[inName] = buffer;
+	constBuffers[inName].Destroy();
+	constBuffers[inName] = buffer;
 
 	UpdateUniformBuffer(inName, inSize, inData);
 }
 
 void Material::SetUniformBufferExternal(const std::string& inName, const BufferResource& inBuffer)
 {
-	buffers[inName].Destroy();
-	buffers[inName] = inBuffer;
-	buffers[inName].SetCleanup(false);
+	constBuffers[inName].Destroy();
+	constBuffers[inName] = inBuffer;
+	constBuffers[inName].SetCleanup(false);
 }
 
 void Material::SetStorageBufferExternal(const std::string& inName, const BufferResource& inBuffer)
@@ -214,8 +223,8 @@ void Material::SetStorageBuffer(const std::string& inName, uint64_t inSize, cons
 
 void Material::UpdateUniformBuffer(const std::string& inName, uint64_t inSize, const char* inData)
 {
-	buffers[inName].CopyTo(inSize, inData);
-	TransferList::GetInstance()->PushBuffer(&buffers[inName]);
+	constBuffers[inName].CopyTo(inSize, inData);
+	TransferList::GetInstance()->PushBuffer(&constBuffers[inName]);
 }
 
 void Material::UpdateStorageBuffer(const std::string& inName, uint64_t inSize, const char* inData)
@@ -226,7 +235,7 @@ void Material::UpdateStorageBuffer(const std::string& inName, uint64_t inSize, c
 
 BufferResource& Material::GetUniformBuffer(const std::string& inName)
 {
-	return buffers[inName];
+	return constBuffers[inName];
 }
 
 BufferResource& Material::GetStorageBuffer(const std::string& inName)
@@ -242,7 +251,7 @@ bool Material::Load()
 bool Material::Cleanup()
 {
 	// cleanup buffers. textures are resources themselves and will be cleaned by data manager
-	for (auto& pair : buffers)
+	for (auto& pair : constBuffers)
 	{
 		pair.second.Destroy();
 	}

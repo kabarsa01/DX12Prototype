@@ -19,6 +19,7 @@ D3D12_RESOURCE_DESC Texture2D::GetImageDesc()
 	D3D12_RESOURCE_DESC desc;
 	desc = CD3DX12_RESOURCE_DESC::Tex2D(linear ? DXGI_FORMAT_R8G8B8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, width, height);
 	desc.MipLevels = genMips ? 0 : 1;
+	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
 	return desc;
 }

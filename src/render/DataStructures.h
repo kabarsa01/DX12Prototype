@@ -12,6 +12,7 @@ struct alignas(16) GlobalShaderData
 {
 	alignas(16) glm::mat4 worldToView;
 	alignas(16) glm::mat4 viewToProj;
+	alignas(16) glm::mat4 cameraToWorld;
 	alignas(16) glm::vec3 cameraPos;
 	alignas(16) glm::vec3 viewVector;
 	alignas(4) float time;
@@ -47,13 +48,6 @@ struct alignas(16) LightsIndices
 	alignas(8) glm::u32vec2 directionalPosition;
 	alignas(8) glm::u32vec2 spotPosition;
 	alignas(8) glm::u32vec2 pointPosition;
-};
-
-// cluster lights indices
-struct alignas(16) ClusterLightsData
-{
-	alignas(8) glm::u32vec2 clusters[g_ClusteringResolution.x][g_ClusteringResolution.y][g_ClusteringResolution.z];
-	alignas(4) glm::uint lightIndices[g_ClusteringResolution.x][g_ClusteringResolution.y][g_ClusteringResolution.z][g_LightsPerCluster / 2];
 };
 
 // cluster lights indices

@@ -34,6 +34,7 @@ Texture2D<float4> normalsTex : register(t1, space1);
 Texture2D<float4> roghnessTex : register(t2, space1);
 Texture2D<float4> metallnessTex : register(t3, space1);
 Texture2D<float4> depthTex : register(t4, space1);
+Texture2D<float4> debugClustersTexture : register(t5, space1);
 
 uint UnpackLightIndex(uint packedIndices, uint indexPosition)
 {
@@ -144,15 +145,13 @@ float4 PSmain(PSInput input) : SV_TARGET
         return float4(0.0, 0.0, 0.0, 1.0);
     }
 
-	float linearDepth = 2.0 * near * far / (far + depth * (near - far));
-	float width = 2.0 * linearDepth * tan(radians(cameraFov * 0.5));
-	float height = width / cameraAspect;
-    float pixelViewSpaceX = width * (0.5 - input.uv.x);
-    float pixelViewSpaceY = height * (-0.5 + input.uv.y);
-
-    float4 pixelCoordWorld = mul(inverse(worldToView), float4(-pixelViewSpaceX, pixelViewSpaceY, -linearDepth, 1.0));
-	float normalizedDepth = (linearDepth - near) / (far - near);
-	uint clusterIndex = clamp(uint(64.0 * log(linearDepth/near) / log(far/near)), 0, 63); // clump it just in case
+	//float linearDepth = 2.0 * near * far / (far + depth * (near - far));
+    
+    float4 projPos = float4((-1.0f + 2.0 * input.uv.x), (1.0f - 2.0 * input.uv.y), depth, 1.0);
+    float4 viewPos = mul(inverse(viewToProj), projPos);
+    viewPos /= viewPos.w;
+    float4 pixelCoordWorld = mul(inverse(worldToView), viewPos);
+    uint clusterIndex = clamp(uint(64.0 * log(abs(viewPos.z) / near) / log(far / near)), 0, 63); // clump it just in case
 
 	// byte addresses for byte address buffers
     uint clusterIndicesByteAddress = ((clusterX * 32 + clusterY) * 64 + clusterIndex) * 128 * 4; //allways 4 bytes aligned
@@ -168,7 +167,7 @@ float4 PSmain(PSInput input) : SV_TARGET
 
 	float3 albedo = albedoTex.SampleLevel(repeatLinearSampler, input.uv, 0).xyz;
 	float3 N = normalsTex.SampleLevel(repeatLinearSampler, input.uv, 0).xyz;
-	float roughness = 0.5;//texture( sampler2D( roughnessTex, repeatLinearSampler ), uv ).r;
+	float roughness = 1.0;//texture( sampler2D( roughnessTex, repeatLinearSampler ), uv ).r;
 	float metallness = 0.0;//texture( sampler2D( metallnessTex, repeatLinearSampler ), uv ).r;
 
 	float3 Lo = float3(0.0f, 0.0f, 0.0f);
@@ -227,5 +226,6 @@ float4 PSmain(PSInput input) : SV_TARGET
 		Lo += CalculateLightInfluence(albedo, N, V, F, pixelToLightDir, lightColor, kD, roughness);
 	}
 
-	return float4(ambient + Lo, 1.0);//float4(normal, 1.0);//
+	return float4(ambient + Lo, 1.0);
+
 }

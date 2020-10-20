@@ -26,7 +26,7 @@ bool Shader::Load()
 
 	UINT flags = 0;// D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_ALL_RESOURCES_BOUND;
 #if defined( DEBUG ) || defined( _DEBUG )
-	flags |= D3DCOMPILE_DEBUG;
+	flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_DEBUG_NAME_FOR_SOURCE;
 #endif
 	std::wstring widecharPath = ToWString(filePath);
 	ThrowIfFailed( D3DCompileFromFile(
