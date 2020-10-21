@@ -118,7 +118,7 @@ glm::vec3 Transform::GetUpVector() const
 	return glm::vec3(up);
 }
 
-glm::vec3 Transform::GetRightVector() const
+glm::vec3 Transform::GetLeftVector() const
 {
 	glm::vec4 right = { 1.0f, 0.0f, 0.0f, 0.0f };
 	right = CalculateRotationMatrix() * right;
