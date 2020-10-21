@@ -117,7 +117,7 @@ void main(CSInput input)
         float4 viewPos = mul(inverse(viewToProj), projPos);
         viewPos /= viewPos.w;
 
-        //float linearDepth = 2.0 * near * far / (far + depth * (near - far));
+        //float linearDepth = near * far / (far + depth * (near - far));
 		// depthSlice = near * (far/near) ^ (slice/numSlices) --- pretty good distribution from Doom 2016
 		// cluster index = maxClusters * log(linearDepth/near) / log(far/near);
         uint clusterIndex = clamp(uint(64.0 * log(abs(viewPos.z / near)) / log(far / near)), 0, 63); // clump it for zero based index just in case

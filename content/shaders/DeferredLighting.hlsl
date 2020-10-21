@@ -145,7 +145,7 @@ float4 PSmain(PSInput input) : SV_TARGET
         return float4(0.0, 0.0, 0.0, 1.0);
     }
 
-	//float linearDepth = 2.0 * near * far / (far + depth * (near - far));
+	//float linearDepth = near * far / (far + depth * (near - far));
     
     float4 projPos = float4((-1.0f + 2.0 * input.uv.x), (1.0f - 2.0 * input.uv.y), depth, 1.0);
     float4 viewPos = mul(inverse(viewToProj), projPos);
