@@ -13,20 +13,14 @@ DescriptorPool::~DescriptorPool()
 
 }
 
-void DescriptorPool::Create(Device* inDevice, D3D12_DESCRIPTOR_HEAP_TYPE inType, uint16_t inDescriptorsCount, bool inShaderVisible)
+void DescriptorPool::Create(Device* inDevice, D3D12_DESCRIPTOR_HEAP_TYPE inType, ComPtr<ID3D12DescriptorHeap> inHeap, uint32_t inHeapOffset, uint16_t inDescriptorsCount)
 {
 	device = inDevice;
+	heap = inHeap;
+	heapOffset = inHeapOffset;
 	type = inType;
 	descriptorCount = inDescriptorsCount;
 	descriptorIncrementSize = device->GetNativeDevice()->GetDescriptorHandleIncrementSize(inType);
-
-	D3D12_DESCRIPTOR_HEAP_DESC heapDesc;
-	heapDesc.Type = inType;
-	heapDesc.NodeMask = 0;
-	heapDesc.Flags = inShaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	heapDesc.NumDescriptors = descriptorCount;
-
-	ThrowIfFailed( device->GetNativeDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&heap)) );
 
 	DescriptorBlockRecord rec{ 0, descriptorCount };
 	freeBlocks.push_back(rec);
@@ -73,8 +67,8 @@ DescriptorBlock DescriptorPool::Allocate(uint16_t inSize)
 	{
 		block.parent = this;
 		block.heap = heap;
-		block.cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(heap->GetCPUDescriptorHandleForHeapStart()).Offset(block.head, descriptorIncrementSize);
-		block.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(heap->GetGPUDescriptorHandleForHeapStart()).Offset(block.head, descriptorIncrementSize);
+		block.cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(heap->GetCPUDescriptorHandleForHeapStart()).Offset(block.head + heapOffset, descriptorIncrementSize);
+		block.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(heap->GetGPUDescriptorHandleForHeapStart()).Offset(block.head + heapOffset, descriptorIncrementSize);
 		block.descriptorIncrementSize = descriptorIncrementSize;
 	}
 

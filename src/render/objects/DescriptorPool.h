@@ -63,7 +63,12 @@ public:
 	DescriptorPool();
 	virtual ~DescriptorPool();
 
-	void Create(Device* inDevice, D3D12_DESCRIPTOR_HEAP_TYPE inType, uint16_t inDescriptorsCount, bool inShaderVisible);
+	void Create(
+		Device* inDevice, 
+		D3D12_DESCRIPTOR_HEAP_TYPE inType, 
+		ComPtr<ID3D12DescriptorHeap> inHeap, 
+		uint32_t inHeapOffset, 
+		uint16_t inDescriptorsCount);
 	void Destroy();
 
 	inline D3D12_DESCRIPTOR_HEAP_TYPE GetType() { return type; }
@@ -74,6 +79,7 @@ private:
 	Device* device;
 	ComPtr<ID3D12DescriptorHeap> heap;
 	D3D12_DESCRIPTOR_HEAP_TYPE type;
+	uint32_t heapOffset;
 	uint16_t descriptorCount;
 	uint32_t descriptorIncrementSize;
 

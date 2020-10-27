@@ -5,6 +5,7 @@
 #include <d3dx12.h>
 #include "DescriptorPool.h"
 #include <vector>
+#include <map>
 
 using namespace Microsoft::WRL;
 
@@ -20,6 +21,8 @@ public:
 	void Create(Device* inDevice);
 	void Destroy();
 
+	inline ComPtr<ID3D12DescriptorHeap> GetHeapByType(D3D12_DESCRIPTOR_HEAP_TYPE inType) { return heapsByTypeMap[inType]; };
+
 	inline std::vector<DescriptorPool*>& GetCBV_SRV_UAVPools() { return CBV_SRV_UAVPools; }
 	inline std::vector<DescriptorPool*>& GetRTVPools() { return RTVPools; }
 	inline std::vector<DescriptorPool*>& GetDSVPools() { return DSVPools; }
@@ -31,11 +34,14 @@ public:
 	static void ReleaseDescriptors(const DescriptorBlock& inBlock);
 private:
 	Device* device;
+	std::map<D3D12_DESCRIPTOR_HEAP_TYPE, ComPtr<ID3D12DescriptorHeap>> heapsByTypeMap;
+
 	std::vector<DescriptorPool*> CBV_SRV_UAVPools;
 	std::vector<DescriptorPool*> RTVPools;
 	std::vector<DescriptorPool*> DSVPools;
 
-	DescriptorBlock AllocateDescriptors(uint16_t inBlockSize, std::vector<DescriptorPool*>& inPools, D3D12_DESCRIPTOR_HEAP_TYPE inType, uint16_t inHeapSize, bool inShaderVisible);
+	ComPtr<ID3D12DescriptorHeap> CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE inType, uint32_t inHeapSize, bool inShaderVisible);
+	DescriptorBlock AllocateDescriptors(uint16_t inBlockSize, std::vector<DescriptorPool*>& inPools, D3D12_DESCRIPTOR_HEAP_TYPE inType, uint16_t inPoolSize);
 	void DeletePools(std::vector<DescriptorPool*>& inPools);
 };
 

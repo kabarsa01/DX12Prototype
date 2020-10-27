@@ -5,28 +5,12 @@
 #include <core/ObjectBase.h>
 #include "glm/fwd.hpp"
 #include <set>
-//#include "data/MeshData.h"
 #include "objects/Device.h"
 #include "objects/SwapChain.h"
 #include "objects/CommandBuffers.h"
 #include "memory/DeviceMemoryManager.h"
 #include "resources/ImageResource.h"
 #include "objects/DescriptorHeaps.h"
-
-// pre-build batch to compile all our shaders
-//
-//call :treeProcess
-//goto : eof
-//
-//: treeProcess
-//rem Do whatever you want here over the files of this subdir, for example :
-//for %%f in(*.vert *.tesc *.tese *.geom *.frag *.comp) do glslangValidator - V % %f - o % %~nf.spv
-//for / D % %d in(*) do (
-//	cd %%d
-//	call : treeProcess
-//	cd ..
-//)
-//exit / b
 
 //-------------------------------------------------------------------------------------------------------
 
